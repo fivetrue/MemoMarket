@@ -78,6 +78,7 @@ dependencies {
     compile 'com.android.support:design:25.1.0'
 
     compile 'jp.wasabeef:recyclerview-animators:2.2.5'
+    compile 'com.balysv.materialmenu:material-menu:2.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

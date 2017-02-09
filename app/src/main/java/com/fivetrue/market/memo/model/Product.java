@@ -14,6 +14,9 @@ public class Product extends RealmObject{
 
     private String brand;
     private String skuId;
+    private long price;
+    private boolean isChecked;
+    private String storeName;
     private long date;
 
     public String getName() {
@@ -40,6 +43,30 @@ public class Product extends RealmObject{
         this.skuId = skuId;
     }
 
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
+    }
+
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+
     public long getDate() {
         return date;
     }
@@ -47,4 +74,5 @@ public class Product extends RealmObject{
     public void setDate(long date) {
         this.date = date;
     }
+
 }

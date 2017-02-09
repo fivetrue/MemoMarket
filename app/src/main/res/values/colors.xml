@@ -16,9 +16,9 @@
     <color name="darkBlue">#3355FA</color>
     <color name="dimBlue">#bccde6</color>
 
-    <color name="colorPrimary">@color/lightGray</color>
-    <color name="colorPrimaryDark">@color/darkGray</color>
-    <color name="colorAccent">@android:color/black</color>
+    <color name="colorPrimary">@android:color/white</color>
+    <color name="colorPrimaryDark">@color/gray</color>
+    <color name="colorAccent">@color/darkGray</color>
 
     <color name="indicatorColor">@color/primaryBlue</color>
 </resources>

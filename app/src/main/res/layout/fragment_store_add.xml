@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/layout_fragment_store_add"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/actionbar_height">
+        <TextView
+            android:id="@+id/tv_fragment_store_add"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/register_store"
+            android:textColor="@android:color/black"
+            android:textAllCaps="true"
+            android:layout_margin="10dp"
+            android:textSize="20dp"/>
+
+        <LinearLayout
+            android:id="@+id/layout_fragment_store_add_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_fragment_store_add"
+            android:layout_margin="16dp"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:background="@drawable/input_text_background">
+            <ProgressBar
+                android:id="@+id/pb_fragment_store_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:visibility="invisible"/>
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/et_fragment_store_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                android:layout_gravity="center_vertical"
+                android:hint="@string/hint_input_store_name"
+                android:textColor="@color/darkGray"
+                android:textColorHint="@color/dimGray"
+                android:singleLine="true"
+                android:imeOptions="actionDone"
+                android:background="@null"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_fragment_store_add"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_check_red_50dp"
+        android:layout_gravity="center|bottom"
+        android:transitionName="@string/transition_floating_action_button"/>
+
+</android.support.design.widget.CoordinatorLayout>

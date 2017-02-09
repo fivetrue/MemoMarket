@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.fivetrue.market.memo.LL;
+import com.fivetrue.market.memo.ui.BaseActivity;
 
 /**
  * Created by ojin.kwon on 2016-11-18.
@@ -20,6 +21,10 @@ public abstract class BaseFragment extends Fragment {
     private static final String TAG = "BaseFragment";
 
     public abstract String getTitle(Context context);
+
+    public String getSubTitle(Context context){
+        return null;
+    }
 
     public abstract int getImageResource();
 
@@ -74,5 +79,18 @@ public abstract class BaseFragment extends Fragment {
         super.onStop();
         if(LL.D) Log.d(TAG, getClass().getSimpleName() + " : onStop() called");
     }
+
+    protected void showLoadingDialog(){
+        if(getActivity() != null && getActivity() instanceof BaseActivity){
+            ((BaseActivity) getActivity()).showLoadingDialog();
+        }
+    }
+
+    protected void dismissLoadingDialog(){
+        if(getActivity() != null && getActivity() instanceof BaseActivity){
+            ((BaseActivity) getActivity()).dismissLoadingDialog();
+        }
+    }
+
 
 }

@@ -1,30 +1,63 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.model.Store;
-import com.fivetrue.market.memo.view.PagerTabContent;
+import com.fivetrue.market.memo.ui.adapter.ProductListAdapter;
 
-/**
- * Created by kwonojin on 2017. 1. 24..
- */
+import java.util.ArrayList;
 
-public class StoreProductFragment extends BaseFragment implements PagerTabContent{
+import io.realm.RealmResults;
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
+
+public class StoreProductFragment extends BaseFragment{
 
     private static final String TAG = "StoreProductFragment";
 
     private static final String KEY_STORE_NAME = "store_name";
 
+    private RecyclerView mRecyclerProducts;
+    private ProductListAdapter mProductListAdapter;
+
+    private FloatingActionButton mAddProduct;
+
+    private String mName;
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mName = getArguments().getString(KEY_STORE_NAME);
+        RealmResults<Product> productRealmResults = RealmDB.getInstance().get()
+                .where(Product.class).equalTo("storeName", mName).findAllAsync();
+
+        mProductListAdapter = new ProductListAdapter(new ArrayList<>(productRealmResults), new ProductListAdapter.OnProductItemListener() {
+            @Override
+            public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                if(holder != null){
+                    boolean b = mProductListAdapter.togglePosition(holder.getAdapterPosition());
+                    RealmDB.getInstance().get().beginTransaction();
+                    item.setChecked(b);
+                    RealmDB.getInstance().get().commitTransaction();
+                }
+            }
+
+            @Override
+            public boolean onLongCLickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                return false;
+            }
+        });
     }
 
     @Nullable
@@ -36,14 +69,41 @@ public class StoreProductFragment extends BaseFragment implements PagerTabConten
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mRecyclerProducts = (RecyclerView) view.findViewById(R.id.rv_fragment_store_product);
+        mAddProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_store_product);
+
+        mRecyclerProducts.setLayoutManager(new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false));
+        mRecyclerProducts.setItemAnimator(new ProductItemAnimator());
+        mRecyclerProducts.setAdapter(mProductListAdapter);
+
+        mAddProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
     }
 
     @Override
     public String getTitle(Context context) {
-        if(getArguments() != null && getArguments().getString(KEY_STORE_NAME) != null){
-            return getArguments().getString(KEY_STORE_NAME);
-        }
-        return "";
+        return getArguments().getString(KEY_STORE_NAME);
+    }
+
+    @Override
+    public String getSubTitle(Context context) {
+        long count = RealmDB.getInstance().get().where(Product.class).equalTo("storeName", mName).count();
+        return String.format(context.getString(R.string.store_product_count), count);
     }
 
     @Override
@@ -57,21 +117,17 @@ public class StoreProductFragment extends BaseFragment implements PagerTabConten
         return b;
     }
 
-    @Override
-    public String getTabTitle(Context context) {
-        if(getArguments() != null && getArguments().getString(KEY_STORE_NAME) != null){
-            return getArguments().getString(KEY_STORE_NAME);
+
+    private static final class ProductItemAnimator extends FadeInAnimator{
+
+        @Override
+        public boolean getSupportsChangeAnimations() {
+            return false;
         }
-        return "";
-    }
 
-    @Override
-    public Drawable getTabDrawable(Context context) {
-        return null;
-    }
-
-    @Override
-    public boolean isShowingIcon() {
-        return false;
+        @Override
+        public long getChangeDuration() {
+            return 0;
+        }
     }
 }

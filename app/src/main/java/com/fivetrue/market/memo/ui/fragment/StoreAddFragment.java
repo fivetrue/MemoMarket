@@ -1,10 +1,10 @@
-package com.fivetrue.market.memo.ui;
+package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.ListPopupWindow;
 import android.text.Editable;
@@ -14,13 +14,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.LL;
@@ -44,36 +45,61 @@ import java.util.List;
  * Created by kwonojin on 2017. 1. 27..
  */
 
-public class StoreAddActivity extends BaseActivity implements AdapterView.OnItemClickListener{
+public class StoreAddFragment extends BaseFragment implements AdapterView.OnItemClickListener{
 
-    private static final String TAG = "StoreAddActivity";
+    private static final String TAG = "StoreAddFragment";
 
     private View mContainer;
+
+    private View mLayoutInput;
+    private ProgressBar mProgressBar;
     private EditText mInput;
-    private Button mOk;
+    private FloatingActionButton mFabOk;
 
     private StoreNameListAdapter mStoreNameListAdapter;
     private ListPopupWindow mPopup;
 
     private FirebaseDataFinder mDataFinder;
     private InputMethodManager mImm;
+
+    @Override
+    public String getTitle(Context context) {
+        return context.getString(R.string.register_store);
+    }
+
+    @Override
+    public int getImageResource() {
+        return 0;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_store_add);
-        initData();
-        initView();
-    }
-
-    private void initData(){
-        mImm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        mImm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mDataFinder = new FirebaseDataFinder();
     }
 
-    private void initView(){
-        mContainer = findViewById(R.id.layout_store_add);
-        mInput = (EditText) findViewById(R.id.et_store_add);
-        mOk = (Button)findViewById(R.id.btn_store_add);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_store_add, null);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mContainer = view.findViewById(R.id.layout_fragment_store_add);
+
+        mLayoutInput = view.findViewById(R.id.layout_fragment_store_add_input);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_fragment_store_add);
+        mInput = (EditText) view.findViewById(R.id.et_fragment_store_add);
+        mFabOk = (FloatingActionButton) view.findViewById(R.id.fab_fragment_store_add);
 
         mInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -91,37 +117,55 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
 
         mInput.addTextChangedListener(mDataFinder);
 
-        mOk.setOnClickListener(new View.OnClickListener() {
+        mFabOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String text = mInput.getText().toString().trim();
                 onFinishedInputText(text);
             }
         });
+
+        mContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int left, int top, int right
+                    , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if(view != null){
+                    view.removeOnLayoutChangeListener(this);
+                    ViewAnimationUtils.createCircularReveal(view, right / 2, bottom
+                            , 0, Math.max(right, bottom)).setDuration(250L).start();
+                }
+            }
+        });
     }
 
     private void setData(List<StoreData> data){
-        if(data != null && data.size() > 0){
+        mProgressBar.setVisibility(View.INVISIBLE);
+        if(data != null && data.size() > 0 && getActivity() != null){
             if(mStoreNameListAdapter == null){
-                mStoreNameListAdapter = new StoreNameListAdapter(this, data);
+                mStoreNameListAdapter = new StoreNameListAdapter(getActivity(), data);
             }else{
                 mStoreNameListAdapter.setData(data);
             }
 
             if(mPopup == null){
-                mPopup = new ListPopupWindow(this);
+                mPopup = new ListPopupWindow(getActivity());
                 mPopup.setAdapter(mStoreNameListAdapter);
                 mPopup.setOnItemClickListener(this);
-                mPopup.setAnchorView(mInput);
+                mPopup.setAnchorView(mLayoutInput);
             }
 
             if(!mPopup.isShowing()){
                 mPopup.show();
             }
+        }else{
+            if(mPopup != null && mPopup.isShowing()){
+                mPopup.dismiss();
+            }
         }
     }
 
     private void onFinishedInputText(String text){
+        mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
         if(TextUtils.isEmpty(text)){
             Snackbar.make(mContainer, R.string.error_empty_store_name, Snackbar.LENGTH_SHORT).show();
         }else if(RealmDB.getInstance().get().where(Store.class).equalTo("name", text).count() > 0){
@@ -134,32 +178,39 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
     }
 
     private void addStore(final Store store){
-        mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
         showLoadingDialog();
-        FirebaseDB.getInstance().addStore(store).addOnSuccessListener(new OnSuccessListener<Void>() {
+        FirebaseDB.getInstance().findStoreContain(store.getName()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onSuccess(Void aVoid) {
-                if(LL.D) Log.d(TAG, "onSuccess: put to firebase");
-                onFinishAfterSaveStore(store);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(LL.D) Log.d(TAG, "onDataChange: check count for adding : " + dataSnapshot.getChildrenCount());
+                if(dataSnapshot.getChildrenCount() == 0){
+                    if(LL.D) Log.d(TAG, "onDataChange: online has no item : " + store.getName());
+                    FirebaseDB.getInstance().addStore(store).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            onSaveStoreToLocalDB(store);
+                            if(LL.D) Log.d(TAG, "onSuccess: put to firebase");
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "onFailure: ", e);
+                            FirebaseCrash.report(e);
+                            onSaveStoreToLocalDB(store);
+                        }
+                    });
+                }else{
+                    if(LL.D) Log.d(TAG, "onDataChange: already online has item : " + store.getName());
+                    onSaveStoreToLocalDB(store);
+                }
             }
-        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "onFailure: ", e);
-                FirebaseCrash.report(e);
-                onFinishAfterSaveStore(store);
+            public void onCancelled(DatabaseError databaseError) {
+                dismissLoadingDialog();
+                Snackbar.make(mContainer, R.string.error_network_message, Snackbar.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    protected View getDecorView() {
-        return mContainer;
-    }
-
-    @Override
-    protected boolean transitionModeWhenFinish() {
-        return true;
     }
 
     @Override
@@ -177,11 +228,11 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
 
     }
 
-    private void onFinishAfterSaveStore(Store store){
-        Intent intent = new Intent();
-        intent.putExtra("name", store.getName());
-        setResult(RESULT_OK, intent);
-        finishAfterTransition();
+    private void onSaveStoreToLocalDB(Store store){
+        dismissLoadingDialog();
+        RealmDB.getInstance().get().beginTransaction();
+        RealmDB.getInstance().get().insert(store);
+        RealmDB.getInstance().get().commitTransaction();
     }
 
     private class FirebaseDataFinder implements TextWatcher {
@@ -204,6 +255,7 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
             if(LL.D) Log.d(TAG, "afterTextChanged() called with: editable = [" + editable + "]");
             String text = editable.toString().trim();
             if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
+                mProgressBar.setVisibility(View.VISIBLE);
                 FirebaseDB.getInstance().findStoreContain(text).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -257,14 +309,14 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
             StoreData store = getItem(i);
             if(view == null){
                 LayoutInflater inflater = LayoutInflater.from(mContext);
-                view = inflater.inflate(R.layout.item_store_list_name, null);
+                view = inflater.inflate(R.layout.item_store_list_popup, null);
                 holder.name = (TextView) view.findViewById(R.id.tv_item_store_list_name);
                 view.setTag(holder);
             }else{
                 holder = (Holder) view.getTag();
                 if(holder == null){
                     LayoutInflater inflater = LayoutInflater.from(mContext);
-                    view = inflater.inflate(R.layout.item_store_list_name, null);
+                    view = inflater.inflate(R.layout.item_store_list_popup, null);
                     holder.name = (TextView) view.findViewById(R.id.tv_item_store_list_name);
                     view.setTag(holder);
                 }
@@ -296,6 +348,14 @@ public class StoreAddActivity extends BaseActivity implements AdapterView.OnItem
 
         private static class Holder{
             public TextView name;
+        }
+    }
+
+    @Override
+    protected void showLoadingDialog() {
+        super.showLoadingDialog();
+        if(mPopup != null && mPopup.isShowing()){
+            mPopup.dismiss();
         }
     }
 }

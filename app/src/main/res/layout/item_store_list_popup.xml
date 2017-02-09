@@ -2,11 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_item_store_list_container"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@color/dimGray">
+    android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/layout_item_store_list_name"
-        android:layout_width="50dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_margin="10dp"
@@ -15,12 +14,8 @@
         <TextView
             android:id="@+id/tv_item_store_list_name"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:gravity="left"
             android:maxLines="1"/>
     </LinearLayout>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorPrimary"/>
 </RelativeLayout>

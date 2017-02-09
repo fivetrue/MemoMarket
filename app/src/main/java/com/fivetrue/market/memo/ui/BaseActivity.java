@@ -20,7 +20,7 @@ import com.fivetrue.market.memo.utils.SimpleViewUtils;
  * Created by kwonojin on 2017. 1. 23..
  */
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener {
 
     private static final String TAG = "BaseActivity";
 
@@ -32,6 +32,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
         mStartX = getIntent().getIntExtra("startX", getWindow().getDecorView().getWidth() / 2);
         mStartY = getIntent().getIntExtra("startY", getWindow().getDecorView().getHeight() / 2);
     }
@@ -49,6 +50,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        getSupportFragmentManager().removeOnBackStackChangedListener(this);
     }
 
     protected boolean popFragment(FragmentManager fm){
@@ -57,15 +59,19 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack){
-        return addFragment(cls, arguments, anchorLayout, addBackstack , null, null, null);
+        return addFragment(cls, arguments, anchorLayout, addBackstack , 0, 0, null, null);
     }
 
     public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, boolean addBackstack){
-        return addFragment(cls, arguments, getFragmentAnchorLayoutID(), addBackstack, null, null, null);
+        return addFragment(cls, arguments, getFragmentAnchorLayoutID(), addBackstack, 0, 0, null, null);
+    }
+
+    public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack, int enterAnim, int exitAnim){
+        return addFragment(cls, arguments, getFragmentAnchorLayoutID(), addBackstack, enterAnim, exitAnim, null, null);
     }
 
     public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack
-            , Transition transition, Transition sharedTransition, Pair<View, String> pair){
+            , int enterAnim, int exitAnim, Object sharedTransition, Pair<View, String> pair){
         BaseFragment f = null;
         try {
             f = (BaseFragment) cls.newInstance();
@@ -73,11 +79,6 @@ public class BaseActivity extends AppCompatActivity {
                 f.setSharedElementEnterTransition(sharedTransition);
                 f.setSharedElementReturnTransition(sharedTransition);
             }
-            if(transition != null){
-                f.setEnterTransition(transition);
-                f.setExitTransition(transition);
-            }
-
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -87,18 +88,25 @@ public class BaseActivity extends AppCompatActivity {
             if(arguments != null){
                 f.setArguments(arguments);
             }
-            FragmentTransaction ft = getCurrentFragmentManager().beginTransaction()
-                    .replace(anchorLayout, f, f.getTitle(this));
+            FragmentTransaction ft = getCurrentFragmentManager().beginTransaction();
+            ft.setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim);
+            ft.replace(anchorLayout, f, f.getTitle(this));
             if(pair != null){
                 ft.addSharedElement(pair.first, pair.second);
             }
             if(addBackstack){
                 ft.addToBackStack(f.getTitle(this));
                 ft.setBreadCrumbTitle(f.getTitle(this));
+                ft.setBreadCrumbShortTitle(f.getSubTitle(this));
+                onAddFragmentBackStack(f);
             }
             ft.commitAllowingStateLoss();
         }
         return f;
+    }
+
+    protected void onAddFragmentBackStack(BaseFragment f){
+
     }
 
     protected FragmentManager getCurrentFragmentManager(){
@@ -175,7 +183,7 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void showLoadingDialog(){
+    public void showLoadingDialog(){
         if(mLoadingDialog == null){
             mLoadingDialog = new LoadingDialog(this);
         }
@@ -184,9 +192,18 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void dismissLoadingDialog(){
+    public void dismissLoadingDialog(){
         if(mLoadingDialog != null && mLoadingDialog.isShowing()){
             mLoadingDialog.dismiss();
         }
+    }
+
+    public int getDefaultFragmentAnchor(){
+        return android.R.id.content;
+    }
+
+    @Override
+    public void onBackStackChanged() {
+
     }
 }

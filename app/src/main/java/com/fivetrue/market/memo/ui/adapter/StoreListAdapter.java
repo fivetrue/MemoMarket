@@ -5,11 +5,12 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.StoreWrapper;
+import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.model.Product;
+import com.fivetrue.market.memo.model.Store;
 
 import java.util.List;
 
@@ -17,21 +18,20 @@ import java.util.List;
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<StoreWrapper>{
+public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Store>{
 
     private static final String TAG = "StoreListAdapter";
 
     public interface OnStoreItemClickListener{
-        void onClickHeader(StoreHolder holder, StoreWrapper item);
-        void onClickItem(StoreHolder holder, StoreWrapper item);
-        boolean onLongCLickItem(StoreHolder holder, StoreWrapper item);
+        void onClickItem(StoreHolder holder, Store item);
+        boolean onLongCLickItem(StoreHolder holder, Store item);
     }
 
     private SparseBooleanArray mSelectedItems;
-    private List<StoreWrapper> mData;
+    private List<Store> mData;
     private OnStoreItemClickListener mOnStoreItemClickListener;
 
-    public StoreListAdapter(List<StoreWrapper> data, OnStoreItemClickListener ll){
+    public StoreListAdapter(List<Store> data, OnStoreItemClickListener ll){
         this.mData = data;
         mOnStoreItemClickListener = ll;
         mSelectedItems = new SparseBooleanArray();
@@ -43,64 +43,31 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
          View view = inflater.inflate(R.layout.item_store_list_item, null);
         RecyclerView.ViewHolder holder = new StoreHolder(view);
-
-        if(viewType == StoreWrapper.TYPE_ADD_HEADER){
-
-        }else if(viewType == StoreWrapper.TYPE_STORE_ITEM){
-
-        }
         return holder;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        StoreWrapper item = getItem(position);
-        if(item != null && holder != null){
-            if(getItemViewType(position) == StoreWrapper.TYPE_ADD_HEADER){
-                onBindStoreHeader((StoreHolder) holder, item, position);
-            }else if(getItemViewType(position) == StoreWrapper.TYPE_STORE_ITEM){
-                onBindStoreItem((StoreHolder) holder, item, position);
-            }
-        }
-    }
-
-    private void onBindStoreHeader(final StoreHolder holder, final StoreWrapper item, int pos){
+        final Store item = getItem(position);
+        final StoreHolder storeHolder = (StoreHolder) holder;
         if(holder != null && item != null){
-            holder.icon.setImageResource(R.drawable.ic_add_white_20dp);
-            holder.name.setText(R.string.add_store);
-            holder.layout.setOnClickListener(new View.OnClickListener() {
+            storeHolder.name.setText(item.getName());
+            long count = RealmDB.getInstance().get().where(Product.class).equalTo("storeName", item.getName()).count();
+            storeHolder.count.setText(String.format(storeHolder.count.getResources().getString(R.string.store_product_count), count));
+            storeHolder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if(mOnStoreItemClickListener != null){
-                        mOnStoreItemClickListener.onClickHeader(holder, item);
-                    }
-                }
-            });
-        }
-    }
-
-    private void onBindStoreItem(final StoreHolder holder, final StoreWrapper item, int pos) {
-        if(holder != null && item != null){
-            holder.icon.setImageResource(R.drawable.ic_shop_white_20dp);
-            holder.name.setText(item.store.getName());
-            holder.container.setBackgroundColor(mSelectedItems.get(pos)
-                    ? holder.container.getResources().getColor(R.color.lightBlue)
-                    : holder.container.getResources().getColor(R.color.dimGray));
-
-            holder.layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(mOnStoreItemClickListener != null){
-                        mOnStoreItemClickListener.onClickItem(holder, item);
+                        mOnStoreItemClickListener.onClickItem(storeHolder, item);
                     }
                 }
             });
 
-            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+            storeHolder.layout.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
                     if(mOnStoreItemClickListener != null){
-                        return mOnStoreItemClickListener.onLongCLickItem(holder, item);
+                        return mOnStoreItemClickListener.onLongCLickItem(storeHolder, item);
                     }
                     return false;
                 }
@@ -110,11 +77,11 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position).type;
+        return super.getItemViewType(position);
     }
 
     @Override
-    public StoreWrapper getItem(int pos) {
+    public Store getItem(int pos) {
         return mData.get(pos);
     }
 
@@ -124,23 +91,26 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
-    public List<StoreWrapper> getData() {
+    public List<Store> getData() {
         return mData;
+    }
+
+    public void setData(List<Store> data){
+        mData = data;
+        notifyDataSetChanged();
     }
 
     public static final class StoreHolder extends RecyclerView.ViewHolder{
 
-        public final View container;
         public final View layout;
-        public final ImageView icon;
         public final TextView name;
+        public final TextView count;
 
         public StoreHolder(View itemView) {
             super(itemView);
-            container = itemView.findViewById(R.id.layout_item_store_list_container);
             layout = itemView.findViewById(R.id.layout_item_store_list_item);
-            icon = (ImageView) itemView.findViewById(R.id.iv_item_store_list_item);
-            name = (TextView) itemView.findViewById(R.id.tv_item_store_list_item);
+            name = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_name);
+            count = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_count);
         }
     }
 

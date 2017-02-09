@@ -2,4 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_add_store"
+        android:icon="@drawable/ic_add_white_20dp"
+        android:title="@string/hint_input_store_name"
+        app:showAsAction="ifRoom"/>
+
 </menu>

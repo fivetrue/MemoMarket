@@ -12,13 +12,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/actionbar_height"
             android:orientation="vertical">
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_fragment_store_product"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:nestedScrollingEnabled="false"/>
+                android:layout_height="match_parent">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="320dp">
+                    <ImageView
+                        android:id="@+id/iv_fragment_stroe_product"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:transitionName="@string/transition_image"
+                        android:visibility="invisible"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/alphaWhite"/>
+                </FrameLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_fragment_store_product"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:nestedScrollingEnabled="false"/>
+            </FrameLayout>
         </LinearLayout>
     </ScrollView>
 

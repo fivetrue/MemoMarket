@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.model;
+package com.fivetrue.market.memo.model.vo;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -11,6 +11,7 @@ public class Store extends RealmObject{
 
     @PrimaryKey
     private String name;
+    private String imageUrl;
 
     public String getName() {
         return name;
@@ -20,5 +21,11 @@ public class Store extends RealmObject{
         this.name = name;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

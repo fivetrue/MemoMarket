@@ -19,7 +19,7 @@ import android.widget.LinearLayout;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.adapter.BasePagerAdapter;
+import com.fivetrue.market.memo.ui.adapter.BasePagerAdapter;
 
 
 /**

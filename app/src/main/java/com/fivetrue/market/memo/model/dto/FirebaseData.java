@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.firebase;
+package com.fivetrue.market.memo.model.dto;
 
 import android.util.Log;
 

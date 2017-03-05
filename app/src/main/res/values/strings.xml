@@ -4,13 +4,19 @@
     <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
     <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
     <string name="transition_floating_action_button" translatable="false">transitionFloatingActionButton</string>
+    <string name="transition_image" translatable="false">transitionImage</string>
     <string name="transition_item_layout" translatable="false">transitionItemLayout</string>
 
+    <string name="delete">Delete</string>
 
     <string name="hint_input_store_name">Input name of store</string>
     <string name="add_item">Add Item</string>
     <string name="register_store">Register Store</string>
     <string name="registered_store">Registered Store</string>
+
+    <string name="hint_input_product_name">Input name of product</string>
+    <string name="register_product">Register Product</string>
+
 
     <string name="no_item">No Item</string>
 
@@ -19,4 +25,9 @@
     <string name="error_exist_store_name">This store is already exist.</string>
     <string name="error_empty_store_name">Store name is not input.</string>
     <string name="error_network_message">Network error.</string>
+
+    <string name="error_empty_product_name">Product is empty</string>
+
+    <string name="delete_store_message">This store will be removed.</string>
+
 </resources>

@@ -2,11 +2,12 @@ package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -19,27 +20,27 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.firebase.StoreData;
-import com.fivetrue.market.memo.model.Store;
-import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.crash.FirebaseCrash;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.fivetrue.market.memo.model.dto.ConfigData;
+import com.fivetrue.market.memo.model.dto.StoreData;
+import com.fivetrue.market.memo.model.image.Image;
+import com.fivetrue.market.memo.model.image.ImageEntry;
+import com.fivetrue.market.memo.model.vo.Store;
+import com.fivetrue.market.memo.ui.adapter.image.ImageListAdapter;
+import com.fivetrue.market.memo.ui.adapter.store.StoreNameListAdapter;
+import com.fivetrue.market.memo.utils.DataManager;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by kwonojin on 2017. 1. 27..
@@ -54,13 +55,18 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
     private View mLayoutInput;
     private ProgressBar mProgressBar;
     private EditText mInput;
+    private View mInputOk;
+
+    private RecyclerView mImageList;
     private FloatingActionButton mFabOk;
 
+    private ImageListAdapter mImageAdapter;
     private StoreNameListAdapter mStoreNameListAdapter;
     private ListPopupWindow mPopup;
 
     private FirebaseDataFinder mDataFinder;
     private InputMethodManager mImm;
+
 
     @Override
     public String getTitle(Context context) {
@@ -99,6 +105,10 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
         mLayoutInput = view.findViewById(R.id.layout_fragment_store_add_input);
         mProgressBar = (ProgressBar) view.findViewById(R.id.pb_fragment_store_add);
         mInput = (EditText) view.findViewById(R.id.et_fragment_store_add);
+        mInputOk = view.findViewById(R.id.iv_fragment_store_input_okey);
+
+        mImageList = (RecyclerView) view.findViewById(R.id.rv_fragment_store_add_images);
+
         mFabOk = (FloatingActionButton) view.findViewById(R.id.fab_fragment_store_add);
 
         mInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -107,11 +117,24 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
                 if(i == EditorInfo.IME_ACTION_DONE){
                     if(LL.D)
                         Log.d(TAG, "onEditorAction: done");
-                    String text = textView.getText().toString().trim();
-                    onFinishedInputText(text);
+                    setInputText(mInput.getText().toString().trim());
                     return true;
                 }
                 return false;
+            }
+        });
+        mInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mInput.selectAll();
+            }
+        });
+
+        mInputOk.setEnabled(false);
+        mInputOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setInputText(mInput.getText().toString().trim());
             }
         });
 
@@ -120,8 +143,7 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
         mFabOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String text = mInput.getText().toString().trim();
-                onFinishedInputText(text);
+                onFinishedInput();
             }
         });
 
@@ -136,6 +158,28 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
                 }
             }
         });
+
+        mImageList.setLayoutManager(new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false));
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if(mPopup != null && mPopup.isShowing()){
+            mPopup.dismiss();
+        }
+    }
+
+    private void setInputText(String text){
+        if(LL.D) Log.d(TAG, "setInputText() called with: text = [" + text + "]");
+        if(mPopup != null){
+            mPopup.dismiss();
+        }
+        if(mDataFinder != null && mImm != null){
+            mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
+            mDataFinder.selectedName = text;
+            findImages(text);
+        }
     }
 
     private void setData(List<StoreData> data){
@@ -164,75 +208,104 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
         }
     }
 
-    private void onFinishedInputText(String text){
+    private void onFinishedInput(){
         mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
-        if(TextUtils.isEmpty(text)){
-            Snackbar.make(mContainer, R.string.error_empty_store_name, Snackbar.LENGTH_SHORT).show();
-        }else if(RealmDB.getInstance().get().where(Store.class).equalTo("name", text).count() > 0){
-            Snackbar.make(mContainer, R.string.error_exist_store_name, Snackbar.LENGTH_SHORT).show();
-        }else{
-            Store store = new Store();
-            store.setName(text);
-            addStore(store);
+        if(mInput != null && mImageAdapter != null){
+            String name = mInput.getText().toString().trim();
+            if(TextUtils.isEmpty(name)){
+                Snackbar.make(mContainer, R.string.error_empty_store_name, Snackbar.LENGTH_SHORT).show();
+            }else if(RealmDB.get().where(Store.class).equalTo("name", name).count() > 0){
+                Snackbar.make(mContainer, R.string.error_exist_store_name, Snackbar.LENGTH_SHORT).show();
+            }else{
+                List<Image> images = mImageAdapter.getSelections();
+                if(images != null && images.size() > 0){
+                    Image image = images.get(0);
+                    Store store = new Store();
+                    store.setName(name);
+                    store.setImageUrl(image.thumbnailUrl);
+                    addStore(store);
+                }else{
+                    Snackbar.make(mContainer, R.string.error_exist_store_name, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    private void findImages(final String name){
+        if(LL.D) Log.d(TAG, "findImages() called with: name = [" + name + "]");
+        if(getActivity() != null){
+            DataManager.getInstance(getActivity()).getConfig().subscribe(new Consumer<ConfigData>() {
+                @Override
+                public void accept(ConfigData configData) throws Exception {
+                    if(TextUtils.isEmpty(name)){
+                        onLoadImages(null);
+                    }else{
+                        DataManager.getInstance(getActivity()).findImage(configData, name)
+                                .subscribeOn(Schedulers.newThread())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Consumer<ImageEntry>() {
+                                    @Override
+                                    public void accept(ImageEntry imageEntry) throws Exception {
+                                        if(LL.D) Log.d(TAG, "accept: loadImage");
+                                        onLoadImages(imageEntry);
+                                    }
+                                }, new Consumer<Throwable>() {
+                                    @Override
+                                    public void accept(Throwable throwable) throws Exception {
+                                        if(LL.D) Log.e(TAG, "accept: ", throwable);
+                                    }
+                                });
+                    }
+                }
+            });
+        }
+
+    }
+
+    private void onLoadImages(ImageEntry imageEntry){
+        if(imageEntry != null && imageEntry.getValue() != null){
+            if(LL.D) Log.d(TAG, "onLoadImages() image count = [" + imageEntry.getValue().size() + "]");
+            if(mImageAdapter == null){
+                mImageAdapter = new ImageListAdapter(imageEntry.getValue());
+                mImageList.setAdapter(mImageAdapter);
+            }else{
+                mImageAdapter.setData(imageEntry.getValue());
+                mImageAdapter.clearSelection();
+            }
+        }else if(mImageAdapter != null){
+            mImageAdapter.getData().clear();
+            mImageAdapter.clearSelection();
         }
     }
 
     private void addStore(final Store store){
-        showLoadingDialog();
-        FirebaseDB.getInstance().findStoreContain(store.getName()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(LL.D) Log.d(TAG, "onDataChange: check count for adding : " + dataSnapshot.getChildrenCount());
-                if(dataSnapshot.getChildrenCount() == 0){
-                    if(LL.D) Log.d(TAG, "onDataChange: online has no item : " + store.getName());
-                    FirebaseDB.getInstance().addStore(store).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            onSaveStoreToLocalDB(store);
-                            if(LL.D) Log.d(TAG, "onSuccess: put to firebase");
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "onFailure: ", e);
-                            FirebaseCrash.report(e);
-                            onSaveStoreToLocalDB(store);
-                        }
-                    });
-                }else{
-                    if(LL.D) Log.d(TAG, "onDataChange: already online has item : " + store.getName());
-                    onSaveStoreToLocalDB(store);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                dismissLoadingDialog();
-                Snackbar.make(mContainer, R.string.error_network_message, Snackbar.LENGTH_SHORT).show();
-            }
-        });
+        DataManager.getInstance(getActivity()).addStore(store)
+                .subscribe(new Consumer<Store>() {
+                    @Override
+                    public void accept(Store store) throws Exception {
+                        finishAddStore();
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.e(TAG, "addStore", throwable);
+                    }
+                });
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
         if(mStoreNameListAdapter != null && mStoreNameListAdapter.getItemCount() > i){
             StoreData store = mStoreNameListAdapter.getItem(i);
             if(LL.D) Log.d(TAG, "onItemClick: store = " + store.name);
-            mDataFinder.selectedName = store.name;
+            setInputText(store.name);
             mInput.setText(store.name);
-            if(mPopup != null && mPopup.isShowing()){
-                mPopup.dismiss();
-            }
         }
-
     }
 
-    private void onSaveStoreToLocalDB(Store store){
-        dismissLoadingDialog();
-        RealmDB.getInstance().get().beginTransaction();
-        RealmDB.getInstance().get().insert(store);
-        RealmDB.getInstance().get().commitTransaction();
+    private void finishAddStore(){
+        if(LL.D) Log.d(TAG, "finishAddStore() called");
+        getFragmentManager().popBackStackImmediate();
     }
 
     private class FirebaseDataFinder implements TextWatcher {
@@ -253,109 +326,21 @@ public class StoreAddFragment extends BaseFragment implements AdapterView.OnItem
         @Override
         public void afterTextChanged(Editable editable) {
             if(LL.D) Log.d(TAG, "afterTextChanged() called with: editable = [" + editable + "]");
-            String text = editable.toString().trim();
-            if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
-                mProgressBar.setVisibility(View.VISIBLE);
-                FirebaseDB.getInstance().findStoreContain(text).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(LL.D)
-                            Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
-                        ArrayList<StoreData> data = new ArrayList<StoreData>();
-                        if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
-                            for(DataSnapshot d : dataSnapshot.getChildren()){
-                                data.add(d.getValue(StoreData.class));
-                            }
+            if(getActivity() != null && mInputOk != null){
+                final String text = editable.toString().trim();
+                mInputOk.setEnabled(!TextUtils.isEmpty(text));
+                if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    DataManager.getInstance(getActivity()).findStoreName(text).subscribe(new Consumer<List<StoreData>>() {
+                        @Override
+                        public void accept(List<StoreData> storeDatas) throws Exception {
+                            setData(storeDatas);
                         }
-                        setData(data);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }else{
-                selectedName = null;
-            }
-        }
-    }
-
-    private static final class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl<StoreData>{
-
-        private static final String TAG = "StoreNameListAdapter";
-
-        private Context mContext;
-        private List<StoreData> mData;
-
-        public StoreNameListAdapter(Context context, List<StoreData> list){
-            this.mContext = context;
-            this.mData = list;
-        }
-
-        @Override
-        public int getCount() {
-            return mData.size();
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            Holder holder = new Holder();
-            StoreData store = getItem(i);
-            if(view == null){
-                LayoutInflater inflater = LayoutInflater.from(mContext);
-                view = inflater.inflate(R.layout.item_store_list_popup, null);
-                holder.name = (TextView) view.findViewById(R.id.tv_item_store_list_name);
-                view.setTag(holder);
-            }else{
-                holder = (Holder) view.getTag();
-                if(holder == null){
-                    LayoutInflater inflater = LayoutInflater.from(mContext);
-                    view = inflater.inflate(R.layout.item_store_list_popup, null);
-                    holder.name = (TextView) view.findViewById(R.id.tv_item_store_list_name);
-                    view.setTag(holder);
+                    });
+                }else{
+                    selectedName = null;
                 }
             }
-
-            holder.name.setText(store.name);
-            return view;
-        }
-
-        @Override
-        public StoreData getItem(int pos) {
-            return mData.get(pos);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mData.size();
-        }
-
-        @Override
-        public List<StoreData> getData() {
-            return mData;
-        }
-
-        public void setData(List<StoreData> data){
-            this.mData = data;
-            notifyDataSetChanged();
-        }
-
-        private static class Holder{
-            public TextView name;
-        }
-    }
-
-    @Override
-    protected void showLoadingDialog() {
-        super.showLoadingDialog();
-        if(mPopup != null && mPopup.isShowing()){
-            mPopup.dismiss();
         }
     }
 }

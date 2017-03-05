@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.model;
+package com.fivetrue.market.memo.model.vo;
 
 import io.realm.RealmObject;
 

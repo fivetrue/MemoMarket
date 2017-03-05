@@ -9,6 +9,7 @@ import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;
+import io.realm.RealmSchema;
 
 /**
  * Created by kwonojin on 2017. 1. 24..
@@ -18,7 +19,7 @@ public class RealmDB {
 
     private static final String TAG = "RealmDB";
 
-    private static final int DB_VERSION = 0;
+    private static final int DB_VERSION = 1;
 
     private static RealmDB sInstance;
 
@@ -28,24 +29,20 @@ public class RealmDB {
         sInstance = new RealmDB(context.getApplicationContext());
     }
 
-    public static RealmDB getInstance(){
-        return sInstance;
+
+    public static Realm get(){
+        return Realm.getDefaultInstance();
     }
 
-
-    private RealmDB(Context context){
+    public RealmDB(Context context){
         this.mContext = context;
         Realm.init(context);
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .schemaVersion(DB_VERSION) // 스키마가 바뀌면 값을 올려야만 합니다
                 .migration(new ReamDBMigration()) // 예외 발생대신에 마이그레이션을 수행하기
                 .build();
+        Realm.setDefaultConfiguration(config);
     }
-
-    public Realm get(){
-        return Realm.getDefaultInstance();
-    }
-
 
     private static final class ReamDBMigration implements RealmMigration {
 
@@ -54,7 +51,7 @@ public class RealmDB {
             if(LL.D)
                 Log.d(TAG, "migrate() called with: realm = [" + realm + "], oldVersion = [" + oldVersion + "], newVersion = [" + newVersion + "]");
 
-            // DynamicRealm는 편집가능한 스키마를 노출합니다
+             // DynamicRealm는 편집가능한 스키마를 노출합니다
 //            RealmSchema schema = realm.getSchema();
 //
 //            // 버전 1로 마이그레이션: 클래스를 생성합니다

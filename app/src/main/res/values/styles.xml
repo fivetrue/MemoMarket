@@ -17,9 +17,10 @@
     </style>
 
     <style name="AppTheme.Toolbar">
-        <item name="android:textColorSecondary">@color/colorPrimaryDark</item>
-        <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/dimBlue</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/colorAccent</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

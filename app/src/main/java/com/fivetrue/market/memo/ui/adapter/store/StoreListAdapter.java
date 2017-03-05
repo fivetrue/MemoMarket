@@ -1,16 +1,19 @@
-package com.fivetrue.market.memo.ui.adapter;
+package com.fivetrue.market.memo.ui.adapter.store;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.model.Product;
-import com.fivetrue.market.memo.model.Store;
+import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.vo.Store;
+import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.List;
 
@@ -18,7 +21,7 @@ import java.util.List;
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Store>{
+public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Store> {
 
     private static final String TAG = "StoreListAdapter";
 
@@ -51,9 +54,7 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final Store item = getItem(position);
         final StoreHolder storeHolder = (StoreHolder) holder;
         if(holder != null && item != null){
-            storeHolder.name.setText(item.getName());
-            long count = RealmDB.getInstance().get().where(Product.class).equalTo("storeName", item.getName()).count();
-            storeHolder.count.setText(String.format(storeHolder.count.getResources().getString(R.string.store_product_count), count));
+            storeHolder.setStore(item);
             storeHolder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -100,18 +101,29 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         notifyDataSetChanged();
     }
 
-    public static final class StoreHolder extends RecyclerView.ViewHolder{
+    @Override
+    public void toggle(int pos) {
 
-        public final View layout;
-        public final TextView name;
-        public final TextView count;
+    }
 
-        public StoreHolder(View itemView) {
-            super(itemView);
-            layout = itemView.findViewById(R.id.layout_item_store_list_item);
-            name = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_name);
-            count = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_count);
-        }
+    @Override
+    public boolean isSelect(int pos) {
+        return false;
+    }
+
+    @Override
+    public void selection(int pos, boolean b) {
+
+    }
+
+    @Override
+    public void clearSelection() {
+
+    }
+
+    @Override
+    public List<Store> getSelections() {
+        return null;
     }
 
     public void selectPosition(int pos){
@@ -133,5 +145,30 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public boolean isSelected(int pos){
         return mSelectedItems.get(pos);
+    }
+
+    public static final class StoreHolder extends RecyclerView.ViewHolder{
+
+        public final View layout;
+        public final ImageView image;
+        public final TextView name;
+        public final TextView count;
+
+        public StoreHolder(View itemView) {
+            super(itemView);
+            layout = itemView.findViewById(R.id.layout_item_store_list_item);
+            image = (ImageView) itemView.findViewById(R.id.iv_item_store_list_item_image);
+            name = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_name);
+            count = (TextView) itemView.findViewById(R.id.tv_item_store_list_item_count);
+        }
+
+        public void setStore(Store store){
+            name.setText(store.getName());
+            long c = RealmDB.get().where(Product.class).equalTo("storeName", store.getName()).count();
+            count.setText(String.format(count.getResources().getString(R.string.store_product_count), c));
+            Glide.with(image.getContext()).load(store.getImageUrl())
+                    .placeholder(R.drawable.ic_product_gray_50dp)
+                    .dontTransform().into(image);
+        }
     }
 }

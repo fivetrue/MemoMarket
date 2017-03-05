@@ -1,11 +1,11 @@
-package com.fivetrue.market.memo.ui.adapter;
+package com.fivetrue.market.memo.ui.adapter.store;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
-import com.fivetrue.market.memo.adapter.BaseFragmentPagerAdapter;
-import com.fivetrue.market.memo.model.Store;
+import com.fivetrue.market.memo.model.vo.Store;
+import com.fivetrue.market.memo.ui.adapter.BaseFragmentPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 
 import java.util.List;

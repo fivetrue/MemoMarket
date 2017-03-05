@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.adapter;
+package com.fivetrue.market.memo.ui.adapter;
 
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;

@@ -41,7 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.adapter.BasePagerAdapter;
+import com.fivetrue.market.memo.ui.adapter.BasePagerAdapter;
 
 import java.util.List;
 import java.util.Locale;

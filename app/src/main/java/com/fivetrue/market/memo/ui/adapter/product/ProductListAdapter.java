@@ -1,7 +1,6 @@
-package com.fivetrue.market.memo.ui.adapter;
+package com.fivetrue.market.memo.ui.adapter.product;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,18 +8,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.fivetrue.market.memo.LL;
+import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.model.Product;
+import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
+import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Predicate;
 
 /**
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product>{
+public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
 
     private static final String TAG = "StoreListAdapter";
 
@@ -43,7 +47,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-         View view = inflater.inflate(R.layout.item_store_list_item, null);
+         View view = inflater.inflate(R.layout.item_product_list_item, null);
         RecyclerView.ViewHolder holder = new ProductHolder(view);
         return holder;
     }
@@ -53,10 +57,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         final Product item = getItem(position);
         final ProductHolder productHolder = (ProductHolder) holder;
         if(holder != null && item != null){
-            productHolder.name.setText(item.getName());
-            long count = RealmDB.getInstance().get().where(Product.class).equalTo("storeName", item.getName()).count();
-            if(LL.D) Log.d(TAG, "onBindViewHolder: store name = " + item.getName() + ", product count : " + count);
-            productHolder.price.setText(item.getPrice() + "");
+            productHolder.setProduct(item, isSelect(position));
             productHolder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -93,39 +94,84 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mData;
     }
 
+    @Override
+    public void setData(List<Product> data) {
+        mData = data;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void toggle(int pos) {
+        boolean b = !mSelectedItems.get(pos);
+        mSelectedItems.put(pos, b);
+        notifyItemChanged(pos);
+    }
+
+    @Override
+    public boolean isSelect(int pos) {
+        return mSelectedItems.get(pos);
+    }
+
+    @Override
+    public void selection(int pos, boolean b) {
+        mSelectedItems.put(pos, b);
+        notifyItemChanged(pos);
+    }
+
+    @Override
+    public void clearSelection() {
+        mSelectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public List<Product> getSelections() {
+        ArrayList<Product> list = new ArrayList<>();
+        for(int i = 0 ; i < getItemCount() ; i++){
+            if(mSelectedItems.get(i)){
+                list.add(getItem(i));
+            }
+        }
+        return list;
+    }
+
+
     public static final class ProductHolder extends RecyclerView.ViewHolder{
 
         public final View layout;
+        public final ImageView image;
         public final TextView name;
-        public final TextView price;
         public final ImageView check;
+        public final ImageView badge;
 
         public ProductHolder(View itemView) {
             super(itemView);
             layout = itemView.findViewById(R.id.layout_item_product_list_item);
+            image = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_image);
             name = (TextView) itemView.findViewById(R.id.tv_item_product_list_item_name);
-            price = (TextView) itemView.findViewById(R.id.tv_item_product_list_item_price);
             check = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_check);
+            badge = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_badge);
         }
-    }
 
-    public boolean togglePosition(int pos){
-        boolean b = !mSelectedItems.get(pos);
-        mSelectedItems.put(pos, b);
-        notifyItemChanged(pos);
-        return b;
-    }
-
-    public int selectedPosition(){
-        for(int i = 1 ; i < getItemCount() ; i++){
-            if(mSelectedItems.get(i)){
-                return i;
+        public void setProduct(Product product, boolean b){
+            name.setText(product.getName());
+            Glide.with(image.getContext())
+                    .load(product.getImageUrl())
+                    .placeholder(R.drawable.ic_product_gray_50dp)
+                    .into(image);
+            if(System.currentTimeMillis() - product.getCheckInDate()
+                    < DefaultPreferenceUtil.getNewProductPeriod(name.getContext())){
+                badge.setImageResource(R.drawable.ic_new_red_20dp);
+            }else{
+                badge.setImageBitmap(null);
             }
-        }
-        return -1;
-    }
 
-    public boolean isSelected(int pos){
-        return mSelectedItems.get(pos);
+            check.setVisibility(b ? View.VISIBLE : View.GONE);
+
+            layout.animate().scaleX(b ? 0.9f : 1f)
+                    .scaleY(b ? 0.9f : 1f)
+                    .setDuration(100L)
+                    .start();
+        }
     }
 }

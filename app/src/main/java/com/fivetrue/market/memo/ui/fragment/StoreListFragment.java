@@ -18,16 +18,16 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.model.Store;
+import com.fivetrue.market.memo.model.vo.Store;
 import com.fivetrue.market.memo.ui.BaseActivity;
-import com.fivetrue.market.memo.ui.adapter.StoreListAdapter;
+import com.fivetrue.market.memo.ui.adapter.store.StoreListAdapter;
 import com.fivetrue.market.memo.ui.fragment.transition.MoveTransition;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 /**
@@ -52,37 +52,15 @@ public class StoreListFragment extends BaseFragment{
     private RecyclerView.LayoutManager mLayoutManager;
     private int mScrollPos = 0;
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        RealmChangeListener<Realm> ll = new RealmChangeListener<Realm>() {
+        setStoreList(RealmDB.get().where(Store.class).findAll());
+        RealmDB.get().addChangeListener(new RealmChangeListener<Realm>() {
             @Override
             public void onChange(Realm element) {
-                RealmResults<Store> storeRealmResults = element.where(Store.class).findAll();
-                mStoreListAdapter.setData(new ArrayList<Store>(storeRealmResults));
-            }
-        };
-
-        RealmDB.getInstance().get().addChangeListener(ll);
-
-        RealmResults<Store> storeRealmResults = RealmDB.getInstance().get().where(Store.class).findAll();
-        if(LL.D) Log.d(TAG, "load store item count : " + storeRealmResults.size());
-        mStoreListAdapter = new StoreListAdapter(new ArrayList<>(storeRealmResults), new StoreListAdapter.OnStoreItemClickListener() {
-            @Override
-            public void onClickItem(StoreListAdapter.StoreHolder holder, Store item) {
-                if(getActivity() != null && getActivity() instanceof BaseActivity){
-                    ((BaseActivity) getActivity())
-                            .addFragment(StoreProductFragment.class
-                                    ,StoreProductFragment.makeArgument(item)
-                                    , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true
-                                    ,0, 0, new MoveTransition()
-                                    ,new Pair<View, String>(mFabAddStore, getString(R.string.transition_floating_action_button)));
-                }
-            }
-
-            @Override
-            public boolean onLongCLickItem(StoreListAdapter.StoreHolder holder, Store item) {
-                return false;
+                setStoreList(RealmDB.get().where(Store.class).findAll());
             }
         });
     }
@@ -98,29 +76,26 @@ public class StoreListFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_store_list, null);
+        return inflater.inflate(R.layout.fragment_product_list, null);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_store);
-        mContainer = view.findViewById(R.id.layout_fragment_store_list);
-        mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_store_list);
-        mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_store_list);
+        mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_product_list);
+        mContainer = view.findViewById(R.id.layout_fragment_product_list);
+        mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
+        mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
-        mFabAddStore = (FloatingActionButton) view.findViewById(R.id.fab_fragment_store_list);
+        mFabAddStore = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
         mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
         mRecyclerStore.setLayoutManager(mLayoutManager);
         mRecyclerStore.setItemAnimator(new FadeInAnimator());
         mRecyclerStore.setAdapter(mStoreListAdapter);
-
         mFabAddStore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(getActivity() != null && getActivity() instanceof BaseActivity){
-                    int x = view.getRight() - view.getWidth() / 2;
-                    int y = view.getBottom() - view.getHeight() / 2;
                     ((BaseActivity) getActivity()).addFragment(StoreAddFragment.class, null
                             , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true
                             , 0, 0
@@ -130,23 +105,45 @@ public class StoreListFragment extends BaseFragment{
             }
         });
 
-        mTextMessage.setVisibility(mStoreListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
-
         mContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int left, int top, int right
                     , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if(view != null){
                     view.removeOnLayoutChangeListener(this);
-                    ViewAnimationUtils.createCircularReveal(view, right, bottom
+                    ViewAnimationUtils.createCircularReveal(view, left, top
                             , 0, Math.max(right, bottom)).setDuration(250L).start();
                 }
             }
         });
 
         if(LL.D) Log.d(TAG, "onViewCreated: mScrollPos = " + mScrollPos);
+        mTextMessage.setVisibility(mStoreListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
 
         mScrollView.setScrollY(mScrollPos);
+    }
+
+    private void setStoreList(List<Store> storeList){
+        if(LL.D) Log.d(TAG, "setStoreList() called with: storeList = [" + storeList + "]");
+        if(storeList != null){
+            if(mStoreListAdapter == null){
+                mStoreListAdapter = new StoreListAdapter(storeList, new StoreListAdapter.OnStoreItemClickListener() {
+                    @Override
+                    public void onClickItem(StoreListAdapter.StoreHolder holder, Store item) {
+                        if(getActivity() != null && getActivity() instanceof BaseActivity){
+
+                        }
+                    }
+
+                    @Override
+                    public boolean onLongCLickItem(StoreListAdapter.StoreHolder holder, Store item) {
+                        return false;
+                    }
+                });
+            }else{
+                mStoreListAdapter.setData(storeList);
+            }
+        }
     }
 
     @Override

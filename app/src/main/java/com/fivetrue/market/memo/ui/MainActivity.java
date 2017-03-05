@@ -2,13 +2,14 @@ package com.fivetrue.market.memo.ui;
 
 import android.animation.ValueAnimator;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.ui.fragment.StoreListFragment;
+import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 
 
 public class MainActivity extends BaseActivity{
@@ -38,11 +39,11 @@ public class MainActivity extends BaseActivity{
     private void initView(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(R.color.colorAccent), MaterialMenuDrawable.Stroke.THIN);
+        mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(R.color.colorPrimary), MaterialMenuDrawable.Stroke.THIN);
         toolbar.setNavigationIcon(mMaterialMenuDrawable);
         mMaterialMenuDrawable.setIconState(MaterialMenuDrawable.IconState.X);
         getSupportActionBar().setTitle(R.string.registered_store);
-        addFragment(StoreListFragment.class, null, getDefaultFragmentAnchor(), false);
+        addFragment(ProductListFragment.class, null, getDefaultFragmentAnchor(), false);
     }
 
     @Override
@@ -61,6 +62,16 @@ public class MainActivity extends BaseActivity{
                     finish();
                 }
                 break;
+            default:
+                if(getSupportFragmentManager().getFragments() != null){
+                    for(Fragment f : getSupportFragmentManager().getFragments()){
+                        if(f != null){
+                            f.onOptionsItemSelected(item);
+                        }
+                    }
+                }
+                break;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -86,35 +97,43 @@ public class MainActivity extends BaseActivity{
     }
 
     private void animateActionBarMenu(MaterialMenuDrawable.IconState state){
-        ValueAnimator animator = null;
-        switch (state){
-            case X:{
-                animator = ValueAnimator.ofFloat(0, 1);
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float value = (Float)valueAnimator.getAnimatedValue();
-                        mMaterialMenuDrawable.setTransformationOffset(
-                                MaterialMenuDrawable.AnimationState.ARROW_X,
-                                value);
+        if(state != null && mMaterialMenuDrawable != null){
+            ValueAnimator animator = null;
+            switch (state){
+                case X:{
+                    if (mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.X){
+                        animator = ValueAnimator.ofFloat(0, 1);
+                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                float value = (Float)valueAnimator.getAnimatedValue();
+                                mMaterialMenuDrawable.setTransformationOffset(
+                                        MaterialMenuDrawable.AnimationState.ARROW_X,
+                                        value);
+                            }
+                        });
                     }
-                });
-            }
-            break;
+                }
+                break;
 
-            case ARROW: {
-                animator = ValueAnimator.ofFloat(1, 0);
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float value = (Float)valueAnimator.getAnimatedValue();
-                        mMaterialMenuDrawable.setTransformationOffset(
-                                MaterialMenuDrawable.AnimationState.ARROW_X,
-                                value);
+                case ARROW: {
+                    if(mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.ARROW){
+                        animator = ValueAnimator.ofFloat(1, 0);
+                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                float value = (Float)valueAnimator.getAnimatedValue();
+                                mMaterialMenuDrawable.setTransformationOffset(
+                                        MaterialMenuDrawable.AnimationState.ARROW_X,
+                                        value);
+                            }
+                        });
                     }
-                });
+                }
+            }
+            if(animator != null){
+                animator.setDuration(250).start();
             }
         }
-        animator.setDuration(250).start();
     }
 }

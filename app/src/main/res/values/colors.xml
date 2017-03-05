@@ -17,8 +17,11 @@
     <color name="dimBlue">#bccde6</color>
 
     <color name="colorPrimary">@android:color/white</color>
-    <color name="colorPrimaryDark">@color/gray</color>
-    <color name="colorAccent">@color/darkGray</color>
+    <color name="colorPrimaryDark">@color/primaryBlue</color>
+    <color name="colorAccent">@color/primaryBlue</color>
 
     <color name="indicatorColor">@color/primaryBlue</color>
+
+    <color name="alphaBlack">#55000000</color>
+    <color name="alphaWhite">#77FFFFFF</color>
 </resources>

@@ -9,10 +9,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
-import android.transition.Transition;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
-import com.fivetrue.market.memo.ui.dialog.LoadingDialog;
+import com.fivetrue.market.memo.MemoApplication;
+import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 
@@ -24,10 +27,10 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
 
     private static final String TAG = "BaseActivity";
 
-    private LoadingDialog mLoadingDialog;
-
     private int mStartX;
     private int mStartY;
+
+    private MenuItem mDeleteItem;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,6 +56,18 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        mDeleteItem = menu.findItem(R.id.action_delete);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     protected boolean popFragment(FragmentManager fm){
         boolean b = fm.popBackStackImmediate();
         return b;
@@ -71,7 +86,7 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     }
 
     public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack
-            , int enterAnim, int exitAnim, Object sharedTransition, Pair<View, String> pair){
+            , int enterAnim, int exitAnim, Object sharedTransition, Pair<View, String>... pair){
         BaseFragment f = null;
         try {
             f = (BaseFragment) cls.newInstance();
@@ -80,9 +95,9 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
                 f.setSharedElementReturnTransition(sharedTransition);
             }
         } catch (InstantiationException e) {
-            e.printStackTrace();
+            Log.e(TAG, "addFragment: ", e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Log.e(TAG, "addFragment: ", e);
         }
         if(f != null){
             if(arguments != null){
@@ -91,8 +106,10 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
             FragmentTransaction ft = getCurrentFragmentManager().beginTransaction();
             ft.setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim);
             ft.replace(anchorLayout, f, f.getTitle(this));
-            if(pair != null){
-                ft.addSharedElement(pair.first, pair.second);
+            if(pair != null && pair.length > 0){
+                for(Pair<View, String> p : pair){
+                    ft.addSharedElement(p.first, p.second);
+                }
             }
             if(addBackstack){
                 ft.addToBackStack(f.getTitle(this));
@@ -183,21 +200,6 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
         }
     }
 
-    public void showLoadingDialog(){
-        if(mLoadingDialog == null){
-            mLoadingDialog = new LoadingDialog(this);
-        }
-        if(!mLoadingDialog.isShowing()){
-            mLoadingDialog.show();
-        }
-    }
-
-    public void dismissLoadingDialog(){
-        if(mLoadingDialog != null && mLoadingDialog.isShowing()){
-            mLoadingDialog.dismiss();
-        }
-    }
-
     public int getDefaultFragmentAnchor(){
         return android.R.id.content;
     }
@@ -205,5 +207,15 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     @Override
     public void onBackStackChanged() {
 
+    }
+
+    public void showDeleteMenuItem(boolean b){
+        if(mDeleteItem != null){
+            mDeleteItem.setVisible(b);
+        }
+    }
+
+    public MemoApplication getApp(){
+        return (MemoApplication) getApplicationContext();
     }
 }

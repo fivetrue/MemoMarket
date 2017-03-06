@@ -19,7 +19,6 @@ import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.BaseActivity;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
@@ -48,6 +47,7 @@ public class ProductListFragment extends BaseFragment{
     private FloatingActionButton mFabAddProduct;
     private FloatingActionButton mFabLoadProduct;
     private FloatingActionButton mFabDeleteProduct;
+    private FloatingActionButton mFabCancel;
 
     private RecyclerView.LayoutManager mLayoutManager;
     private int mScrollPos = 0;
@@ -58,13 +58,6 @@ public class ProductListFragment extends BaseFragment{
         super.onCreate(savedInstanceState);
         setProductList(RealmDB.get().where(Product.class)
                 .equalTo("checkOut", false).findAll().sort("checkInDate"));
-        RealmDB.get().addChangeListener(new RealmChangeListener<Realm>() {
-            @Override
-            public void onChange(Realm element) {
-                setProductList(RealmDB.get().where(Product.class).equalTo("checkOut", false)
-                        .findAll().sort("checkInDate"));
-            }
-        });
     }
 
     @Override
@@ -92,6 +85,7 @@ public class ProductListFragment extends BaseFragment{
         mFabAddProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
         mFabLoadProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_checkout);
         mFabDeleteProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_delete);
+        mFabCancel = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_cancel);
 
         mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
         mRecyclerProduct.setLayoutManager(mLayoutManager);
@@ -100,6 +94,14 @@ public class ProductListFragment extends BaseFragment{
         mFabAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                RealmDB.get().addChangeListener(new RealmChangeListener<Realm>() {
+                    @Override
+                    public void onChange(Realm element) {
+                        element.removeChangeListener(this);
+                        setProductList(RealmDB.get().where(Product.class).equalTo("checkOut", false)
+                                .findAll().sort("checkInDate"));
+                    }
+                });
                 if(getActivity() != null){
                     startActivity(new Intent(getActivity(), ProductAddActivity.class));
                 }
@@ -116,7 +118,29 @@ public class ProductListFragment extends BaseFragment{
         mFabDeleteProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                RealmDB.get().executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        List<Product> products = mProductListAdapter.getSelections();
+                        for(Product p : products){
+                            int index = mProductListAdapter.getData().indexOf(p);
+                            mProductListAdapter.toggle(index);
+                            mProductListAdapter.notifyItemRemoved(index);
+                        }
+                        for(Product p : products){
+                            p.deleteFromRealm();
+                        }
+                        updateButtons();
+                    }
+                });
+            }
+        });
 
+        mFabCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mProductListAdapter.clearSelection();
+                updateButtons();
             }
         });
 
@@ -167,9 +191,12 @@ public class ProductListFragment extends BaseFragment{
                 if(mProductListAdapter.getSelections().size() > 0){
                     SimpleViewUtils.showView(mFabLoadProduct, View.VISIBLE);
                     SimpleViewUtils.showView(mFabDeleteProduct, View.VISIBLE);
+                    SimpleViewUtils.showView(mFabCancel, View.VISIBLE);
+
                 }else{
-                    SimpleViewUtils.hideView(mFabLoadProduct, View.INVISIBLE);
-                    SimpleViewUtils.hideView(mFabDeleteProduct, View.INVISIBLE);
+                    SimpleViewUtils.hideView(mFabLoadProduct, View.GONE);
+                    SimpleViewUtils.hideView(mFabDeleteProduct, View.GONE);
+                    SimpleViewUtils.hideView(mFabCancel, View.GONE);
                 }
             }
         }

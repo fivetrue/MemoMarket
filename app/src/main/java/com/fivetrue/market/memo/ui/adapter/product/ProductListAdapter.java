@@ -17,8 +17,6 @@ import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.functions.Predicate;
 
 /**
  * Created by kwonojin on 2017. 1. 26..

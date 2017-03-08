@@ -2,7 +2,6 @@ package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -12,7 +11,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -22,22 +20,19 @@ import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.BaseActivity;
-import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 /**
  * Created by kwonojin on 2017. 2. 7..
  */
 
-public class ProductListFragment extends BaseFragment{
+public class CartFragment extends BaseFragment{
 
     private static final String TAG = "ProductListFragment";
 
@@ -47,9 +42,8 @@ public class ProductListFragment extends BaseFragment{
 
     private TextView mTextMessage;
 
-    private FloatingActionButton mFabAddProduct;
-    private FloatingActionButton mFabLoadProduct;
-    private FloatingActionButton mFabDeleteProduct;
+    private FloatingActionButton mFabBuyProduct;
+    private FloatingActionButton mFabReturnProduct;
     private FloatingActionButton mFabCancel;
 
     private RecyclerView.LayoutManager mLayoutManager;
@@ -60,6 +54,11 @@ public class ProductListFragment extends BaseFragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setProductList(loadProducts());
+    }
+
+    public List<Product> loadProducts(){
+        return RealmDB.get().where(Product.class)
+                .equalTo("checkOut", true).equalTo("checkOutDate", 0).findAll().sort("checkInDate");
     }
 
     @Override
@@ -73,67 +72,40 @@ public class ProductListFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_product_list, null);
+        return inflater.inflate(R.layout.fragment_cart_list, null);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_product_list);
-        mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
-        mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
+        mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_cart_list);
+        mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_cart_list);
+        mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_cart_list);
 
-        mFabAddProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
-        mFabLoadProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_checkout);
-        mFabDeleteProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_delete);
-        mFabCancel = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_cancel);
+        mFabBuyProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_cart_list_buy);
+        mFabReturnProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_cart_list_return);
+        mFabCancel = (FloatingActionButton) view.findViewById(R.id.fab_fragment_cart_list_cancel);
 
         mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
         mRecyclerProduct.setAdapter(mProductListAdapter);
-        mFabAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RealmDB.get().addChangeListener(new RealmChangeListener<Realm>() {
-                    @Override
-                    public void onChange(Realm element) {
-                        element.removeChangeListener(this);
-                        setProductList(loadProducts());
-                    }
-                });
-                if(getActivity() != null){
-                    startActivity(new Intent(getActivity(), ProductAddActivity.class));
-                }
-            }
-        });
 
-        mFabLoadProduct.setOnClickListener(new View.OnClickListener() {
+        mFabBuyProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RealmDB.get().executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        for(Product p : mProductListAdapter.getSelections()){
-                            p.setCheckOut(true);
-                        }
-                        mProductListAdapter.clearSelection();
-                        updateButtons();
-                        setProductList(loadProducts());
-                    }
-                });
 
             }
         });
 
-        mFabDeleteProduct.setOnClickListener(new View.OnClickListener() {
+        mFabReturnProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(getActivity() != null){
 
                     new AlertDialog.Builder(getActivity())
                             .setTitle(android.R.string.dialog_alert_title)
-                            .setMessage(R.string.delete_product_message)
+                            .setMessage(R.string.return_product_message)
                             .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -147,14 +119,11 @@ public class ProductListFragment extends BaseFragment{
                                 public void execute(Realm realm) {
                                     List<Product> products = mProductListAdapter.getSelections();
                                     for(Product p : products){
-                                        int index = mProductListAdapter.getData().indexOf(p);
-                                        mProductListAdapter.toggle(index);
-                                        mProductListAdapter.notifyItemRemoved(index);
+                                        p.setCheckOut(false);
                                     }
-                                    for(Product p : products){
-                                        p.deleteFromRealm();
-                                    }
+                                    mProductListAdapter.clearSelection();
                                     updateButtons();
+                                    setProductList(loadProducts());
                                 }
                             });
                             dialogInterface.dismiss();
@@ -172,7 +141,7 @@ public class ProductListFragment extends BaseFragment{
             }
         });
 
-        view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        view.findViewById(R.id.layout_fragment_cart_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int left, int top, int right
                     , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -188,11 +157,6 @@ public class ProductListFragment extends BaseFragment{
         mTextMessage.setVisibility(mProductListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
 
         mScrollView.setScrollY(mScrollPos);
-    }
-
-    private List<Product> loadProducts(){
-        return RealmDB.get().where(Product.class)
-                .equalTo("checkOut", false).findAll().sort("checkInDate");
     }
 
     private void setProductList(List<Product> productList){
@@ -224,34 +188,19 @@ public class ProductListFragment extends BaseFragment{
 
     private void updateButtons(){
         if(mProductListAdapter != null){
-            if(mFabLoadProduct != null && mFabDeleteProduct != null){
+            if(mFabBuyProduct != null && mFabReturnProduct != null){
                 if(mProductListAdapter.getSelections().size() > 0){
-                    SimpleViewUtils.showView(mFabLoadProduct, View.VISIBLE);
-                    SimpleViewUtils.showView(mFabDeleteProduct, View.VISIBLE);
+                    SimpleViewUtils.showView(mFabBuyProduct, View.VISIBLE);
+                    SimpleViewUtils.showView(mFabReturnProduct, View.VISIBLE);
                     SimpleViewUtils.showView(mFabCancel, View.VISIBLE);
 
                 }else{
-                    SimpleViewUtils.hideView(mFabLoadProduct, View.GONE);
-                    SimpleViewUtils.hideView(mFabDeleteProduct, View.GONE);
+                    SimpleViewUtils.hideView(mFabBuyProduct, View.GONE);
+                    SimpleViewUtils.hideView(mFabReturnProduct, View.GONE);
                     SimpleViewUtils.hideView(mFabCancel, View.GONE);
                 }
             }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_cart :
-                if(getActivity() != null && getActivity() instanceof BaseActivity){
-                    mProductListAdapter.clearSelection();
-                    updateButtons();
-                    ((BaseActivity) getActivity()).addFragment(CartFragment.class, null
-                            , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true);
-                }
-            break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -266,7 +215,7 @@ public class ProductListFragment extends BaseFragment{
 
     @Override
     public String getTitle(Context context) {
-        return null;
+        return context.getString(R.string.cart);
     }
 
     @Override
@@ -286,5 +235,4 @@ public class ProductListFragment extends BaseFragment{
             return 0;
         }
     }
-
 }

@@ -30,8 +30,6 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     private int mStartX;
     private int mStartY;
 
-    private MenuItem mDeleteItem;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,14 +55,7 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        mDeleteItem = menu.findItem(R.id.action_delete);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -207,12 +198,6 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     @Override
     public void onBackStackChanged() {
 
-    }
-
-    public void showDeleteMenuItem(boolean b){
-        if(mDeleteItem != null){
-            mDeleteItem.setVisible(b);
-        }
     }
 
     public MemoApplication getApp(){

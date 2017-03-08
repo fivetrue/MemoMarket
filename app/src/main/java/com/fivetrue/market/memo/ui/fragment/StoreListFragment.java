@@ -41,7 +41,6 @@ public class StoreListFragment extends BaseFragment{
     private static final String KEY_SCROLL_POSITION = "scroll_position";
 
     private NestedScrollView mScrollView;
-    private View mContainer;
     private RecyclerView mRecyclerStore;
     private StoreListAdapter mStoreListAdapter;
 
@@ -83,7 +82,6 @@ public class StoreListFragment extends BaseFragment{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_product_list);
-        mContainer = view.findViewById(R.id.layout_fragment_product_list);
         mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
@@ -105,7 +103,7 @@ public class StoreListFragment extends BaseFragment{
             }
         });
 
-        mContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        mScrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int left, int top, int right
                     , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {

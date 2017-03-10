@@ -37,7 +37,7 @@
         android:id="@+id/fab_fragment_product_list_checkout"
         android:layout_width="@dimen/fab_size"
         android:layout_height="@dimen/fab_size"
-        android:src="@drawable/ic_cart_loaded_white_50dp"
+        android:src="@drawable/ic_cart_checkout_white_50dp"
         android:layout_margin="@dimen/activity_vertical_margin"
         android:layout_gravity="center|bottom"
         android:visibility="invisible"

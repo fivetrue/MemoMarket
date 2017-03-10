@@ -8,6 +8,7 @@
     <string name="transition_item_layout" translatable="false">transitionItemLayout</string>
 
     <string name="delete">Delete</string>
+    <string name="revert">Revert</string>
     <string name="cart">Cart</string>
     <string name="product">Product</string>
 
@@ -32,6 +33,8 @@
 
     <string name="delete_store_message">This store will be removed.</string>
     <string name="delete_product_message">Selected items will be removed.</string>
-    <string name="return_product_message">Selected items will be returned to product.</string>
+
+    <string name="product_returned_complete_message">Product has returned</string>
+    <string name="product_moved_completed_message">Product has moved to cart</string>
 
 </resources>

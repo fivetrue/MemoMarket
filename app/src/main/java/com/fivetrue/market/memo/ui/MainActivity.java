@@ -10,8 +10,6 @@ import android.view.MenuItem;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.ui.fragment.BaseFragment;
-import com.fivetrue.market.memo.ui.fragment.CartFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 
 
@@ -156,6 +154,4 @@ public class MainActivity extends BaseActivity{
             }
         }
     }
-
-
 }

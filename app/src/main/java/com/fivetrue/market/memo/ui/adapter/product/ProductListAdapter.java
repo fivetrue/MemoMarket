@@ -95,7 +95,13 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void setData(List<Product> data) {
         mData = data;
-        notifyDataSetChanged();
+    }
+
+    public void setData(List<Product> data, boolean notify){
+        setData(data);
+        if(notify){
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -119,7 +125,14 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void clearSelection() {
         mSelectedItems.clear();
-        notifyDataSetChanged();
+    }
+
+    public void clearSelection(boolean notify){
+        clearSelection();
+        if(notify){
+            notifyDataSetChanged();
+        }
+
     }
 
     @Override

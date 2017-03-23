@@ -10,6 +10,8 @@
     <string name="delete">Delete</string>
     <string name="revert">Revert</string>
     <string name="cart">Cart</string>
+    <string name="timeline">Timeline</string>
+    <string name="shopping_basket">Shopping Basket</string>
     <string name="product">Product</string>
 
     <string name="hint_input_store_name">Input name of store</string>

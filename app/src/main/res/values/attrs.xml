@@ -8,6 +8,9 @@
     <declare-styleable name="PagerSlidingTabStrip">
         <attr name="indicatorColor" format="color"/>
         <attr name="indicatorHeight" format="dimension"/>
+        <attr name="indicatorRadius" format="dimension" />
+        <attr name="indicatorVerticalPadding" format="dimension" />
+        <attr name="indicatorHorizontalPadding" format="dimension" />
         <attr name="dividerMargin" format="dimension"/>
         <attr name="tabPadding" format="dimension"/>
         <attr name="tabIconPadding" format="dimension"/>

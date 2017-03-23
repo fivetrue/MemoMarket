@@ -95,6 +95,8 @@ public class CheckOutProductFragment extends BaseFragment{
         mFabBuyProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                List<Product> products = mProductListAdapter.getSelections();
+
 
             }
         });

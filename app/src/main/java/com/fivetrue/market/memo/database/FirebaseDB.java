@@ -143,6 +143,7 @@ public class FirebaseDB {
                                 if(LL.D) Log.d(TAG, "onDataChange: check count for adding : " + dataSnapshot.getChildrenCount());
                                 storeDataList = new ArrayList<StoreData>();
                                 if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
+
                                     for(DataSnapshot d : dataSnapshot.getChildren()){
                                         storeDataList.add(d.getValue(StoreData.class));
                                     }

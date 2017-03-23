@@ -125,14 +125,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void clearSelection() {
         mSelectedItems.clear();
-    }
-
-    public void clearSelection(boolean notify){
-        clearSelection();
-        if(notify){
-            notifyDataSetChanged();
-        }
-
+        notifyDataSetChanged();
     }
 
     @Override

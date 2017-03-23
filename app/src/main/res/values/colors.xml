@@ -11,6 +11,8 @@
     <color name="lightRed">#FF6C6C</color>
     <color name="primaryRed">#E24343</color>
 
+    <color name="primaryOrange">#FF5E00</color>
+
     <color name="primaryBlue">#5295FA</color>
     <color name="lightBlue">#77BBFA</color>
     <color name="darkBlue">#3355FA</color>

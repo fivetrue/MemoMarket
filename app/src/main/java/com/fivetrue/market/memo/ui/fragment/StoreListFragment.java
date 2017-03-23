@@ -40,7 +40,6 @@ public class StoreListFragment extends BaseFragment{
 
     private static final String KEY_SCROLL_POSITION = "scroll_position";
 
-    private NestedScrollView mScrollView;
     private RecyclerView mRecyclerStore;
     private StoreListAdapter mStoreListAdapter;
 
@@ -49,8 +48,6 @@ public class StoreListFragment extends BaseFragment{
     private FloatingActionButton mFabAddStore;
 
     private RecyclerView.LayoutManager mLayoutManager;
-    private int mScrollPos = 0;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,9 +64,6 @@ public class StoreListFragment extends BaseFragment{
     @Override
     public void onStop() {
         super.onStop();
-        if(mScrollView != null){
-            mScrollPos = mScrollView.getScrollY();
-        }
     }
 
     @Nullable
@@ -81,7 +75,6 @@ public class StoreListFragment extends BaseFragment{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mScrollView = (NestedScrollView) view.findViewById(R.id.sv_fragment_product_list);
         mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
@@ -103,7 +96,7 @@ public class StoreListFragment extends BaseFragment{
             }
         });
 
-        mScrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int left, int top, int right
                     , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -115,10 +108,7 @@ public class StoreListFragment extends BaseFragment{
             }
         });
 
-        if(LL.D) Log.d(TAG, "onViewCreated: mScrollPos = " + mScrollPos);
         mTextMessage.setVisibility(mStoreListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
-
-        mScrollView.setScrollY(mScrollPos);
     }
 
     private void setStoreList(List<Store> storeList){

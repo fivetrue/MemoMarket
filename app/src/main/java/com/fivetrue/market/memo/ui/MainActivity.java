@@ -4,13 +4,22 @@ import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
+import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
+import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
+import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
+import com.fivetrue.market.memo.view.PagerTabContent;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends BaseActivity{
@@ -20,6 +29,12 @@ public class MainActivity extends BaseActivity{
     private MaterialMenuDrawable mMaterialMenuDrawable;
 
     private MenuItem mCartMenu;
+
+    private TextView mTitle;
+
+    private PagerSlidingTabStrip mTab;
+    private ViewPager mViewPager;
+    private MainPagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +52,49 @@ public class MainActivity extends BaseActivity{
 
     private void initData(){
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+
+        ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(TimelineFragment.class, TimelineFragment.makeArgument(this)));
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
+        mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
     }
 
     private void initView(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(null);
+
+        mTitle = (TextView) findViewById(R.id.tv_main_title);
+        mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
+        mViewPager = (ViewPager) findViewById(R.id.vp_main);
+
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(mAdapter != null && mAdapter.getRealCount() > position){
+                    if(mAdapter.getItem(position) instanceof PagerTabContent){
+                        mTitle.setText(((PagerTabContent) mAdapter.getItem(position)).getTabTitle(MainActivity.this));
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mViewPager.setAdapter(mAdapter);
+        mTab.setViewPager(mViewPager);
+
         mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(R.color.colorPrimary), MaterialMenuDrawable.Stroke.THIN);
         toolbar.setNavigationIcon(mMaterialMenuDrawable);
         mMaterialMenuDrawable.setIconState(MaterialMenuDrawable.IconState.X);
-        getSupportActionBar().setTitle(R.string.product);
-        addFragment(ProductListFragment.class, null, getDefaultFragmentAnchor(), false);
     }
 
     @Override

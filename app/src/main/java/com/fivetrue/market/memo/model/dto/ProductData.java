@@ -9,7 +9,6 @@ import com.fivetrue.market.memo.model.vo.Product;
 public class ProductData extends FirebaseData{
 
     public String name;
-    private String brand;
     private String skuId;
     private long price;
     private String storeName;
@@ -20,7 +19,6 @@ public class ProductData extends FirebaseData{
 
     public ProductData(Product store){
         name = store.getName();
-        brand = store.getBrand();
         skuId = store.getBarcode();
         price = store.getPrice();
         storeName = store.getStoreName();

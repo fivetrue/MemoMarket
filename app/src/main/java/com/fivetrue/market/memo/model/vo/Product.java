@@ -9,7 +9,6 @@ import io.realm.RealmObject;
 public class Product extends RealmObject{
 
     private String name;
-    private String brand;
     private String barcode;
     private long price;
     private boolean checkOut;
@@ -24,14 +23,6 @@ public class Product extends RealmObject{
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
     }
 
     public String getBarcode() {

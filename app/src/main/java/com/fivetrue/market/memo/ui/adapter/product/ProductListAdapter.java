@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.adapter.product;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
@@ -25,6 +27,9 @@ import java.util.List;
 public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
 
     private static final String TAG = "StoreListAdapter";
+
+    public static final int PRODUCT = 0x01;
+    public static final int FOOTER = 0x02;
 
     public interface OnProductItemListener {
         void onClickItem(ProductHolder holder, Product item);
@@ -45,31 +50,52 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-         View view = inflater.inflate(R.layout.item_product_list_item, null);
-        RecyclerView.ViewHolder holder = new ProductHolder(view);
-        return holder;
+        if(viewType == FOOTER){
+            View view = inflater.inflate(R.layout.item_product_list_footer, null);
+            RecyclerView.ViewHolder holder = new ProductFooter(view);
+            return holder;
+        }else{
+            View view = inflater.inflate(R.layout.item_product_list_item, null);
+            RecyclerView.ViewHolder holder = new ProductHolder(view);
+            return holder;
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
+        if(getItemViewType(position) == FOOTER){
+
+        }else{
+            onBindProductHolder((ProductHolder) holder, position);
+        }
+    }
+
+    private void onBindFooterHolder(ProductFooter holder, int position){
+        if(LL.D)
+            Log.d(TAG, "onBindFooterHolder() called with: holder = [" + holder + "], position = [" + position + "]");
+    }
+
+    private void onBindProductHolder(final ProductHolder holder, int position){
+        if(LL.D)
+            Log.d(TAG, "onBindProductHolder() called with: holder = [" + holder + "], position = [" + position + "]");
         final Product item = getItem(position);
-        final ProductHolder productHolder = (ProductHolder) holder;
         if(holder != null && item != null){
-            productHolder.setProduct(item, isSelect(position));
-            productHolder.layout.setOnClickListener(new View.OnClickListener() {
+            holder.setProduct(item, isSelect(position));
+            holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if(mProductItemListener != null){
-                        mProductItemListener.onClickItem(productHolder, item);
+                        mProductItemListener.onClickItem(holder, item);
                     }
                 }
             });
 
-            productHolder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
                     if(mProductItemListener != null){
-                        return mProductItemListener.onLongCLickItem(productHolder, item);
+                        return mProductItemListener.onLongCLickItem(holder, item);
                     }
                     return false;
                 }
@@ -78,13 +104,34 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
+    public int getItemViewType(int position) {
+        if(mData.size() == position){
+            return FOOTER;
+        }
+        return PRODUCT;
+    }
+
+    @Override
     public Product getItem(int pos) {
-        return mData.get(pos);
+        if(mData.size() > pos){
+            return mData.get(pos);
+        }
+        return null;
     }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        if (mData == null) {
+            return 0;
+        }
+
+        if (mData.size() == 0) {
+            //Return 1 here to show nothing
+            return 1;
+        }
+
+        // Add extra view to show the footer view
+        return mData.size() + 1;
     }
 
     @Override
@@ -106,6 +153,9 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void toggle(int pos) {
+        if(getItemViewType(pos) == FOOTER){
+            return;
+        }
         boolean b = !mSelectedItems.get(pos);
         mSelectedItems.put(pos, b);
         notifyItemChanged(pos);
@@ -118,6 +168,10 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void selection(int pos, boolean b) {
+        if(getItemViewType(pos) == FOOTER){
+            return;
+        }
+
         mSelectedItems.put(pos, b);
         notifyItemChanged(pos);
     }
@@ -176,6 +230,14 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     .scaleY(b ? 0.9f : 1f)
                     .setDuration(100L)
                     .start();
+        }
+    }
+
+    public static final class ProductFooter extends RecyclerView.ViewHolder{
+
+
+        public ProductFooter(View itemView) {
+            super(itemView);
         }
     }
 }

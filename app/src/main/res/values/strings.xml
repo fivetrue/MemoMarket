@@ -6,6 +6,7 @@
     <string name="transition_floating_action_button" translatable="false">transitionFloatingActionButton</string>
     <string name="transition_image" translatable="false">transitionImage</string>
     <string name="transition_item_layout" translatable="false">transitionItemLayout</string>
+    <string name="bottom_navigator_behavior" translatable="false">com.fivetrue.market.memo.view.BottomNavigationBehavior</string>
 
     <string name="delete">Delete</string>
     <string name="revert">Revert</string>

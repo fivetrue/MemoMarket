@@ -87,7 +87,7 @@ public class CheckOutProductFragment extends BaseFragment{
         mFabReturnProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_checkout_product_list_return);
         mFabCancel = (FloatingActionButton) view.findViewById(R.id.fab_fragment_checkout_product_list_cancel);
 
-        mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
+        mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
         mRecyclerProduct.setAdapter(mProductListAdapter);

@@ -39,7 +39,7 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
  * Created by kwonojin on 2017. 2. 7..
  */
 
-public class ProductListFragment extends BaseFragment implements PagerTabContent{
+public class ProductListFragment extends BaseFragment implements PagerTabContent, RealmChangeListener<Realm> {
 
     private static final String TAG = "ProductListFragment";
 
@@ -48,12 +48,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     private TextView mTextMessage;
 
-    private FloatingActionButton mFabAddProduct;
-    private FloatingActionButton mFabCheckOutProduct;
-    private FloatingActionButton mFabDeleteProduct;
-    private FloatingActionButton mFabCancel;
-
-    private RecyclerView.LayoutManager mLayoutManager;
+    private GridLayoutManager mLayoutManager;
 
 
     @Override
@@ -79,111 +74,106 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
-        mFabAddProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
-        mFabCheckOutProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_checkout);
-        mFabDeleteProduct = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_delete);
-        mFabCancel = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_cancel);
+        mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                switch (mProductListAdapter.getItemViewType(position)){
+                    case ProductListAdapter.FOOTER :
+                        return 2;
 
-        mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
+                    case ProductListAdapter.PRODUCT:
+                        return 1;
+
+                    default:
+                        return -1;
+                }
+            }
+        });
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
         mRecyclerProduct.setAdapter(mProductListAdapter);
-        mFabAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RealmDB.get().addChangeListener(new RealmChangeListener<Realm>() {
-                    @Override
-                    public void onChange(Realm element) {
-                        element.removeChangeListener(this);
-                        setProductList(loadProducts(), true);
-                    }
-                });
-                if(getActivity() != null){
-                    startActivity(new Intent(getActivity(), ProductAddActivity.class));
-                }
-            }
-        });
 
-        mFabCheckOutProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RealmDB.get().executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        final List<Product> products = mProductListAdapter.getSelections();
-                        for(Product p : products){
-                            p.setCheckOut(true);
-                        }
-                        mProductListAdapter.clearSelection();
-                        setProductList(loadProducts(), true);
-                        updateButtons();
+//        mFabCheckOutProduct.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                RealmDB.get().executeTransaction(new Realm.Transaction() {
+//                    @Override
+//                    public void execute(Realm realm) {
+//                        final List<Product> products = mProductListAdapter.getSelections();
+//                        for(Product p : products){
+//                            p.setCheckOut(true);
+//                        }
+//                        mProductListAdapter.clearSelection();
+//                        setProductList(loadProducts(), true);
+//                        updateButtons();
+//
+//                        Snackbar.make(mRecyclerProduct, R.string.product_moved_completed_message
+//                                , Snackbar.LENGTH_LONG)
+//                                .setAction(R.string.revert, new View.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(View view) {
+//                                        RealmDB.get().executeTransaction(new Realm.Transaction() {
+//                                            @Override
+//                                            public void execute(Realm realm) {
+//                                                for(Product p : products){
+//                                                    p.setCheckOut(false);
+//                                                }
+//                                                setProductList(loadProducts(), true);
+//                                            }
+//                                        });
+//                                    }
+//                                }).show();
+//                    }
+//                });
+//            }
+//        });
+//
+//        mFabDeleteProduct.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(getActivity() != null){
+//
+//                    new AlertDialog.Builder(getActivity())
+//                            .setTitle(android.R.string.dialog_alert_title)
+//                            .setMessage(R.string.delete_product_message)
+//                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    dialogInterface.dismiss();
+//                                }
+//                            }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            RealmDB.get().executeTransaction(new Realm.Transaction() {
+//                                @Override
+//                                public void execute(Realm realm) {
+//                                    final List<Product> products = mProductListAdapter.getSelections();
+//                                    for(Product p : products){
+//                                        int index = mProductListAdapter.getData().indexOf(p);
+//                                        mProductListAdapter.toggle(index);
+//                                        mProductListAdapter.notifyItemRemoved(index);
+//                                    }
+//                                    for(Product p : products){
+//                                        p.deleteFromRealm();
+//                                    }
+//                                    updateButtons();
+//                                }
+//                            });
+//                            dialogInterface.dismiss();
+//                        }
+//                    }).show();
+//                }
+//            }
+//        });
 
-                        Snackbar.make(mRecyclerProduct, R.string.product_moved_completed_message
-                                , Snackbar.LENGTH_LONG)
-                                .setAction(R.string.revert, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        RealmDB.get().executeTransaction(new Realm.Transaction() {
-                                            @Override
-                                            public void execute(Realm realm) {
-                                                for(Product p : products){
-                                                    p.setCheckOut(false);
-                                                }
-                                                setProductList(loadProducts(), true);
-                                            }
-                                        });
-                                    }
-                                }).show();
-                    }
-                });
-            }
-        });
-
-        mFabDeleteProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(getActivity() != null){
-
-                    new AlertDialog.Builder(getActivity())
-                            .setTitle(android.R.string.dialog_alert_title)
-                            .setMessage(R.string.delete_product_message)
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            RealmDB.get().executeTransaction(new Realm.Transaction() {
-                                @Override
-                                public void execute(Realm realm) {
-                                    final List<Product> products = mProductListAdapter.getSelections();
-                                    for(Product p : products){
-                                        int index = mProductListAdapter.getData().indexOf(p);
-                                        mProductListAdapter.toggle(index);
-                                        mProductListAdapter.notifyItemRemoved(index);
-                                    }
-                                    for(Product p : products){
-                                        p.deleteFromRealm();
-                                    }
-                                    updateButtons();
-                                }
-                            });
-                            dialogInterface.dismiss();
-                        }
-                    }).show();
-                }
-            }
-        });
-
-        mFabCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mProductListAdapter.clearSelection();
-                updateButtons();
-            }
-        });
+//        mFabCancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                mProductListAdapter.clearSelection();
+//                updateButtons();
+//            }
+//        });
 
         view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
@@ -214,7 +204,6 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
                     @Override
                     public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
                         mProductListAdapter.toggle(holder.getAdapterPosition());
-                        updateButtons();
                     }
 
                     @Override
@@ -232,27 +221,9 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         }
     }
 
-    private void updateButtons(){
-        if(mProductListAdapter != null){
-            if(mFabCheckOutProduct != null && mFabDeleteProduct != null){
-                if(mProductListAdapter.getSelections().size() > 0){
-                    SimpleViewUtils.showView(mFabCheckOutProduct, View.VISIBLE);
-                    SimpleViewUtils.showView(mFabDeleteProduct, View.VISIBLE);
-                    SimpleViewUtils.showView(mFabCancel, View.VISIBLE);
-
-                }else{
-                    SimpleViewUtils.hideView(mFabCheckOutProduct, View.GONE);
-                    SimpleViewUtils.hideView(mFabDeleteProduct, View.GONE);
-                    SimpleViewUtils.hideView(mFabCancel, View.GONE);
-                }
-            }
-        }
-    }
-
     private void moveToCart(){
         if(getActivity() != null && getActivity() instanceof BaseActivity){
             mProductListAdapter.clearSelection();
-            updateButtons();
             ((BaseActivity) getActivity()).addFragment(CheckOutProductFragment.class, null
                     , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true);
         }
@@ -272,11 +243,13 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        RealmDB.get().addChangeListener(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        RealmDB.get().removeChangeListener(this);
     }
 
     @Override
@@ -302,6 +275,20 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     @Override
     public boolean isShowingIcon() {
         return true;
+    }
+
+    @Override
+    public void onChange(Realm element) {
+        setProductList(loadProducts(), true);
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if(mProductListAdapter.getSelections().size() > 0){
+            mProductListAdapter.clearSelection();
+            return true;
+        }
+        return super.onBackPressed();
     }
 
     private static class ProductItemAnimator extends FadeInAnimator{

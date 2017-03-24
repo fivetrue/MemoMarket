@@ -78,4 +78,8 @@ public abstract class BaseFragment extends Fragment {
         super.onStop();
         if(LL.D) Log.d(TAG, getClass().getSimpleName() + " : onStop() called");
     }
+
+    public boolean onBackPressed(){
+        return false;
+    }
 }

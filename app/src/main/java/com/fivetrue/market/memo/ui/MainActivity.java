@@ -1,21 +1,24 @@
 package com.fivetrue.market.memo.ui;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
-import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
+import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
@@ -34,6 +37,9 @@ public class MainActivity extends BaseActivity{
 
     private PagerSlidingTabStrip mTab;
     private ViewPager mViewPager;
+
+    private FloatingActionButton mFabAdd;
+
     private MainPagerAdapter mAdapter;
 
     @Override
@@ -67,6 +73,7 @@ public class MainActivity extends BaseActivity{
         mTitle = (TextView) findViewById(R.id.tv_main_title);
         mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
         mViewPager = (ViewPager) findViewById(R.id.vp_main);
+        mFabAdd = (FloatingActionButton) findViewById(R.id.fab_main_add);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -78,13 +85,28 @@ public class MainActivity extends BaseActivity{
             public void onPageSelected(int position) {
                 if(mAdapter != null && mAdapter.getRealCount() > position){
                     if(mAdapter.getItem(position) instanceof PagerTabContent){
-                        mTitle.setText(((PagerTabContent) mAdapter.getItem(position)).getTabTitle(MainActivity.this));
+                        PagerTabContent content = (PagerTabContent) mAdapter.getItem(position);
+                        mTitle.setText(content.getTabTitle(MainActivity.this));
+                        if(content.getTabTitle(MainActivity.this).equals(getString(R.string.product))){
+                            SimpleViewUtils.showView(mFabAdd, View.VISIBLE);
+                        }else{
+                            SimpleViewUtils.hideView(mFabAdd, View.GONE);
+                        }
+
                     }
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mFabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
 
             }
         });

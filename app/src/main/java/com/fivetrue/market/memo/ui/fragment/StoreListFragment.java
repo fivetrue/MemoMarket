@@ -20,6 +20,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Store;
 import com.fivetrue.market.memo.ui.BaseActivity;
+import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.ui.adapter.store.StoreListAdapter;
 import com.fivetrue.market.memo.ui.fragment.transition.MoveTransition;
 
@@ -45,9 +46,9 @@ public class StoreListFragment extends BaseFragment{
 
     private TextView mTextMessage;
 
-    private FloatingActionButton mFabAddStore;
+//    private FloatingActionButton mFabAddStore;
 
-    private RecyclerView.LayoutManager mLayoutManager;
+    private GridLayoutManager mLayoutManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,23 +79,33 @@ public class StoreListFragment extends BaseFragment{
         mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
-        mFabAddStore = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
+//        mFabAddStore = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
         mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
-        mRecyclerStore.setLayoutManager(mLayoutManager);
-        mRecyclerStore.setItemAnimator(new FadeInAnimator());
-        mRecyclerStore.setAdapter(mStoreListAdapter);
-        mFabAddStore.setOnClickListener(new View.OnClickListener() {
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
-            public void onClick(View view) {
-                if(getActivity() != null && getActivity() instanceof BaseActivity){
-                    ((BaseActivity) getActivity()).addFragment(StoreAddFragment.class, null
-                            , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true
-                            , 0, 0
-                            , new MoveTransition()
-                            , new Pair<View, String>(mFabAddStore, getString(R.string.transition_floating_action_button)));
+            public int getSpanSize(int position) {
+                if(mStoreListAdapter.getItemViewType(position) == ProductListAdapter.FOOTER){
+                    return 1;
+                }else{
+                    return 2;
                 }
             }
         });
+        mRecyclerStore.setLayoutManager(mLayoutManager);
+        mRecyclerStore.setItemAnimator(new FadeInAnimator());
+        mRecyclerStore.setAdapter(mStoreListAdapter);
+//        mFabAddStore.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(getActivity() != null && getActivity() instanceof BaseActivity){
+//                    ((BaseActivity) getActivity()).addFragment(StoreAddFragment.class, null
+//                            , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true
+//                            , 0, 0
+//                            , new MoveTransition()
+//                            , new Pair<View, String>(mFabAddStore, getString(R.string.transition_floating_action_button)));
+//                }
+//            }
+//        });
 
         view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override

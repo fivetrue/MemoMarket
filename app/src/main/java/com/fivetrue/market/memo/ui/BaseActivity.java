@@ -11,11 +11,9 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.fivetrue.market.memo.MemoApplication;
-import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 
@@ -135,6 +133,15 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
 
     @Override
     public void onBackPressed() {
+
+        for(Fragment f : getCurrentFragmentManager().getFragments()){
+            if(f != null && f instanceof BaseFragment){
+                if(((BaseFragment) f).onBackPressed()){
+                    return;
+                }
+            }
+        }
+
         if(popFragment(getCurrentFragmentManager())){
             return;
         }

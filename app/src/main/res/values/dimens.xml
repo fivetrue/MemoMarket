@@ -8,9 +8,9 @@
 
     <dimen name="navigation_height">120dp</dimen>
 
-    <dimen name="app_bar_height">110dp</dimen>
-    <dimen name="actionbar_height">55dp</dimen>
-    <dimen name="tab_height">55dp</dimen>
+    <dimen name="app_bar_height">60dp</dimen>
+    <dimen name="actionbar_height">60dp</dimen>
+    <dimen name="tab_height">60dp</dimen>
 
     <!-- Dialog -->
     <dimen name="base_dialog_margin">10dp</dimen>

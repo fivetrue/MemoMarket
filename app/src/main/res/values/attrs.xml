@@ -17,6 +17,7 @@
         <attr name="tabBackgroundColor" format="color"/>
         <attr name="tabTextSize" format="dimension"/>
         <attr name="tabTextColor" format="color"/>
+        <attr name="tabTextDrawable" format="reference" />
         <attr name="selectedTabTextColor" format="color"/>
         <attr name="tabTextAllCaps" format="boolean"/>
         <attr name="tabTextOutline" format="boolean"/>

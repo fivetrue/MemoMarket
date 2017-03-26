@@ -2,10 +2,11 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    tools:context=".ui.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -17,18 +18,20 @@
             android:layout_height="match_parent"
             app:titleEnabled="false"
             app:layout_scrollFlags="enterAlways|enterAlwaysCollapsed|scroll|snap">
-d
+            d
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/actionbar_height"
                 android:theme="@style/AppTheme.Toolbar"
-                app:elevation="0dp"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
                 <TextView
                     android:id="@+id/tv_main_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textAllCaps="true"
+                    android:textStyle="bold"
                     android:layout_gravity="center" />
             </android.support.v7.widget.Toolbar>
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -39,6 +42,7 @@ d
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <android.support.v4.view.ViewPager
             android:id="@+id/vp_main"
             android:layout_width="match_parent"
@@ -54,16 +58,17 @@ d
         android:layout_width="match_parent"
         android:layout_height="@dimen/tab_height"
         android:layout_gravity="bottom"
+        android:outlineProvider="bounds"
+        android:elevation="5dp"
+        app:tabIconPadding="5dp"
+        app:tabTextSize="12dp"
         app:layout_behavior="@string/bottom_navigator_behavior"
-        app:tabIconPadding="10dp"
+        app:tabTextColor="@color/gray"
+        app:selectedTabTextColor="@color/colorPrimary"
+        app:tabBackgroundColor="@android:color/white"
         app:indicatorColor="@color/indicatorColor"
-        app:tabTextColor="@android:color/white"
-        app:selectedTabTextColor="@android:color/white"
-        app:tabBackgroundColor="@color/lightGray"
-        app:indicatorRadius="4dp"
-        app:indicatorHeight="5dp"
-        app:indicatorHorizontalPadding="50dp"
-        app:shouldExpand="true"/>
+        app:indicatorHeight="0dp"
+        app:shouldExpand="true" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_main_add"

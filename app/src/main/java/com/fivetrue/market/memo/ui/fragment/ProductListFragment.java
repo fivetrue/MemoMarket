@@ -1,14 +1,11 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,15 +21,14 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.BaseActivity;
-import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
-import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 /**
@@ -71,6 +67,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
@@ -92,88 +89,8 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         });
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
-        mRecyclerProduct.setAdapter(mProductListAdapter);
-
-//        mFabCheckOutProduct.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                RealmDB.get().executeTransaction(new Realm.Transaction() {
-//                    @Override
-//                    public void execute(Realm realm) {
-//                        final List<Product> products = mProductListAdapter.getSelections();
-//                        for(Product p : products){
-//                            p.setCheckOut(true);
-//                        }
-//                        mProductListAdapter.clearSelection();
-//                        setProductList(loadProducts(), true);
-//                        updateButtons();
-//
-//                        Snackbar.make(mRecyclerProduct, R.string.product_moved_completed_message
-//                                , Snackbar.LENGTH_LONG)
-//                                .setAction(R.string.revert, new View.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(View view) {
-//                                        RealmDB.get().executeTransaction(new Realm.Transaction() {
-//                                            @Override
-//                                            public void execute(Realm realm) {
-//                                                for(Product p : products){
-//                                                    p.setCheckOut(false);
-//                                                }
-//                                                setProductList(loadProducts(), true);
-//                                            }
-//                                        });
-//                                    }
-//                                }).show();
-//                    }
-//                });
-//            }
-//        });
-//
-//        mFabDeleteProduct.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(getActivity() != null){
-//
-//                    new AlertDialog.Builder(getActivity())
-//                            .setTitle(android.R.string.dialog_alert_title)
-//                            .setMessage(R.string.delete_product_message)
-//                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    dialogInterface.dismiss();
-//                                }
-//                            }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int i) {
-//                            RealmDB.get().executeTransaction(new Realm.Transaction() {
-//                                @Override
-//                                public void execute(Realm realm) {
-//                                    final List<Product> products = mProductListAdapter.getSelections();
-//                                    for(Product p : products){
-//                                        int index = mProductListAdapter.getData().indexOf(p);
-//                                        mProductListAdapter.toggle(index);
-//                                        mProductListAdapter.notifyItemRemoved(index);
-//                                    }
-//                                    for(Product p : products){
-//                                        p.deleteFromRealm();
-//                                    }
-//                                    updateButtons();
-//                                }
-//                            });
-//                            dialogInterface.dismiss();
-//                        }
-//                    }).show();
-//                }
-//            }
-//        });
-
-//        mFabCancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mProductListAdapter.clearSelection();
-//                updateButtons();
-//            }
-//        });
+        AlphaInAnimationAdapter adapter = new AlphaInAnimationAdapter(mProductListAdapter);
+        mRecyclerProduct.setAdapter(adapter);
 
         view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
@@ -239,6 +156,53 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         return super.onOptionsItemSelected(item);
     }
 
+    public int getSelectedCount(){
+        int count = 0;
+        if(mProductListAdapter != null){
+            count = mProductListAdapter.getSelections().size();
+        }
+        return count;
+    }
+
+    public void checkoutProducts(final View snackbarAnchor){
+        RealmDB.get().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                final List<Product> products = mProductListAdapter.getSelections();
+                for(Product p : products){
+                    p.setCheckOut(true);
+                }
+                mProductListAdapter.clearSelection();
+                setProductList(loadProducts(), true);
+
+                if(snackbarAnchor != null){
+                    Snackbar.make(snackbarAnchor, R.string.product_moved_completed_message
+                            , Snackbar.LENGTH_LONG)
+                            .setAction(R.string.revert, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    RealmDB.get().executeTransaction(new Realm.Transaction() {
+                                        @Override
+                                        public void execute(Realm realm) {
+                                            for(Product p : products){
+                                                p.setCheckOut(false);
+                                            }
+                                            setProductList(loadProducts(), true);
+                                        }
+                                    });
+                                }
+                            }).show();
+                }
+            }
+        });
+    }
+
+    public void updateList(){
+        if(mProductListAdapter != null){
+            mProductListAdapter.notifyDataSetChanged();
+        }
+    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -273,8 +237,8 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     }
 
     @Override
-    public boolean isShowingIcon() {
-        return true;
+    public TabIcon getIconState() {
+        return TabIcon.TextWithIcon;
     }
 
     @Override
@@ -291,7 +255,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         return super.onBackPressed();
     }
 
-    private static class ProductItemAnimator extends FadeInAnimator{
+    private static class ProductItemAnimator extends DefaultItemAnimator{
 
         @Override
         public boolean getSupportsChangeAnimations() {

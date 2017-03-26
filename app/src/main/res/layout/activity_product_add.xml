@@ -11,19 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="50dp"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="10dp">
+        android:layout_margin="30dp"
+        app:cardBackgroundColor="@android:color/white">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="30dp"
             android:orientation="vertical">
             <TextView
                 android:id="@+id/tv_fragment_product_add"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/register_product"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimary"
                 android:textAllCaps="true"
                 android:layout_margin="10dp"
                 android:textSize="20dp"/>
@@ -32,7 +32,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_below="@id/tv_fragment_product_add"
-                android:layout_margin="16dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
                 android:padding="5dp"
                 android:orientation="horizontal"
                 android:background="@drawable/input_text_background">
@@ -69,27 +70,24 @@
                     android:src="@drawable/selector_ok" />
             </LinearLayout>
 
-            <FrameLayout
+            <ProgressBar
+                android:id="@+id/pb_product_add_done"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/fab_margin"
-                android:layout_gravity="center_horizontal">
-                <ProgressBar
-                    android:id="@+id/pb_product_add_done"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:visibility="invisible"/>
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_product_add"
-                    android:layout_width="@dimen/fab_size"
-                    android:layout_height="@dimen/fab_size"
-                    android:src="@drawable/ic_check_white_50dp"
-                    android:layout_gravity="center|bottom"
-                    android:visibility="invisible"
-                    app:backgroundTint="@color/primaryRed"/>
-            </FrameLayout>
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
         </LinearLayout>
     </android.support.v7.widget.CardView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_product_add"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:src="@drawable/ic_check_white_50dp"
+        android:visibility="invisible"
+        app:layout_anchor="@id/pb_product_add_done"
+        app:layout_anchorGravity="center"
+        app:backgroundTint="@color/colorPrimary"/>
+
 </android.support.design.widget.CoordinatorLayout>

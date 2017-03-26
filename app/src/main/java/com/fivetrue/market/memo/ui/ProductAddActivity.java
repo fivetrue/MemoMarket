@@ -27,6 +27,7 @@ import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.product.ProductNameListAdapter;
+import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.DataManager;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 
@@ -120,6 +121,8 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
                 findImage();
             }
         });
+
+        ((TextView)findViewById(R.id.tv_fragment_product_add)).setTypeface(CommonUtils.getFont(this, "font/Magra.ttf"));
     }
 
     private void setInputText(String text){

@@ -3,6 +3,7 @@ package com.fivetrue.market.memo.ui;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +19,9 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
+import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
+import com.fivetrue.market.memo.view.BottomNavigationBehavior;
 import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
@@ -71,6 +74,7 @@ public class MainActivity extends BaseActivity{
         getSupportActionBar().setTitle(null);
 
         mTitle = (TextView) findViewById(R.id.tv_main_title);
+        mTitle.setTypeface(CommonUtils.getFont(this,  "font/DroidSansMono.ttf"));
         mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
         mViewPager = (ViewPager) findViewById(R.id.vp_main);
         mFabAdd = (FloatingActionButton) findViewById(R.id.fab_main_add);
@@ -99,13 +103,40 @@ public class MainActivity extends BaseActivity{
 
             @Override
             public void onPageScrollStateChanged(int state) {
+                if(mTab != null && mTab.getLayoutParams() instanceof CoordinatorLayout.LayoutParams){
+                    CoordinatorLayout.Behavior behavior =
+                            ((CoordinatorLayout.LayoutParams) mTab.getLayoutParams()).getBehavior();
+                    if(behavior != null && behavior instanceof BottomNavigationBehavior){
+                        switch (state){
+                            case ViewPager.SCROLL_STATE_DRAGGING :
+                            case ViewPager.SCROLL_STATE_SETTLING:
+                                ((BottomNavigationBehavior) behavior).setScrollingEnabled(false);
+                                return;
 
+                            case ViewPager.SCROLL_STATE_IDLE:
+                                ((BottomNavigationBehavior) behavior).setScrollingEnabled(true);
+                                return;
+                        }
+                    }
+                }
             }
         });
 
         mFabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(mAdapter != null && mViewPager != null){
+                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+                        if(f != null
+                                && f instanceof ProductListFragment
+                                && ((ProductListFragment) f).getSelectedCount() > 0){
+                            ((ProductListFragment) f).checkoutProducts(findViewById(R.id.layout_main));
+                            return;
+                        }
+                    }
+                }
+
                 startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
 
             }
@@ -114,7 +145,7 @@ public class MainActivity extends BaseActivity{
         mViewPager.setAdapter(mAdapter);
         mTab.setViewPager(mViewPager);
 
-        mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(R.color.colorPrimary), MaterialMenuDrawable.Stroke.THIN);
+        mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(android.R.color.white), MaterialMenuDrawable.Stroke.THIN);
         toolbar.setNavigationIcon(mMaterialMenuDrawable);
         mMaterialMenuDrawable.setIconState(MaterialMenuDrawable.IconState.X);
     }

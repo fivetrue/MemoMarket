@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_margin="5dp"
-            android:src="@drawable/ic_circle_check_red_20dp"
+            android:src="@drawable/ic_circle_check_accent_25dp"
             android:visibility="gone"/>
     </RelativeLayout>
 </RelativeLayout>

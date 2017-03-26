@@ -30,6 +30,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -80,7 +81,8 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, V child, View dependency) {
         mWithSnackBarImpl.updateSnackbar(parent, dependency, child);
-        return dependency instanceof Snackbar.SnackbarLayout;
+//        return dependency instanceof Snackbar.SnackbarLayout;
+        return false;
     }
 
     @Override
@@ -229,16 +231,22 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
     private class LollipopBottomNavWithSnackBarImpl implements BottomNavigationWithSnackbar {
 
         @Override
-        public void updateSnackbar(CoordinatorLayout parent, View dependency, View child) {
+        public void updateSnackbar(final CoordinatorLayout parent, View dependency, final View child) {
             if (!isTablet && dependency instanceof Snackbar.SnackbarLayout) {
                 if (mSnackbarHeight == -1) {
                     mSnackbarHeight = dependency.getHeight();
                 }
+
                 int targetPadding = (mSnackbarHeight +
                         child.getMeasuredHeight());
                 dependency.setPadding(dependency.getPaddingLeft(),
                         dependency.getPaddingTop(), dependency.getPaddingRight(), targetPadding
                 );
+
+                hidden = true;
+                handleDirection((V) child, ScrollDirection.SCROLL_DIRECTION_DOWN);
+
+
             }
         }
     }

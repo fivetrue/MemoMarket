@@ -1,4 +1,4 @@
-/*
+package com.fivetrue.market.memo.view;/*
  * Copyright (C) 2013 Andreas Stuetz <andreas.stuetz@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fivetrue.market.memo.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -178,8 +177,10 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         mPaintBackround.setStyle(Paint.Style.FILL);
 
 
-        defaultTabLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-        expandedTabLayoutParams = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
+        defaultTabLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        defaultTabLayoutParams.gravity = Gravity.CENTER;
+        expandedTabLayoutParams = new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1.0f);
+        expandedTabLayoutParams.gravity = Gravity.CENTER;
 
         if (locale == null) {
             locale = getResources().getConfiguration().locale;
@@ -226,10 +227,17 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             for (int i = 0; i < adapter.getCount(); i++) {
                 if(adapter.getItem(i) instanceof PagerTabContent){
                     PagerTabContent content = (PagerTabContent) adapter.getItem(i);
-                    if(content.isShowingIcon()){
-                        addIconTab(i, content.getTabDrawable(getContext()));
-                    }else{
-                        addTextTab(i, content.getTabTitle(getContext()));
+                    PagerTabContent.TabIcon icon = content.getIconState();
+                    switch (icon){
+                        case Icon:
+                            addIconTab(i, content.getTabDrawable(getContext()));
+                            break;
+                        case Text:
+                            addTextTab(i, content.getTabTitle(getContext()), null);
+                            break;
+                        case TextWithIcon:
+                            addTextTab(i, content.getTabTitle(getContext()), content.getTabDrawable(getContext()));
+                            break;
                     }
                 }
             }
@@ -276,7 +284,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         }
     }
 
-    private void addTextTab(final int position, String title) {
+    private void addTextTab(final int position, String title, Drawable drawable) {
 
         HoverTextView tab = new HoverTextView(getContext());
         tab.setText(title);
@@ -285,6 +293,11 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         tab.setGravity(Gravity.CENTER);
         if(textOutline){
             tab.setShadowLayer(5, 0, 0, Color.BLACK);
+        }
+
+        if(drawable != null){
+            tab.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+            tab.setCompoundDrawablePadding(tabIconPadding);
         }
 
         tab.setOnClickListener(new OnClickListener() {
@@ -452,7 +465,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         for (int i = 0; i < tabsContainer.getChildCount(); i++) {
             PagerTabContent content  = (PagerTabContent) adapter.getItem(i);
 
-            if(content.isShowingIcon()){
+            if(content.getIconState() == PagerTabContent.TabIcon.Icon){
                 ImageView tabImage = (ImageView) tabsContainer.getChildAt(i);
                 if(i == position){
                     tabImage.setSelected(true);
@@ -464,9 +477,11 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
                 if(i == position){
                     tabText.setTypeface(null, selectTabTypefaceStyle);
                     tabText.setTextColor(selectTextColor);
+                    tabText.setSelected(true);
                 } else {
                     tabText.setTypeface(null, tabTypefaceStyle);
                     tabText.setTextColor(tabTextColor);
+                    tabText.setSelected(false);
                 }
             }
         }

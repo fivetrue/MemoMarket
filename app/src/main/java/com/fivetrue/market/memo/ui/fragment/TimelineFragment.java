@@ -84,7 +84,7 @@ public class TimelineFragment extends BaseFragment implements PagerTabContent{
 
     @Override
     public int getImageResource() {
-        return 0;
+        return R.drawable.selector_feed;
     }
 
     @Override
@@ -98,8 +98,8 @@ public class TimelineFragment extends BaseFragment implements PagerTabContent{
     }
 
     @Override
-    public boolean isShowingIcon() {
-        return false;
+    public TabIcon getIconState() {
+        return TabIcon.TextWithIcon;
     }
 
     public static Bundle makeArgument(Context context){

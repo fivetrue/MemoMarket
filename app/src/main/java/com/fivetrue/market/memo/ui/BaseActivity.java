@@ -134,17 +134,22 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     @Override
     public void onBackPressed() {
 
-        for(Fragment f : getCurrentFragmentManager().getFragments()){
-            if(f != null && f instanceof BaseFragment){
-                if(((BaseFragment) f).onBackPressed()){
-                    return;
+        if(getCurrentFragmentManager() != null){
+            if(getCurrentFragmentManager().getFragments() != null){
+                for(Fragment f : getCurrentFragmentManager().getFragments()){
+                    if(f != null && f instanceof BaseFragment){
+                        if(((BaseFragment) f).onBackPressed()){
+                            return;
+                        }
+                    }
                 }
+            }
+
+            if(popFragment(getCurrentFragmentManager())){
+                return;
             }
         }
 
-        if(popFragment(getCurrentFragmentManager())){
-            return;
-        }
         if(transitionModeWhenFinish()){
             SimpleViewUtils.hideView(getDecorView(), View.INVISIBLE, mStartX, mStartY, new SimpleViewUtils.SimpleAnimationStatusListener() {
                 @Override

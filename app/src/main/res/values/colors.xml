@@ -9,7 +9,12 @@
     <color name="dimGray">#D5D5D5</color>
 
     <color name="lightRed">#FF6C6C</color>
-    <color name="primaryRed">#E24343</color>
+    <color name="primaryRed">#CE0A31</color>
+    <color name="darkRed">#8D2036</color>
+
+
+    <color name="lightGreen">#E4E4C5</color>
+    <color name="primaryGreen">#B9D48B</color>
 
     <color name="primaryOrange">#FF5E00</color>
 
@@ -18,12 +23,13 @@
     <color name="darkBlue">#3355FA</color>
     <color name="dimBlue">#bccde6</color>
 
-    <color name="colorPrimary">@android:color/white</color>
-    <color name="colorPrimaryDark">@color/primaryBlue</color>
-    <color name="colorAccent">@color/primaryBlue</color>
+    <color name="colorPrimary">@color/primaryRed</color>
+    <color name="colorPrimaryDark">@color/darkRed</color>
+    <color name="colorAccent">@color/primaryGreen</color>
 
-    <color name="indicatorColor">@color/primaryBlue</color>
+    <color name="indicatorColor">@color/colorAccent</color>
 
     <color name="alphaBlack">#55000000</color>
     <color name="alphaWhite">#77FFFFFF</color>
+    
 </resources>

@@ -26,6 +26,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.subjects.PublishSubject;
 
 
 /**
@@ -44,11 +45,22 @@ public class FirebaseDB {
     private static final String NODE_STORE = "store";
     private static final String NODE_PRODUCT = "product";
 
+    private PublishSubject<ConfigData> mConfigDataPublishSubject;
 
     private Context mContext;
 
-    public FirebaseDB(Context context){
+    private static FirebaseDB sInstance;
+
+    public static FirebaseDB getInstance(Context context){
+        if(sInstance == null){
+            sInstance = new FirebaseDB(context.getApplicationContext());
+        }
+        return sInstance;
+    }
+
+    private FirebaseDB(Context context){
         mContext = context;
+        mConfigDataPublishSubject = PublishSubject.create();
     }
 
 

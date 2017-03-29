@@ -46,8 +46,6 @@ public class StoreListFragment extends BaseFragment{
 
     private TextView mTextMessage;
 
-//    private FloatingActionButton mFabAddStore;
-
     private GridLayoutManager mLayoutManager;
 
     @Override
@@ -79,7 +77,6 @@ public class StoreListFragment extends BaseFragment{
         mRecyclerStore = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
 
-//        mFabAddStore = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list_add);
         mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
         mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -94,18 +91,6 @@ public class StoreListFragment extends BaseFragment{
         mRecyclerStore.setLayoutManager(mLayoutManager);
         mRecyclerStore.setItemAnimator(new FadeInAnimator());
         mRecyclerStore.setAdapter(mStoreListAdapter);
-//        mFabAddStore.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(getActivity() != null && getActivity() instanceof BaseActivity){
-//                    ((BaseActivity) getActivity()).addFragment(StoreAddFragment.class, null
-//                            , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true
-//                            , 0, 0
-//                            , new MoveTransition()
-//                            , new Pair<View, String>(mFabAddStore, getString(R.string.transition_floating_action_button)));
-//                }
-//            }
-//        });
 
         view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override

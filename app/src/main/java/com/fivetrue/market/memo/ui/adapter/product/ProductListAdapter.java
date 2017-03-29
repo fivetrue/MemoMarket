@@ -1,17 +1,22 @@
 package com.fivetrue.market.memo.ui.adapter.product;
 
+import android.content.Context;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
@@ -26,21 +31,21 @@ import java.util.List;
 
 public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
 
-    private static final String TAG = "StoreListAdapter";
+    private static final String TAG = "ProductListAdapter";
 
     public static final int PRODUCT = 0x01;
     public static final int FOOTER = 0x02;
 
     public interface OnProductItemListener {
-        void onClickItem(ProductHolder holder, Product item);
-        boolean onLongCLickItem(ProductHolder holder, Product item);
+        void onClickItem(ProductListAdapter.ProductHolder holder, Product item);
+        boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item);
     }
 
     private SparseBooleanArray mSelectedItems;
     private List<Product> mData;
-    private OnProductItemListener mProductItemListener;
+    private ProductListAdapter.OnProductItemListener mProductItemListener;
 
-    public ProductListAdapter(List<Product> data, OnProductItemListener ll){
+    public ProductListAdapter(List<Product> data, ProductListAdapter.OnProductItemListener ll){
         this.mData = data;
         mProductItemListener = ll;
         mSelectedItems = new SparseBooleanArray();
@@ -52,11 +57,11 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if(viewType == FOOTER){
             View view = inflater.inflate(R.layout.item_product_list_footer, null);
-            RecyclerView.ViewHolder holder = new ProductFooter(view);
+            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductFooter(view);
             return holder;
         }else{
             View view = inflater.inflate(R.layout.item_product_list_item, null);
-            RecyclerView.ViewHolder holder = new ProductHolder(view);
+            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductHolder(view);
             return holder;
         }
     }
@@ -67,41 +72,74 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(getItemViewType(position) == FOOTER){
 
         }else{
-            onBindProductHolder((ProductHolder) holder, position);
+            onBindProductHolder((ProductListAdapter.ProductHolder) holder, position);
         }
     }
 
-    private void onBindFooterHolder(ProductFooter holder, int position){
-        if(LL.D)
-            Log.d(TAG, "onBindFooterHolder() called with: holder = [" + holder + "], position = [" + position + "]");
+    private void onBindFooterHolder(ProductListAdapter.ProductFooter holder, int position){
+
     }
 
-    private void onBindProductHolder(final ProductHolder holder, int position){
-        if(LL.D)
-            Log.d(TAG, "onBindProductHolder() called with: holder = [" + holder + "], position = [" + position + "]");
+    private void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
         final Product item = getItem(position);
         if(holder != null && item != null){
             holder.setProduct(item, isSelect(position));
-            holder.layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(mProductItemListener != null){
-                        mProductItemListener.onClickItem(holder, item);
-                    }
+            holder.layout.setOnClickListener(view -> {
+                if(mProductItemListener != null){
+                    mProductItemListener.onClickItem(holder, item);
                 }
             });
 
-            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    if(mProductItemListener != null){
-                        return mProductItemListener.onLongCLickItem(holder, item);
-                    }
-                    return false;
+            holder.layout.setOnLongClickListener(view -> {
+                if(mProductItemListener != null){
+                    return mProductItemListener.onLongClickItem(holder, item);
                 }
+                return false;
+            });
+
+            holder.more.setOnClickListener(view -> {
+                showPopup(view.getContext(), view, item, position);
             });
         }
     }
+
+    protected void showPopup(Context context, View view, Product item, int position){
+        ListPopupWindow popupWindow = makePopup(context, item, position);
+        popupWindow.setContentWidth((int) (((View) view.getParent()).getWidth() * 0.7));
+        popupWindow.setAnchorView(view);
+        popupWindow.setDropDownGravity(Gravity.LEFT);
+        popupWindow.show();
+    }
+
+    protected ListPopupWindow makePopup(Context context, Product item, int position){
+        final ListPopupWindow popupWindow = new ListPopupWindow(context);
+        String [] listItems = {context.getString(R.string.delete)
+                , context.getString(R.string.checkout)};
+        popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
+        popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
+            popupWindow.dismiss();
+            switch (i){
+                case 0 :
+                    RealmDB.get().executeTransaction(realm -> {
+                        item.deleteFromRealm();
+                        notifyItemRemoved(position);
+                    });
+                    break;
+                case 1 :
+                    RealmDB.get().executeTransaction(realm -> {
+                        item.setCheckOut(true);
+                        notifyItemRemoved(position);
+
+                    });
+                    break;
+            }
+            Toast.makeText(view1.getContext()
+                    , String.format("%s %s", listItems[i], item.getName())
+                    , Toast.LENGTH_SHORT).show();
+        });
+        return popupWindow;
+    }
+
 
     @Override
     public int getItemViewType(int position) {
@@ -142,14 +180,9 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void setData(List<Product> data) {
         mData = data;
+        notifyDataSetChanged();
     }
 
-    public void setData(List<Product> data, boolean notify){
-        setData(data);
-        if(notify){
-            notifyDataSetChanged();
-        }
-    }
 
     @Override
     public void toggle(int pos) {
@@ -201,6 +234,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public final TextView name;
         public final ImageView check;
         public final ImageView badge;
+        public final ImageView more;
 
         public ProductHolder(View itemView) {
             super(itemView);
@@ -209,6 +243,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             name = (TextView) itemView.findViewById(R.id.tv_item_product_list_item_name);
             check = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_check);
             badge = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_badge);
+            more = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_more);
         }
 
         public void setProduct(Product product, boolean b){
@@ -225,7 +260,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
 
             check.setVisibility(b ? View.VISIBLE : View.GONE);
-
+            more.setVisibility(b ? View.INVISIBLE : View.VISIBLE);
             layout.animate().scaleX(b ? 0.9f : 1f)
                     .scaleY(b ? 0.9f : 1f)
                     .setDuration(100L)

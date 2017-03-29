@@ -1,7 +1,10 @@
 package com.fivetrue.market.memo.ui;
 
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
+import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
 import com.fivetrue.market.memo.utils.CommonUtils;
@@ -26,6 +30,10 @@ import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
 import java.util.ArrayList;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 
 public class MainActivity extends BaseActivity{
@@ -45,6 +53,8 @@ public class MainActivity extends BaseActivity{
 
     private MainPagerAdapter mAdapter;
 
+    private Disposable mProductDisposable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +66,9 @@ public class MainActivity extends BaseActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(mProductDisposable.isDisposed()){
+            mProductDisposable.dispose();
+        }
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
     }
 
@@ -65,8 +78,39 @@ public class MainActivity extends BaseActivity{
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
         fragmentSets.add(new MainPagerAdapter.FragmentSet(TimelineFragment.class, TimelineFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
+        for(int i = 0 ; i < mAdapter.getRealCount() ; i ++){
+            Fragment f = mAdapter.getItem(i);
+            if(f != null && f instanceof ProductListFragment){
+                mProductDisposable = ((ProductListFragment) f).getObservable()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .map(products -> products.size() > 0)
+                        .subscribe(hasSelection -> updateUI(hasSelection));
+            }
+        }
     }
+
+    private void updateUI(final boolean hasSelection){
+        if(mFabAdd.getTag() == null
+                || mFabAdd.getTag() instanceof Boolean && ((Boolean)mFabAdd.getTag()) != hasSelection){
+            AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(this,
+                    hasSelection ? R.animator.card_flip_left : R.animator.card_flip_right);
+            set.setTarget(mFabAdd);
+            set.start();
+            mFabAdd.postDelayed(() -> {
+                if(hasSelection){
+                    mFabAdd.setImageResource(R.drawable.ic_cart_checkout_white_50dp);
+                    mFabAdd.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+                }else{
+                    mFabAdd.setImageResource(R.drawable.ic_add_white_20dp);
+                    mFabAdd.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+                }
+            }, getResources().getInteger(R.integer.card_flip_time_half));
+        }
+        mFabAdd.setTag(hasSelection);
+    }
+
 
     private void initView(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -75,11 +119,13 @@ public class MainActivity extends BaseActivity{
 
         mTitle = (TextView) findViewById(R.id.tv_main_title);
         mTitle.setTypeface(CommonUtils.getFont(this,  "font/DroidSansMono.ttf"));
+        mTitle.setText(R.string.app_name);
         mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
         mViewPager = (ViewPager) findViewById(R.id.vp_main);
         mFabAdd = (FloatingActionButton) findViewById(R.id.fab_main_add);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -90,7 +136,6 @@ public class MainActivity extends BaseActivity{
                 if(mAdapter != null && mAdapter.getRealCount() > position){
                     if(mAdapter.getItem(position) instanceof PagerTabContent){
                         PagerTabContent content = (PagerTabContent) mAdapter.getItem(position);
-                        mTitle.setText(content.getTabTitle(MainActivity.this));
                         if(content.getTabTitle(MainActivity.this).equals(getString(R.string.product))){
                             SimpleViewUtils.showView(mFabAdd, View.VISIBLE);
                         }else{
@@ -122,24 +167,19 @@ public class MainActivity extends BaseActivity{
             }
         });
 
-        mFabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mAdapter != null && mViewPager != null){
-                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
-                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
-                        if(f != null
-                                && f instanceof ProductListFragment
-                                && ((ProductListFragment) f).getSelectedCount() > 0){
-                            ((ProductListFragment) f).checkoutProducts(findViewById(R.id.layout_main));
-                            return;
-                        }
+        mFabAdd.setOnClickListener( view -> {
+            if(mAdapter != null && mViewPager != null){
+                if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+                    Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+                    if(f != null
+                            && f instanceof ProductListFragment
+                            && ((ProductListFragment) f).getAdapter().getSelections().size() > 0){
+                        ((ProductListFragment) f).doProducts(findViewById(R.id.layout_main));
+                        return;
                     }
                 }
-
-                startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
-
             }
+            startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
         });
 
         mViewPager.setAdapter(mAdapter);
@@ -148,6 +188,14 @@ public class MainActivity extends BaseActivity{
         mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(android.R.color.white), MaterialMenuDrawable.Stroke.THIN);
         toolbar.setNavigationIcon(mMaterialMenuDrawable);
         mMaterialMenuDrawable.setIconState(MaterialMenuDrawable.IconState.X);
+
+        if(mTab.getLayoutParams() instanceof CoordinatorLayout.LayoutParams){
+            CoordinatorLayout.Behavior behavior =
+                    ((CoordinatorLayout.LayoutParams) mTab.getLayoutParams()).getBehavior();
+            if(behavior != null && behavior instanceof BottomNavigationBehavior){
+                ((BottomNavigationBehavior) behavior).setLayoutDependsOn(false);
+            }
+        }
     }
 
     @Override
@@ -200,17 +248,14 @@ public class MainActivity extends BaseActivity{
             mCartMenu.setVisible(false);
             FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             if(backStackEntry != null && backStackEntry.getBreadCrumbTitle() != null){
-                getSupportActionBar().setTitle(backStackEntry.getBreadCrumbTitle());
-                getSupportActionBar().setSubtitle(backStackEntry.getBreadCrumbShortTitle());
+                mTitle.setText(backStackEntry.getBreadCrumbTitle());
             }else{
-                getSupportActionBar().setTitle(R.string.registered_store);
-                getSupportActionBar().setSubtitle(null);
+                mTitle.setText(R.string.app_name);
             }
             animateActionBarMenu(MaterialMenuDrawable.IconState.ARROW);
         }else{
             mCartMenu.setVisible(true);
-            getSupportActionBar().setTitle(R.string.product);
-            getSupportActionBar().setSubtitle(null);
+            mTitle.setText(R.string.app_name);
             animateActionBarMenu(MaterialMenuDrawable.IconState.X);
         }
     }

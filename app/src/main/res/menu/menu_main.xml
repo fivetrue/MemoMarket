@@ -7,9 +7,4 @@
         android:title="@string/cart"
         app:showAsAction="ifRoom"/>
 
-    <item android:id="@+id/action_shopping_basket"
-        android:icon="@drawable/ic_shopping_basket_white_20dp"
-        android:title="@string/shopping_basket"
-        app:showAsAction="ifRoom"/>
-
 </menu>

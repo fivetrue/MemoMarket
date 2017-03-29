@@ -52,8 +52,7 @@ public class DataManager {
 
     private DataManager(Context context){
         mContext = context;
-        mFirebaseDB = new FirebaseDB(context);
-        mRealDB = new RealmDB(context);
+        mFirebaseDB = FirebaseDB.getInstance(context);
     }
 
     public Observable<ConfigData> getConfig(){

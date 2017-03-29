@@ -50,6 +50,7 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
     private int mSnackbarHeight = -1;
     private boolean scrollingEnabled = true;
     private boolean hideAlongSnackbar = false;
+    private boolean mlayoutDependsOn = true;
     int[] attrsArray = new int[] {
             android.R.attr.id };
     public BottomNavigationBehavior() {
@@ -81,8 +82,7 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, V child, View dependency) {
         mWithSnackBarImpl.updateSnackbar(parent, dependency, child);
-//        return dependency instanceof Snackbar.SnackbarLayout;
-        return false;
+        return dependency instanceof Snackbar.SnackbarLayout && mlayoutDependsOn;
     }
 
     @Override
@@ -191,6 +191,10 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
         this.scrollingEnabled = scrollingEnabled;
     }
 
+    public void setLayoutDependsOn(boolean b){
+        mlayoutDependsOn = b;
+    }
+
     public void setHidden(V view, boolean bottomLayoutHidden) {
         if (!bottomLayoutHidden && hidden) {
             animateOffset(view, 0);
@@ -236,16 +240,11 @@ public final class BottomNavigationBehavior<V extends View> extends VerticalScro
                 if (mSnackbarHeight == -1) {
                     mSnackbarHeight = dependency.getHeight();
                 }
-
-                int targetPadding = (mSnackbarHeight +
-                        child.getMeasuredHeight());
-                dependency.setPadding(dependency.getPaddingLeft(),
-                        dependency.getPaddingTop(), dependency.getPaddingRight(), targetPadding
-                );
-
-                hidden = true;
-                handleDirection((V) child, ScrollDirection.SCROLL_DIRECTION_DOWN);
-
+//                int targetPadding = (mSnackbarHeight +
+//                        child.getMeasuredHeight());
+//                dependency.setPadding(dependency.getPaddingLeft(),
+//                        dependency.getPaddingTop(), dependency.getPaddingRight(), targetPadding
+//                );
 
             }
         }

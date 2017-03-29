@@ -4,11 +4,14 @@ buildscript {
     }
     dependencies {
         classpath "io.realm:realm-gradle-plugin:2.2.0"
+        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
+
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
 
@@ -37,14 +40,6 @@ android {
         versionName BASE_VERSION + "." + VERSION_TYPE
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField(LONG, BUILD_DATE, String.valueOf(System.currentTimeMillis()) + "L")
-
-        manifestPlaceholders = [
-                GETUI_APP_ID : "DSwSJnlleyAkKkHsk9acs3",
-                GETUI_APP_KEY : "s6o1dRLcFc7YVQ4EE36HO3",
-                GETUI_APP_SECRET : "lhh3QJngij8sBZV3eIUz02",
-                UMENG_APP_KEY : "586da9b8ae1bf875b5001f5e",
-                UMENG_APP_CANNEL_ID : "ZTE_Preload",
-        ]
     }
 
     signingConfigs {
@@ -68,6 +63,10 @@ android {
             buildConfigField(BOOLEAN, LL_D, TRUE)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 }
 

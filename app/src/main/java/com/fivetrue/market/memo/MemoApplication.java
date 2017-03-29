@@ -2,6 +2,7 @@ package com.fivetrue.market.memo;
 
 import android.app.Application;
 
+import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.utils.DataManager;
 
 
@@ -16,6 +17,7 @@ public class MemoApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        RealmDB.init(this);
         DataManager.getInstance(this);
     }
 }

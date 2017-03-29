@@ -12,30 +12,32 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.BaseActivity;
+import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.PublishSubject;
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
-import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 /**
  * Created by kwonojin on 2017. 2. 7..
  */
 
-public class ProductListFragment extends BaseFragment implements PagerTabContent, RealmChangeListener<Realm> {
+public class ProductListFragment extends BaseFragment implements PagerTabContent {
 
     private static final String TAG = "ProductListFragment";
 
@@ -46,11 +48,15 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     private GridLayoutManager mLayoutManager;
 
+    private Disposable mProductDisposable;
+
+    private PublishSubject<List<Product>> mProductSelectedPublishSubject = PublishSubject.create();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setProductList(loadProducts(), true);
+        mProductDisposable = initProductDataObservable();
+        ProductDB.getInstance().updatePublish();
     }
 
     @Override
@@ -91,45 +97,30 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
         AlphaInAnimationAdapter adapter = new AlphaInAnimationAdapter(mProductListAdapter);
         mRecyclerProduct.setAdapter(adapter);
-
-        view.findViewById(R.id.layout_fragment_product_list).addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int left, int top, int right
-                    , int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if(view != null){
-                    view.removeOnLayoutChangeListener(this);
-                    ViewAnimationUtils.createCircularReveal(view, left, top
-                            , 0, Math.max(right, bottom)).setDuration(250L).start();
-                }
-            }
-        });
-
         mTextMessage.setVisibility(mProductListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
     }
 
-    private List<Product> loadProducts(){
-        return RealmDB.get().where(Product.class)
-                .equalTo("checkOut", false).findAll().sort("checkInDate");
+    protected Disposable initProductDataObservable(){
+        return ProductDB.getInstance().getObservable()
+                .map(products -> {
+                    List<Product> productList = new ArrayList<Product>();
+                    for(Product product : products){
+                        if(!product.isCheckOut()){
+                            productList.add(product);
+                        }
+                    }
+                    return productList;
+                })
+                .subscribe(product -> setProductList(product));
     }
 
-    private void setProductList(List<Product> productList, boolean notify){
+    protected void setProductList(List<Product> productList){
         if(LL.D) Log.d(TAG, "setProductList() called with: storeList = [" + productList + "]");
         if(productList != null){
             if(mProductListAdapter == null){
-                mProductListAdapter = new ProductListAdapter(productList, new ProductListAdapter.OnProductItemListener(){
-
-                    @Override
-                    public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
-                        mProductListAdapter.toggle(holder.getAdapterPosition());
-                    }
-
-                    @Override
-                    public boolean onLongCLickItem(ProductListAdapter.ProductHolder holder, Product item) {
-                        return false;
-                    }
-                });
+                mProductListAdapter = makeAdapter(productList);
             }else{
-                mProductListAdapter.setData(productList, notify);
+                mProductListAdapter.setData(productList);
             }
 
             if(mTextMessage != null){
@@ -138,82 +129,55 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         }
     }
 
-    private void moveToCart(){
-        if(getActivity() != null && getActivity() instanceof BaseActivity){
-            mProductListAdapter.clearSelection();
-            ((BaseActivity) getActivity()).addFragment(CheckOutProductFragment.class, null
-                    , ((BaseActivity) getActivity()).getDefaultFragmentAnchor(), true);
-        }
-    }
+    protected ProductListAdapter makeAdapter(List<Product> productList){
+        return new ProductListAdapter(productList, new ProductListAdapter.OnProductItemListener(){
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_cart :
-                moveToCart();
-            break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public int getSelectedCount(){
-        int count = 0;
-        if(mProductListAdapter != null){
-            count = mProductListAdapter.getSelections().size();
-        }
-        return count;
-    }
-
-    public void checkoutProducts(final View snackbarAnchor){
-        RealmDB.get().executeTransaction(new Realm.Transaction() {
             @Override
-            public void execute(Realm realm) {
-                final List<Product> products = mProductListAdapter.getSelections();
-                for(Product p : products){
-                    p.setCheckOut(true);
-                }
-                mProductListAdapter.clearSelection();
-                setProductList(loadProducts(), true);
+            public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                mProductListAdapter.toggle(holder.getAdapterPosition());
+                publish();
+            }
 
-                if(snackbarAnchor != null){
-                    Snackbar.make(snackbarAnchor, R.string.product_moved_completed_message
-                            , Snackbar.LENGTH_LONG)
-                            .setAction(R.string.revert, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    RealmDB.get().executeTransaction(new Realm.Transaction() {
-                                        @Override
-                                        public void execute(Realm realm) {
-                                            for(Product p : products){
-                                                p.setCheckOut(false);
-                                            }
-                                            setProductList(loadProducts(), true);
-                                        }
-                                    });
-                                }
-                            }).show();
-                }
+            @Override
+            public boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                return false;
             }
         });
     }
 
-    public void updateList(){
-        if(mProductListAdapter != null){
-            mProductListAdapter.notifyDataSetChanged();
+    public BaseAdapterImpl<Product> getAdapter(){
+        return mProductListAdapter;
+    }
+
+    public void doProducts(final View snackbarAnchor){
+        RealmDB.get().executeTransaction(realm -> {
+            final List<Product> products = mProductListAdapter.getSelections();
+            for(Product p : products){
+                p.setCheckOut(true);
+            }
+            mProductListAdapter.clearSelection();
+            publish();
+            if(snackbarAnchor != null){
+                Snackbar.make(snackbarAnchor, R.string.product_moved_completed_message
+                        , Snackbar.LENGTH_LONG)
+                        .setAction(R.string.revert, view -> {
+                            RealmDB.get().executeTransaction(realm1 -> {
+                                for(Product p : products){
+                                    p.setCheckOut(false);
+                                }
+                                publish();
+                            });
+                        }).show();
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mProductDisposable != null && !mProductDisposable.isDisposed()){
+            mProductDisposable.dispose();
         }
-    }
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        RealmDB.get().addChangeListener(this);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        RealmDB.get().removeChangeListener(this);
     }
 
     @Override
@@ -242,17 +206,23 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     }
 
     @Override
-    public void onChange(Realm element) {
-        setProductList(loadProducts(), true);
-    }
-
-    @Override
     public boolean onBackPressed() {
         if(mProductListAdapter.getSelections().size() > 0){
             mProductListAdapter.clearSelection();
+            publish();
             return true;
         }
         return super.onBackPressed();
+    }
+
+    public void publish(){
+        if(mProductListAdapter != null){
+            mProductSelectedPublishSubject.onNext(mProductListAdapter.getSelections());
+        }
+    }
+
+    public Observable<List<Product>> getObservable(){
+        return mProductSelectedPublishSubject;
     }
 
     private static class ProductItemAnimator extends DefaultItemAnimator{

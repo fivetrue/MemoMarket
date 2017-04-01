@@ -8,7 +8,7 @@
 
     <dimen name="navigation_height">120dp</dimen>
 
-    <dimen name="app_bar_height">60dp</dimen>
+    <dimen name="app_bar_height">120dp</dimen>
     <dimen name="actionbar_height">60dp</dimen>
     <dimen name="tab_height">60dp</dimen>
 

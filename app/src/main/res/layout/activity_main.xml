@@ -10,21 +10,38 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/app_bar_height"
-        app:elevation="8dp">
+        android:layout_height="@dimen/app_bar_height">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:theme="@style/AppTheme.Toolbar"
             app:titleEnabled="false"
-            app:layout_scrollFlags="enterAlways|enterAlwaysCollapsed|scroll|snap">
-            d
+            app:layout_scrollFlags="enterAlways|enterAlwaysCollapsed|exitUntilCollapsed|scroll|snap">
+
+            <com.fivetrue.market.memo.view.PagerSlidingTabStrip
+                android:id="@+id/tab_main"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tab_height"
+                android:layout_gravity="bottom"
+                android:elevation="2dp"
+                app:tabIconPadding="5dp"
+                app:tabTextSize="12dp"
+                app:layout_behavior="@string/bottom_navigator_behavior"
+                app:tabTextColor="@color/gray"
+                app:selectedTabTextColor="@color/colorPrimary"
+                app:tabBackgroundColor="@android:color/white"
+                app:indicatorColor="@color/colorPrimaryDark"
+                app:indicatorHeight="2dp"
+                app:shouldExpand="true" />
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/actionbar_height"
+                android:layout_height="?attr/actionBarSize"
                 android:theme="@style/AppTheme.Toolbar"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:elevation="4dp">
                 <TextView
                     android:id="@+id/tv_main_title"
                     android:layout_width="wrap_content"
@@ -53,30 +70,22 @@
             android:background="@drawable/common_shadow" />
     </RelativeLayout>
 
-    <com.fivetrue.market.memo.view.PagerSlidingTabStrip
-        android:id="@+id/tab_main"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/tab_height"
-        android:layout_gravity="bottom"
-        android:outlineProvider="bounds"
-        android:elevation="5dp"
-        app:tabIconPadding="5dp"
-        app:tabTextSize="12dp"
-        app:layout_behavior="@string/bottom_navigator_behavior"
-        app:tabTextColor="@color/gray"
-        app:selectedTabTextColor="@color/colorPrimary"
-        app:tabBackgroundColor="@android:color/white"
-        app:indicatorColor="@color/indicatorColor"
-        app:indicatorHeight="0dp"
-        app:shouldExpand="true" />
-
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_main_add"
+        android:id="@+id/fab_main_product"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="25dp"
         android:src="@drawable/ic_add_white_20dp"
         android:visibility="invisible"
-        app:layout_anchor="@id/tab_main"
-        app:layout_anchorGravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal|bottom"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_main_checkout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:src="@drawable/ic_cart_checkout_white_50dp"
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal|bottom"
+        app:backgroundTint="@color/colorPrimaryDark"/>
 </android.support.design.widget.CoordinatorLayout>

@@ -102,6 +102,11 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
+    public void add(Store data) {
+
+    }
+
+    @Override
     public void toggle(int pos) {
 
     }
@@ -118,6 +123,11 @@ public class StoreListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public void clearSelection() {
+
+    }
+
+    @Override
+    public void clear() {
 
     }
 

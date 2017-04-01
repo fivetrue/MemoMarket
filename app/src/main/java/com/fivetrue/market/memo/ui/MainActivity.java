@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
+import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
@@ -27,11 +28,9 @@ import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.BottomNavigationBehavior;
 import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
-import com.fivetrue.market.memo.view.PagerTabContent;
 
 import java.util.ArrayList;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
@@ -42,18 +41,18 @@ public class MainActivity extends BaseActivity{
 
     private MaterialMenuDrawable mMaterialMenuDrawable;
 
-    private MenuItem mCartMenu;
-
     private TextView mTitle;
 
     private PagerSlidingTabStrip mTab;
     private ViewPager mViewPager;
 
-    private FloatingActionButton mFabAdd;
+    private FloatingActionButton mFabProduct;
+    private FloatingActionButton mFabCheckout;
 
     private MainPagerAdapter mAdapter;
 
     private Disposable mProductDisposable;
+    private Disposable mCheckOutDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +68,9 @@ public class MainActivity extends BaseActivity{
         if(mProductDisposable.isDisposed()){
             mProductDisposable.dispose();
         }
+        if(mCheckOutDisposable.isDisposed()){
+            mCheckOutDisposable.dispose();
+        }
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
     }
 
@@ -82,33 +84,53 @@ public class MainActivity extends BaseActivity{
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
         for(int i = 0 ; i < mAdapter.getRealCount() ; i ++){
             Fragment f = mAdapter.getItem(i);
-            if(f != null && f instanceof ProductListFragment){
-                mProductDisposable = ((ProductListFragment) f).getObservable()
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .map(products -> products.size() > 0)
-                        .subscribe(hasSelection -> updateUI(hasSelection));
+            if(f != null){
+             if(f instanceof CheckOutProductFragment){
+                 mCheckOutDisposable = ((CheckOutProductFragment) f).getObservable()
+                         .observeOn(AndroidSchedulers.mainThread())
+                         .map(products -> products.size() > 0)
+                         .subscribe(hasSelection -> updateCheckoutButton(hasSelection));
+             }else if(f instanceof ProductListFragment){
+                 mProductDisposable = ((ProductListFragment) f).getObservable()
+                         .observeOn(AndroidSchedulers.mainThread())
+                         .map(products -> products.size() > 0)
+                         .subscribe(hasSelection -> updateProductButton(hasSelection));
+             }
             }
         }
     }
 
-    private void updateUI(final boolean hasSelection){
-        if(mFabAdd.getTag() == null
-                || mFabAdd.getTag() instanceof Boolean && ((Boolean)mFabAdd.getTag()) != hasSelection){
+    private void updateProductButton(final boolean hasSelection){
+        if(mFabProduct.getTag() == null
+                || mFabProduct.getTag() instanceof Boolean && ((Boolean) mFabProduct.getTag()) != hasSelection){
             AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(this,
                     hasSelection ? R.animator.card_flip_left : R.animator.card_flip_right);
-            set.setTarget(mFabAdd);
+            set.setTarget(mFabProduct);
             set.start();
-            mFabAdd.postDelayed(() -> {
+            mFabProduct.postDelayed(() -> {
                 if(hasSelection){
-                    mFabAdd.setImageResource(R.drawable.ic_cart_checkout_white_50dp);
-                    mFabAdd.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+                    mFabProduct.setImageResource(R.drawable.ic_cart_loaded_white_50dp);
+                    mFabProduct.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 }else{
-                    mFabAdd.setImageResource(R.drawable.ic_add_white_20dp);
-                    mFabAdd.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+                    mFabProduct.setImageResource(R.drawable.ic_add_white_20dp);
+                    mFabProduct.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
                 }
             }, getResources().getInteger(R.integer.card_flip_time_half));
         }
-        mFabAdd.setTag(hasSelection);
+        mFabProduct.setTag(hasSelection);
+    }
+
+    private void updateCheckoutButton(final boolean hasSelection){
+        if(hasSelection){
+            if(!mFabCheckout.isShown()){
+                SimpleViewUtils.showView(mFabCheckout, View.VISIBLE);
+            }
+        }else{
+            if(mFabCheckout.isShown()){
+                SimpleViewUtils.hideView(mFabCheckout, View.GONE);
+            }
+        }
+        mFabCheckout.setTag(hasSelection);
     }
 
 
@@ -122,7 +144,8 @@ public class MainActivity extends BaseActivity{
         mTitle.setText(R.string.app_name);
         mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
         mViewPager = (ViewPager) findViewById(R.id.vp_main);
-        mFabAdd = (FloatingActionButton) findViewById(R.id.fab_main_add);
+        mFabProduct = (FloatingActionButton) findViewById(R.id.fab_main_product);
+        mFabCheckout = (FloatingActionButton) findViewById(R.id.fab_main_checkout);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
@@ -134,12 +157,28 @@ public class MainActivity extends BaseActivity{
             @Override
             public void onPageSelected(int position) {
                 if(mAdapter != null && mAdapter.getRealCount() > position){
-                    if(mAdapter.getItem(position) instanceof PagerTabContent){
-                        PagerTabContent content = (PagerTabContent) mAdapter.getItem(position);
-                        if(content.getTabTitle(MainActivity.this).equals(getString(R.string.product))){
-                            SimpleViewUtils.showView(mFabAdd, View.VISIBLE);
+                    if(mAdapter.getItem(position) instanceof Fragment){
+                        Fragment f = mAdapter.getItem(position);
+                        if(f instanceof ProductListFragment){
+                            if(f instanceof CheckOutProductFragment){
+                                if(mFabCheckout.getTag() != null
+                                        && mFabCheckout.getTag() instanceof Boolean
+                                        && (Boolean) mFabCheckout.getTag()){
+                                    SimpleViewUtils.showView(
+                                            mFabCheckout, View.VISIBLE);
+                                }else{
+                                    SimpleViewUtils.hideView(
+                                            mFabCheckout, View.GONE);
+                                }
+                                SimpleViewUtils.hideView(mFabProduct, View.GONE);
+                            }else{
+                                SimpleViewUtils.showView(mFabProduct, View.VISIBLE);
+                                SimpleViewUtils.hideView(mFabCheckout, View.GONE);
+                            }
+
                         }else{
-                            SimpleViewUtils.hideView(mFabAdd, View.GONE);
+                            SimpleViewUtils.hideView(mFabCheckout, View.GONE);
+                            SimpleViewUtils.hideView(mFabProduct, View.GONE);
                         }
 
                     }
@@ -148,26 +187,10 @@ public class MainActivity extends BaseActivity{
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                if(mTab != null && mTab.getLayoutParams() instanceof CoordinatorLayout.LayoutParams){
-                    CoordinatorLayout.Behavior behavior =
-                            ((CoordinatorLayout.LayoutParams) mTab.getLayoutParams()).getBehavior();
-                    if(behavior != null && behavior instanceof BottomNavigationBehavior){
-                        switch (state){
-                            case ViewPager.SCROLL_STATE_DRAGGING :
-                            case ViewPager.SCROLL_STATE_SETTLING:
-                                ((BottomNavigationBehavior) behavior).setScrollingEnabled(false);
-                                return;
-
-                            case ViewPager.SCROLL_STATE_IDLE:
-                                ((BottomNavigationBehavior) behavior).setScrollingEnabled(true);
-                                return;
-                        }
-                    }
-                }
             }
         });
 
-        mFabAdd.setOnClickListener( view -> {
+        mFabProduct.setOnClickListener(view -> {
             if(mAdapter != null && mViewPager != null){
                 if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
                     Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
@@ -180,6 +203,22 @@ public class MainActivity extends BaseActivity{
                 }
             }
             startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
+        });
+
+        mFabCheckout.setOnClickListener(view -> {
+            if(view.isShown()){
+                if(mAdapter != null && mViewPager != null){
+                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+                        if(f != null
+                                && f instanceof CheckOutProductFragment
+                                && ((CheckOutProductFragment) f).getAdapter().getSelections().size() > 0){
+                            ((CheckOutProductFragment) f).doProducts(findViewById(R.id.layout_main));
+                            return;
+                        }
+                    }
+                }
+            }
         });
 
         mViewPager.setAdapter(mAdapter);
@@ -207,12 +246,6 @@ public class MainActivity extends BaseActivity{
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        mCartMenu = menu.findItem(R.id.action_cart);
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -245,7 +278,6 @@ public class MainActivity extends BaseActivity{
     public void onBackStackChanged() {
         FragmentManager fm = getCurrentFragmentManager();
         if(fm.getBackStackEntryCount() > 0){
-            mCartMenu.setVisible(false);
             FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             if(backStackEntry != null && backStackEntry.getBreadCrumbTitle() != null){
                 mTitle.setText(backStackEntry.getBreadCrumbTitle());
@@ -254,7 +286,6 @@ public class MainActivity extends BaseActivity{
             }
             animateActionBarMenu(MaterialMenuDrawable.IconState.ARROW);
         }else{
-            mCartMenu.setVisible(true);
             mTitle.setText(R.string.app_name);
             animateActionBarMenu(MaterialMenuDrawable.IconState.X);
         }
@@ -267,14 +298,11 @@ public class MainActivity extends BaseActivity{
                 case X:{
                     if (mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.X){
                         animator = ValueAnimator.ofFloat(0, 1);
-                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                float value = (Float)valueAnimator.getAnimatedValue();
-                                mMaterialMenuDrawable.setTransformationOffset(
-                                        MaterialMenuDrawable.AnimationState.ARROW_X,
-                                        value);
-                            }
+                        animator.addUpdateListener(valueAnimator -> {
+                            float value = (Float)valueAnimator.getAnimatedValue();
+                            mMaterialMenuDrawable.setTransformationOffset(
+                                    MaterialMenuDrawable.AnimationState.ARROW_X,
+                                    value);
                         });
                     }
                 }
@@ -283,14 +311,11 @@ public class MainActivity extends BaseActivity{
                 case ARROW: {
                     if(mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.ARROW){
                         animator = ValueAnimator.ofFloat(1, 0);
-                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                float value = (Float)valueAnimator.getAnimatedValue();
-                                mMaterialMenuDrawable.setTransformationOffset(
-                                        MaterialMenuDrawable.AnimationState.ARROW_X,
-                                        value);
-                            }
+                        animator.addUpdateListener(valueAnimator -> {
+                            float value = (Float)valueAnimator.getAnimatedValue();
+                            mMaterialMenuDrawable.setTransformationOffset(
+                                    MaterialMenuDrawable.AnimationState.ARROW_X,
+                                    value);
                         });
                     }
                 }
@@ -299,5 +324,20 @@ public class MainActivity extends BaseActivity{
                 animator.setDuration(250).start();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mAdapter != null && mViewPager != null){
+            if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+                Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+                if(f != null && f instanceof BaseFragment){
+                    if(((BaseFragment) f).onBackPressed()){
+                        return;
+                    }
+                }
+            }
+        }
+        super.onBackPressed();
     }
 }

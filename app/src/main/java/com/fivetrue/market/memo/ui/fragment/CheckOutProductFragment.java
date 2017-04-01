@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.product.CheckOutProductListAdapter;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
@@ -45,24 +48,32 @@ public class CheckOutProductFragment extends ProductListFragment{
     private static final String TAG = "CheckOutProductFragment";
 
     @Override
-    protected Disposable initProductDataObservable() {
-        return ProductDB.getInstance().getObservable()
-                .map(products -> {
-                    List<Product> productList = new ArrayList<Product>();
-                    for(Product product : products){
-                        if(product.isCheckOut() && product.getCheckOutDate() == 0){
-                            productList.add(product);
-                        }
-                    }
-                    return productList;
-                })
-                .subscribe(product -> setProductList(product));
+    protected boolean makeFilter(Product p) {
+        boolean b = false;
+        if(p != null){
+            b = p.isCheckOut() && p.getCheckOutDate() == 0;
+        }
+        return b;
+    }
+
+    @Override
+    public void doProducts(View snackbarAnchor) {
+        if(getAdapter() != null && getActivity() != null){
+            ProductDB.get().executeTransaction(realm -> {
+                long currentMs = System.currentTimeMillis();
+                List<Product> products = getAdapter().getSelections();
+                for(Product p : products){
+                    p.setCheckOutDate(currentMs);
+                }
+                Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), products, currentMs);
+                getActivity().startActivity(intent);
+            });
+        }
     }
 
     @Override
     protected ProductListAdapter makeAdapter(List<Product> productList) {
-        return new CheckOutProductListAdapter(productList, new ProductListAdapter.OnProductItemListener(){
-
+        return new CheckOutProductListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
             @Override
             public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
                 getAdapter().toggle(holder.getAdapterPosition());

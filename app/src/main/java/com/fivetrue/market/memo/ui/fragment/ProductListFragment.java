@@ -10,7 +10,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -20,7 +19,6 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.BaseActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
 import com.fivetrue.market.memo.view.PagerTabContent;
@@ -55,9 +53,13 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mProductDisposable = initProductDataObservable();
-        ProductDB.getInstance().updatePublish();
+        mProductDisposable = ProductDB.getInstance().getObservable()
+                .map(products ->
+                    Observable.fromIterable(products)
+                            .filter(product -> makeFilter(product)).toList().blockingGet())
+                .subscribe(product -> setProductList(product));
     }
+
 
     @Override
     public void onStop() {
@@ -95,23 +97,15 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         });
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
-        AlphaInAnimationAdapter adapter = new AlphaInAnimationAdapter(mProductListAdapter);
-        mRecyclerProduct.setAdapter(adapter);
-        mTextMessage.setVisibility(mProductListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
+        ProductDB.getInstance().updatePublish();
     }
 
-    protected Disposable initProductDataObservable(){
-        return ProductDB.getInstance().getObservable()
-                .map(products -> {
-                    List<Product> productList = new ArrayList<Product>();
-                    for(Product product : products){
-                        if(!product.isCheckOut()){
-                            productList.add(product);
-                        }
-                    }
-                    return productList;
-                })
-                .subscribe(product -> setProductList(product));
+    protected boolean makeFilter(Product p){
+        boolean b = false;
+        if(p != null){
+            b = !p.isCheckOut();
+        }
+        return b;
     }
 
     protected void setProductList(List<Product> productList){
@@ -119,13 +113,20 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         if(productList != null){
             if(mProductListAdapter == null){
                 mProductListAdapter = makeAdapter(productList);
+                AlphaInAnimationAdapter adapter = new AlphaInAnimationAdapter(mProductListAdapter);
+                mRecyclerProduct.setAdapter(adapter);
             }else{
                 mProductListAdapter.setData(productList);
             }
+        }
+        validationList();
+    }
 
-            if(mTextMessage != null){
-                mTextMessage.setVisibility(mProductListAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
-            }
+    protected void validationList(){
+        if(mTextMessage != null){
+            mTextMessage.setVisibility(mProductListAdapter != null
+                    && mProductListAdapter.getItemCount() > 0
+                    ? View.GONE : View.VISIBLE);
         }
     }
 

@@ -133,7 +133,6 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
 
     @Override
     public void onBackPressed() {
-
         if(getCurrentFragmentManager() != null){
             if(getCurrentFragmentManager().getFragments() != null){
                 for(Fragment f : getCurrentFragmentManager().getFragments()){

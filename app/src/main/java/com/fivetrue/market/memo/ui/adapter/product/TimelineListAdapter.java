@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,25 +28,18 @@ import java.util.List;
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
+public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
 
-    private static final String TAG = "ProductListAdapter";
+    private static final String TAG = "TimelineListAdapter";
 
     public static final int PRODUCT = 0x01;
     public static final int FOOTER = 0x02;
 
-    public interface OnProductItemListener {
-        void onClickItem(ProductListAdapter.ProductHolder holder, Product item);
-        boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item);
-    }
-
     private SparseBooleanArray mSelectedItems;
     private List<Product> mData;
-    private ProductListAdapter.OnProductItemListener mProductItemListener;
 
-    public ProductListAdapter(List<Product> data, ProductListAdapter.OnProductItemListener ll){
+    public TimelineListAdapter(List<Product> data){
         this.mData = data;
-        mProductItemListener = ll;
         mSelectedItems = new SparseBooleanArray();
     }
 
@@ -57,11 +49,11 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if(viewType == FOOTER){
             View view = inflater.inflate(R.layout.item_product_list_footer, null);
-            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductFooter(view);
+            RecyclerView.ViewHolder holder = new TimelineListAdapter.ProductFooter(view);
             return holder;
         }else{
             View view = inflater.inflate(R.layout.item_product_list_item, null);
-            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductHolder(view);
+            RecyclerView.ViewHolder holder = new TimelineListAdapter.ProductHolder(view);
             return holder;
         }
     }
@@ -72,28 +64,22 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(getItemViewType(position) == FOOTER){
 
         }else{
-            onBindProductHolder((ProductListAdapter.ProductHolder) holder, position);
+            onBindProductHolder((TimelineListAdapter.ProductHolder) holder, position);
         }
     }
 
-    private void onBindFooterHolder(ProductListAdapter.ProductFooter holder, int position){
+    private void onBindFooterHolder(TimelineListAdapter.ProductFooter holder, int position){
 
     }
 
-    private void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
+    private void onBindProductHolder(final TimelineListAdapter.ProductHolder holder, final int position){
         final Product item = getItem(position);
         if(holder != null && item != null){
             holder.setProduct(item, isSelect(position));
             holder.layout.setOnClickListener(view -> {
-                if(mProductItemListener != null){
-                    mProductItemListener.onClickItem(holder, item);
-                }
             });
 
             holder.layout.setOnLongClickListener(view -> {
-                if(mProductItemListener != null){
-                    return mProductItemListener.onLongClickItem(holder, item);
-                }
                 return false;
             });
 
@@ -133,7 +119,6 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                     break;
             }
-            clearSelection();
             Toast.makeText(view1.getContext()
                     , String.format("%s %s", listItems[i], item.getName())
                     , Toast.LENGTH_SHORT).show();
@@ -190,13 +175,6 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         notifyItemChanged(mData.size());
     }
 
-    public void remove(Product p){
-        int index = mData.indexOf(p);
-        if(index >= 0){
-            mData.remove(index);
-            notifyItemRemoved(index);
-        }
-    }
 
     @Override
     public void toggle(int pos) {
@@ -230,6 +208,12 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
+    public void clear() {
+        mData.clear();
+        clearSelection();
+    }
+
+    @Override
     public List<Product> getSelections() {
         ArrayList<Product> list = new ArrayList<>();
         for(int i = 0 ; i < getItemCount() ; i++){
@@ -239,13 +223,6 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
         return list;
     }
-
-    @Override
-    public void clear(){
-        mData.clear();
-        clearSelection();
-    }
-
 
     public static final class ProductHolder extends RecyclerView.ViewHolder{
 

@@ -81,6 +81,12 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.Imag
     }
 
     @Override
+    public void add(Image data) {
+        mData.add(data);
+        notifyItemChanged(mData.size());
+    }
+
+    @Override
     public void toggle(int pos) {
         mSelection.put(pos, !mSelection.get(pos));
         notifyItemChanged(pos);
@@ -104,6 +110,12 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.Imag
     }
 
     @Override
+    public void clear() {
+        mData.clear();
+        clearSelection();
+    }
+
+    @Override
     public List<Image> getSelections() {
         ArrayList<Image> images = new ArrayList<>();
         for(int i  = 0 ; i < getItemCount() ; i ++){
@@ -113,7 +125,6 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.Imag
         }
         return images;
     }
-
 
     public static final class ImageViewHolder extends RecyclerView.ViewHolder{
 

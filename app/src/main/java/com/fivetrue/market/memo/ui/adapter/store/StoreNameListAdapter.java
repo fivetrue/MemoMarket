@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.adapter.store;
 
 import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +84,11 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
     }
 
     @Override
+    public void add(StoreData data) {
+
+    }
+
+    @Override
     public void toggle(int pos) {
 
     }
@@ -99,6 +105,11 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
 
     @Override
     public void clearSelection() {
+
+    }
+
+    @Override
+    public void clear() {
 
     }
 

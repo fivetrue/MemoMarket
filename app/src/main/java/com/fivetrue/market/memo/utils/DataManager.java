@@ -75,16 +75,6 @@ public class DataManager {
         return mImageService.getImageList(config.msKey, q, "en-us");
     }
 
-    public Observable<Product> addProduct(final Product product){
-        Observable<Product> observable = Observable.create(new ObservableOnSubscribe<Product>() {
-            @Override
-            public void subscribe(ObservableEmitter<Product> e) throws Exception {
-
-            }
-        });
-        return observable;
-    }
-
     public Observable<Store> addStore(final Store store){
         Observable<Store> observable = Observable.create(new ObservableOnSubscribe<Store>() {
             @Override

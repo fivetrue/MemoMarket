@@ -3,32 +3,36 @@ package com.fivetrue.market.memo.ui.adapter.product;
 import android.content.Context;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import io.reactivex.observables.GroupedObservable;
 
 
 /**
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
+public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<GroupedObservable<Long, Product>> {
 
     private static final String TAG = "TimelineListAdapter";
 
@@ -36,9 +40,10 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static final int FOOTER = 0x02;
 
     private SparseBooleanArray mSelectedItems;
-    private List<Product> mData;
+    private List<GroupedObservable<Long, Product>> mData;
+    private Map<GroupedObservable<Long, Product> , List<Product>> mDataMap = new HashMap<>();
 
-    public TimelineListAdapter(List<Product> data){
+    public TimelineListAdapter(List<GroupedObservable<Long, Product>> data){
         this.mData = data;
         mSelectedItems = new SparseBooleanArray();
     }
@@ -52,8 +57,8 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             RecyclerView.ViewHolder holder = new TimelineListAdapter.ProductFooter(view);
             return holder;
         }else{
-            View view = inflater.inflate(R.layout.item_product_list_item, null);
-            RecyclerView.ViewHolder holder = new TimelineListAdapter.ProductHolder(view);
+            View view = inflater.inflate(R.layout.item_timeline_list_item, null);
+            RecyclerView.ViewHolder holder = new TimelineListAdapter.TimelineHolder(view);
             return holder;
         }
     }
@@ -64,7 +69,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if(getItemViewType(position) == FOOTER){
 
         }else{
-            onBindProductHolder((TimelineListAdapter.ProductHolder) holder, position);
+            onBindProductHolder((TimelineListAdapter.TimelineHolder) holder, position);
         }
     }
 
@@ -72,10 +77,16 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     }
 
-    private void onBindProductHolder(final TimelineListAdapter.ProductHolder holder, final int position){
-        final Product item = getItem(position);
+    private void onBindProductHolder(final TimelineListAdapter.TimelineHolder holder, final int position){
+        final GroupedObservable<Long, Product> item = getItem(position);
         if(holder != null && item != null){
-            holder.setProduct(item, isSelect(position));
+            List<Product> products = mDataMap.get(item);
+            if(products == null){
+                products = item.toList().blockingGet();
+                mDataMap.put(item, products);
+
+            }
+            holder.setData(item, products);
             holder.layout.setOnClickListener(view -> {
             });
 
@@ -89,7 +100,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    protected void showPopup(Context context, View view, Product item, int position){
+    protected void showPopup(Context context, View view, GroupedObservable<Long, Product> item, int position){
         ListPopupWindow popupWindow = makePopup(context, item, position);
         popupWindow.setContentWidth((int) (((View) view.getParent()).getWidth() * 0.7));
         popupWindow.setAnchorView(view);
@@ -97,31 +108,13 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         popupWindow.show();
     }
 
-    protected ListPopupWindow makePopup(Context context, Product item, int position){
+    protected ListPopupWindow makePopup(Context context, GroupedObservable<Long, Product> item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.delete)
                 , context.getString(R.string.checkout)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
-            switch (i){
-                case 0 :
-                    RealmDB.get().executeTransaction(realm -> {
-                        item.deleteFromRealm();
-                        notifyItemRemoved(position);
-                    });
-                    break;
-                case 1 :
-                    RealmDB.get().executeTransaction(realm -> {
-                        item.setCheckOut(true);
-                        notifyItemRemoved(position);
-
-                    });
-                    break;
-            }
-            Toast.makeText(view1.getContext()
-                    , String.format("%s %s", listItems[i], item.getName())
-                    , Toast.LENGTH_SHORT).show();
         });
         return popupWindow;
     }
@@ -136,7 +129,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public Product getItem(int pos) {
+    public GroupedObservable<Long, Product> getItem(int pos) {
         if(mData.size() > pos){
             return mData.get(pos);
         }
@@ -159,22 +152,21 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public List<Product> getData() {
+    public List<GroupedObservable<Long, Product>> getData() {
         return mData;
     }
 
     @Override
-    public void setData(List<Product> data) {
+    public void setData(List<GroupedObservable<Long, Product>> data) {
         mData = data;
         notifyDataSetChanged();
     }
 
     @Override
-    public void add(Product data) {
+    public void add(GroupedObservable<Long, Product> data) {
         mData.add(data);
-        notifyItemChanged(mData.size());
+        notifyItemInserted(mData.size());
     }
-
 
     @Override
     public void toggle(int pos) {
@@ -214,60 +206,40 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public List<Product> getSelections() {
-        ArrayList<Product> list = new ArrayList<>();
-        for(int i = 0 ; i < getItemCount() ; i++){
-            if(mSelectedItems.get(i)){
-                list.add(getItem(i));
-            }
-        }
-        return list;
+    public List<GroupedObservable<Long, Product>> getSelections() {
+        return null;
     }
 
-    public static final class ProductHolder extends RecyclerView.ViewHolder{
+    public static final class TimelineHolder extends RecyclerView.ViewHolder{
 
         public final View layout;
-        public final ImageView image;
-        public final TextView name;
-        public final ImageView check;
-        public final ImageView badge;
+        public final GridView images;
+        public final TextView date;
         public final ImageView more;
 
-        public ProductHolder(View itemView) {
+        public TimelineHolder(View itemView) {
             super(itemView);
-            layout = itemView.findViewById(R.id.layout_item_product_list_item);
-            image = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_image);
-            name = (TextView) itemView.findViewById(R.id.tv_item_product_list_item_name);
-            check = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_check);
-            badge = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_badge);
-            more = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_more);
+            layout = itemView.findViewById(R.id.layout_item_timeline_list_layout);
+            images = (GridView) itemView.findViewById(R.id.gv_item_timeline_list_images);
+            date = (TextView) itemView.findViewById(R.id.tv_item_timeline_list_date);
+            more = (ImageView) itemView.findViewById(R.id.iv_item_timeline_list_more);
         }
 
-        public void setProduct(Product product, boolean b){
-            name.setText(product.getName());
-            Glide.with(image.getContext())
-                    .load(product.getImageUrl())
-                    .placeholder(R.drawable.ic_product_gray_50dp)
-                    .into(image);
-            if(System.currentTimeMillis() - product.getCheckInDate()
-                    < DefaultPreferenceUtil.getNewProductPeriod(name.getContext())){
-                badge.setImageResource(R.drawable.ic_new_red_20dp);
+        public void setData(GroupedObservable<Long, Product> data, List<Product> products){
+            Locale locale = date.getContext().getResources().getConfiguration().locale;
+            String formatted = DateFormat.getBestDateTimePattern(locale, "MM/dd/yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat(formatted);
+            date.setText(sdf.format(new Date(data.getKey())) + " ( " + products.size() + " )");
+            if(images.getAdapter() == null){
+                images.setAdapter(new ProductImageListAdapter(images.getContext()
+                        , products));
             }else{
-                badge.setImageBitmap(null);
+                ((ProductImageListAdapter)images.getAdapter()).setData(products);
             }
-
-            check.setVisibility(b ? View.VISIBLE : View.GONE);
-            more.setVisibility(b ? View.INVISIBLE : View.VISIBLE);
-            layout.animate().scaleX(b ? 0.9f : 1f)
-                    .scaleY(b ? 0.9f : 1f)
-                    .setDuration(100L)
-                    .start();
         }
     }
 
     public static final class ProductFooter extends RecyclerView.ViewHolder{
-
-
         public ProductFooter(View itemView) {
             super(itemView);
         }

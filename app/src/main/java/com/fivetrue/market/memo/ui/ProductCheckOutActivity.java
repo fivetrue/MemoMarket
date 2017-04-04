@@ -4,45 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.support.v7.widget.SnapHelper;
+import android.widget.Toast;
 
-import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
-import com.fivetrue.market.memo.model.dto.ConfigData;
-import com.fivetrue.market.memo.model.dto.ProductData;
-import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.ProductCheckOutListAdapter;
-import com.fivetrue.market.memo.ui.adapter.product.ProductNameListAdapter;
-import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.DataManager;
-import com.fivetrue.market.memo.utils.SimpleViewUtils;
+import com.fivetrue.market.memo.ui.adapter.product.CheckOutListAdapter;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 /**
  * Created by kwonojin on 2017. 3. 5..
@@ -55,12 +34,13 @@ public class ProductCheckOutActivity extends BaseActivity{
     public static final String KEY_CHECKOUT_DATE = "checkout_date";
 
     private RecyclerView mRecyclerView;
-    private ProductCheckOutListAdapter mAdapter;
+    private CheckOutListAdapter mAdapter;
 
     private LinearLayoutManager mLayoutManager;
 
     private long mCheckOutMillis;
 
+    private Product mProductForBarcode;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,16 +52,54 @@ public class ProductCheckOutActivity extends BaseActivity{
 
     private void initData(){
         mCheckOutMillis = getIntent().getLongExtra(KEY_CHECKOUT_DATE, 0);
-        mAdapter = new ProductCheckOutListAdapter(Observable.fromIterable(ProductDB.getInstance().getProducts())
+        mAdapter = new CheckOutListAdapter(Observable.fromIterable(ProductDB.getInstance().getProducts())
                 .filter(product -> product.isCheckOut() && product.getCheckOutDate() == mCheckOutMillis)
-                .toList().blockingGet());
+                .toList().blockingGet(), new CheckOutListAdapter.OnClickCheckoutProductListener() {
+            @Override
+            public void onAcceptProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
+                FirebaseDB.getInstance(ProductCheckOutActivity.this)
+                        .addProduct(product).addOnCompleteListener(task -> {
+                    mAdapter.getData().remove(pos);
+                    mAdapter.notifyDataSetChanged();
+                    if(mAdapter.getItemCount() == 0){
+                        finish();
+                    }
+                });
+            }
+
+            @Override
+            public void onDeleteProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
+                ProductDB.get().executeTransaction(realm -> {
+                    product.setCheckOutDate(0);
+                    mAdapter.notifyItemRemoved(pos);
+                    mAdapter.notifyDataSetChanged();
+                    if(mAdapter.getItemCount() == 0){
+                        finish();
+                    }
+                });
+            }
+
+            @Override
+            public void onScanBarcode(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
+                mProductForBarcode = product;
+                IntentIntegrator integrator = new IntentIntegrator(ProductCheckOutActivity.this);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                integrator.setPrompt(getString(R.string.scan_barcode));
+                integrator.setCameraId(0);  // Use a specific camera of the device
+                integrator.setBeepEnabled(false);
+                integrator.setBarcodeImageEnabled(true);
+                integrator.initiateScan();
+            }
+        });
     }
 
     private void initView(){
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_checkout_list);
-        mRecyclerView.setEnabled(false);
         mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new FadeInAnimator());
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -90,5 +108,26 @@ public class ProductCheckOutActivity extends BaseActivity{
         Intent intent = new Intent(context, ProductCheckOutActivity.class);
         intent.putExtra(KEY_CHECKOUT_DATE, ms);
         return intent;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                if(mAdapter != null && mProductForBarcode != null){
+                    ProductDB.get().executeTransaction(realm -> {
+                        mProductForBarcode.setBarcode(result.getContents());
+                        mAdapter.notifyDataSetChanged();
+                        mProductForBarcode = null;
+                    });
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

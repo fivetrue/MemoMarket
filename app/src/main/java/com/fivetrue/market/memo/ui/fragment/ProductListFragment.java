@@ -125,7 +125,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     protected void validationList(){
         if(mTextMessage != null){
             mTextMessage.setVisibility(mProductListAdapter != null
-                    && mProductListAdapter.getItemCount() > 0
+                    && mProductListAdapter.getItemCount() - 1 > 0
                     ? View.GONE : View.VISIBLE);
         }
     }

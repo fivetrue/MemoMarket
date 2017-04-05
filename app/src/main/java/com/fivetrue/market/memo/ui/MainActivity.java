@@ -198,6 +198,7 @@ public class MainActivity extends BaseActivity{
                             && f instanceof ProductListFragment
                             && ((ProductListFragment) f).getAdapter().getSelections().size() > 0){
                         ((ProductListFragment) f).doProducts(findViewById(R.id.layout_main));
+                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
                         return;
                     }
                 }

@@ -17,6 +17,7 @@
     <string name="product">Product</string>
     <string name="settings">Settings</string>
     <string name="price">Price</string>
+    <string name="store">Store</string>
 
     <string name="hint_input_store_name">Input name of store</string>
     <string name="add_item">Add Item</string>
@@ -43,5 +44,6 @@
 
     <string name="product_returned_complete_message">Product has returned</string>
     <string name="product_moved_completed_message">Product has moved to cart</string>
+    <string name="product_has_no_price">Product has no price</string>
 
 </resources>

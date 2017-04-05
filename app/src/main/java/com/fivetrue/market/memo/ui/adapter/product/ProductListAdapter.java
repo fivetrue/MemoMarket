@@ -117,6 +117,9 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
+            Toast.makeText(view1.getContext()
+                    , String.format("%s %s", listItems[i], item.getName())
+                    , Toast.LENGTH_SHORT).show();
             switch (i){
                 case 0 :
                     RealmDB.get().executeTransaction(realm -> {
@@ -128,14 +131,10 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     RealmDB.get().executeTransaction(realm -> {
                         item.setCheckOut(true);
                         notifyItemRemoved(position);
-
                     });
                     break;
             }
             clearSelection();
-            Toast.makeText(view1.getContext()
-                    , String.format("%s %s", listItems[i], item.getName())
-                    , Toast.LENGTH_SHORT).show();
         });
         return popupWindow;
     }

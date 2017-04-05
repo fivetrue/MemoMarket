@@ -1,12 +1,13 @@
 package com.fivetrue.market.memo.ui.adapter.product;
 
-import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,9 +16,11 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
-import com.google.zxing.integration.android.IntentIntegrator;
+import com.fivetrue.market.memo.ui.adapter.store.StoreNameListAdapter;
 
 import java.util.List;
+
+import io.reactivex.Observable;
 
 /**
  * Created by kwonojin on 2017. 3. 30..
@@ -28,9 +31,9 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final String TAG = "CheckOutListAdapter";
 
     public interface OnClickCheckoutProductListener{
-        void onAcceptProduct(CheckOutViewHolder holder, Product product, int pos);
-        void onDeleteProduct(CheckOutViewHolder holder, Product product, int pos);
-        void onScanBarcode(CheckOutViewHolder holder, Product product, int pos);
+        void onAcceptProduct(CheckOutViewHolder holder, Product product);
+        void onDeleteProduct(CheckOutViewHolder holder, Product product);
+        void onScanBarcode(CheckOutViewHolder holder, Product product);
     }
 
     private List<Product> mProducts;
@@ -58,15 +61,38 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         Product p = getItem(position);
         viewHolder.setData(p);
         viewHolder.revert.setOnClickListener(v ->
-                mOnClickCheckoutProductListener.onDeleteProduct((CheckOutViewHolder) holder, p, position)
+                mOnClickCheckoutProductListener.onDeleteProduct((CheckOutViewHolder) holder, p)
         );
         viewHolder.scanBarcode.setOnClickListener(v ->
-                mOnClickCheckoutProductListener.onScanBarcode((CheckOutViewHolder) holder, p, position)
+                mOnClickCheckoutProductListener.onScanBarcode((CheckOutViewHolder) holder, p)
         );
 
         viewHolder.accept.setOnClickListener(view ->
-                mOnClickCheckoutProductListener.onAcceptProduct((CheckOutViewHolder) holder, p, position)
+                mOnClickCheckoutProductListener.onAcceptProduct((CheckOutViewHolder) holder, p)
         );
+
+        viewHolder.storeInput.setOnFocusChangeListener((view, b) -> {
+            if(b){
+                ((EditText)view).selectAll();
+                List<String> data = Observable.fromIterable(ProductDB.getInstance().getProducts())
+                        .filter(product -> !TextUtils.isEmpty(product.getStoreName()))
+                        .map(product -> product.getStoreName())
+                        .distinct()
+                        .toList().blockingGet();
+
+                StoreNameListAdapter adapter = new StoreNameListAdapter(view.getContext(), data);
+                ListPopupWindow popupWindow = new ListPopupWindow(view.getContext());
+                popupWindow.setAdapter(adapter);
+                popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
+                    popupWindow.dismiss();
+                    if(adapter != null && adapter.getItemCount() > i){
+                        viewHolder.storeInput.setText(adapter.getItem(i));
+                    }
+                });
+                popupWindow.setAnchorView(view);
+                popupWindow.show();
+            }
+        });
     }
 
     @Override
@@ -124,9 +150,11 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static final class CheckOutViewHolder extends RecyclerView.ViewHolder{
 
         private View view;
-        private ImageView mainImage;
-        private TextView productName;
-        private TextView barcode;
+        public ImageView mainImage;
+        public TextView productName;
+        public TextView barcode;
+        public EditText priceInput;
+        public EditText storeInput;
         private FloatingActionButton revert;
         private FloatingActionButton scanBarcode;
         private FloatingActionButton accept;
@@ -137,6 +165,8 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             mainImage = (ImageView) view.findViewById(R.id.iv_item_checkout_main);
             productName = (TextView) view.findViewById(R.id.tv_item_checkout_name);
             barcode = (TextView) view.findViewById(R.id.tv_item_checkout_barcode);
+            priceInput = (EditText) view.findViewById(R.id.et_item_checkout_price);
+            storeInput = (EditText) view.findViewById(R.id.et_item_checkout_store);
             revert = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_revert);
             scanBarcode = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_scan_barcode);
             accept = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_accept);
@@ -148,6 +178,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         .dontTransform().into(mainImage);
                 productName.setText(product.getName());
                 barcode.setText(product.getBarcode());
+                storeInput.setText(product.getStoreName());
             }
         }
     }

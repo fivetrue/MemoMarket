@@ -17,7 +17,9 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.utils.CommonUtils;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.reactivex.Observable;
 import io.reactivex.observables.GroupedObservable;
 
 
@@ -215,6 +218,8 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public final View layout;
         public final GridView images;
         public final TextView date;
+        public final TextView count;
+        public final TextView price;
         public final ImageView more;
 
         public TimelineHolder(View itemView) {
@@ -222,6 +227,8 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             layout = itemView.findViewById(R.id.layout_item_timeline_list_layout);
             images = (GridView) itemView.findViewById(R.id.gv_item_timeline_list_images);
             date = (TextView) itemView.findViewById(R.id.tv_item_timeline_list_date);
+            count = (TextView) itemView.findViewById(R.id.tv_item_timeline_list_count);
+            price = (TextView) itemView.findViewById(R.id.tv_item_timeline_list_price);
             more = (ImageView) itemView.findViewById(R.id.iv_item_timeline_list_more);
         }
 
@@ -229,7 +236,13 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             Locale locale = date.getContext().getResources().getConfiguration().locale;
             String formatted = DateFormat.getBestDateTimePattern(locale, "MM/dd/yyyy");
             SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-            date.setText(sdf.format(new Date(data.getKey())) + " ( " + products.size() + " )");
+            date.setText(sdf.format(new Date(data.getKey())));
+            count.setText("( " + products.size() + " )");
+            long value = 0;
+            for(Product p : products){
+                value += p.getPrice();
+            }
+            price.setText(CommonUtils.convertToCurrency(value));
             if(images.getAdapter() == null){
                 images.setAdapter(new ProductImageListAdapter(images.getContext()
                         , products));

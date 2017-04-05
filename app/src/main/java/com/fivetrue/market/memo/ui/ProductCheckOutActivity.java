@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
@@ -56,23 +57,43 @@ public class ProductCheckOutActivity extends BaseActivity{
                 .filter(product -> product.isCheckOut() && product.getCheckOutDate() == mCheckOutMillis)
                 .toList().blockingGet(), new CheckOutListAdapter.OnClickCheckoutProductListener() {
             @Override
-            public void onAcceptProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
-                FirebaseDB.getInstance(ProductCheckOutActivity.this)
-                        .addProduct(product).addOnCompleteListener(task -> {
-                    mAdapter.getData().remove(pos);
-                    mAdapter.notifyDataSetChanged();
-                    if(mAdapter.getItemCount() == 0){
-                        finish();
+            public void onAcceptProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
+                if(holder != null){
+                    String price = holder.priceInput.getText().toString();
+                    String store = holder.storeInput.getText().toString();
+                    String barcode = holder.barcode.getText().toString();
+                    if(!TextUtils.isEmpty(price)){
+                        try{
+                            long value = Long.parseLong(price.trim());
+                            ProductDB.get().executeTransaction(realm -> {
+                                product.setPrice(value);
+                                product.setStoreName(store);
+                                product.setBarcode(barcode);
+                                FirebaseDB.getInstance(ProductCheckOutActivity.this)
+                                        .addProduct(product).addOnCompleteListener(task -> {
+                                    mAdapter.getData().remove(holder.getAdapterPosition());
+                                    mAdapter.notifyItemRemoved(holder.getAdapterPosition());
+                                    if(mAdapter.getItemCount() == 0){
+                                        finish();
+                                    }
+                                });
+                            });
+                        }catch (Exception e){
+
+                        }
+                    }else{
+                        Toast.makeText(ProductCheckOutActivity.this, R.string.product_has_no_price, Toast.LENGTH_SHORT).show();
                     }
-                });
+
+                }
             }
 
             @Override
-            public void onDeleteProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
+            public void onDeleteProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
                 ProductDB.get().executeTransaction(realm -> {
                     product.setCheckOutDate(0);
-                    mAdapter.notifyItemRemoved(pos);
-                    mAdapter.notifyDataSetChanged();
+                    mAdapter.getData().remove(holder.getAdapterPosition());
+                    mAdapter.notifyItemRemoved(holder.getAdapterPosition());
                     if(mAdapter.getItemCount() == 0){
                         finish();
                     }
@@ -80,7 +101,7 @@ public class ProductCheckOutActivity extends BaseActivity{
             }
 
             @Override
-            public void onScanBarcode(CheckOutListAdapter.CheckOutViewHolder holder, Product product, int pos) {
+            public void onScanBarcode(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
                 mProductForBarcode = product;
                 IntentIntegrator integrator = new IntentIntegrator(ProductCheckOutActivity.this);
                 integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);

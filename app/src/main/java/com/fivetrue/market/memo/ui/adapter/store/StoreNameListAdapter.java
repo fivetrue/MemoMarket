@@ -1,7 +1,6 @@
 package com.fivetrue.market.memo.ui.adapter.store;
 
 import android.content.Context;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.dto.StoreData;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.List;
@@ -18,14 +16,14 @@ import java.util.List;
  * Created by kwonojin on 2017. 2. 26..
  */
 
-public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl<StoreData> {
+public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl<String> {
 
     private static final String TAG = "StoreNameListAdapter";
 
     private Context mContext;
-    private List<StoreData> mData;
+    private List<String> mData;
 
-    public StoreNameListAdapter(Context context, List<StoreData> list){
+    public StoreNameListAdapter(Context context, List<String> list){
         this.mContext = context;
         this.mData = list;
     }
@@ -43,7 +41,7 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         Holder holder = new Holder();
-        StoreData store = getItem(i);
+        String store = getItem(i);
         if(view == null){
             LayoutInflater inflater = LayoutInflater.from(mContext);
             view = inflater.inflate(R.layout.item_store_list_popup, null);
@@ -59,12 +57,12 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
             }
         }
 
-        holder.name.setText(store.name);
+        holder.name.setText(store);
         return view;
     }
 
     @Override
-    public StoreData getItem(int pos) {
+    public String getItem(int pos) {
         return mData.get(pos);
     }
 
@@ -74,17 +72,17 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
     }
 
     @Override
-    public List<StoreData> getData() {
+    public List<String> getData() {
         return mData;
     }
 
-    public void setData(List<StoreData> data){
+    public void setData(List<String> data){
         this.mData = data;
         notifyDataSetChanged();
     }
 
     @Override
-    public void add(StoreData data) {
+    public void add(String data) {
 
     }
 
@@ -114,9 +112,10 @@ public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl
     }
 
     @Override
-    public List<StoreData> getSelections() {
+    public List<String> getSelections() {
         return null;
     }
+
 
     private static class Holder{
         public TextView name;

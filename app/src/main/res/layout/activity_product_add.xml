@@ -2,7 +2,6 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_product_add_input"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/alphaBlack">
@@ -29,6 +28,7 @@
                 android:textSize="20dp"/>
 
             <LinearLayout
+                android:id="@+id/layout_product_add_input"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_below="@id/tv_fragment_product_add"
@@ -69,6 +69,23 @@
                     android:layout_gravity="center_vertical"
                     android:src="@drawable/selector_ok" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_product_input_barcode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="10dp"
+                android:textColor="@color/gray"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_product_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_scan_white_50dp"
+                android:layout_gravity="center"
+                app:fabSize="mini"
+                app:backgroundTint="@color/darkBlue"/>
 
             <ProgressBar
                 android:id="@+id/pb_product_add_done"

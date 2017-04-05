@@ -38,6 +38,7 @@
     <string name="error_network_message">Network error.</string>
 
     <string name="error_empty_product_name">Product is empty</string>
+    <string name="error_empty_product_barcode">There is no barcode.</string>
 
     <string name="delete_store_message">This store will be removed.</string>
     <string name="delete_product_message">Selected items will be removed.</string>

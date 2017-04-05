@@ -1,10 +1,13 @@
 package com.fivetrue.market.memo.database;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
+import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.dto.StoreData;
@@ -42,7 +45,7 @@ public class FirebaseDB {
 
     private static final String NODE_CONFIG = "config";
     private static final String NODE_MARKET = "market";
-    private static final String NODE_STORE = "store";
+//    private static final String NODE_STORE = "store";
     private static final String NODE_PRODUCT = "product";
 
     private PublishSubject<ConfigData> mConfigDataPublishSubject;
@@ -104,82 +107,45 @@ public class FirebaseDB {
         return observable;
     }
 
-    public Observable<StoreData> addStore(String name){
-        final StoreData data = new StoreData(name);
-        Observable<StoreData> observable = Observable.create(new ObservableOnSubscribe<StoreData>() {
-            @Override
-            public void subscribe(final ObservableEmitter<StoreData> ob) throws Exception {
-                FirebaseDatabase.getInstance().getReference(NODE_MARKET)
-                        .child(NODE_STORE)
-                        .push()
-                        .setValue(data.getValues())
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                ob.onNext(data);
-                                ob.onComplete();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        ob.onError(e);
-                        ob.onComplete();
+    public Observable<ProductData> findSkuID(String sku){
+        return Observable.create(e -> {
+            FirebaseDatabase.getInstance().getReference(NODE_MARKET)
+                    .child(NODE_PRODUCT).orderByChild("skuId").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(LL.D)
+                        Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
+                    if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
+                        List<ProductData> dataList = Observable.fromIterable(dataSnapshot.getChildren())
+                                .map(data -> data.getValue(ProductData.class))
+                                .filter(productData -> !TextUtils.isEmpty(productData.skuId) && productData.skuId.equalsIgnoreCase(sku))
+                                .toList().blockingGet();
+                        if(dataList != null && dataList.size() > 0){
+                            e.onNext(dataList.get(0));
+                            e.onComplete();
+                        }else{
+                            e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
+                        }
+                    }else{
+                        e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
                     }
-                });
-            }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    if(LL.D)
+                        Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
+                    e.onError(databaseError.toException());
+                }
+            });
         });
-        return observable;
     }
+
 
     public Task<Void> addProduct(Product product){
         ProductData data = new ProductData(product);
         return FirebaseDatabase.getInstance().getReference(NODE_MARKET).child(NODE_PRODUCT).push().setValue(data.getValues());
 
-    }
-
-    public Observable<List<StoreData>> findStoreContain(final String text){
-        String key = "findStoreContain:"+text;
-        Observable<List<StoreData>> storeObs = sObservableMap.get(key);
-        if(storeObs == null){
-            storeObs = Observable.create(new ObservableOnSubscribe<List<StoreData>>() {
-
-                private List<StoreData> storeDataList;
-
-                @Override
-                public void subscribe(final ObservableEmitter<List<StoreData>> e) throws Exception {
-                    if(storeDataList == null){
-                        FirebaseDatabase.getInstance().getReference(NODE_MARKET)
-                                .child(NODE_STORE).orderByChild("name").startAt(text).endAt(text +  "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(LL.D) Log.d(TAG, "onDataChange: check count for adding : " + dataSnapshot.getChildrenCount());
-                                storeDataList = new ArrayList<StoreData>();
-                                if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
-
-                                    for(DataSnapshot d : dataSnapshot.getChildren()){
-                                        storeDataList.add(d.getValue(StoreData.class));
-                                    }
-                                }
-                                e.onNext(storeDataList);
-                                e.onComplete();
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                if(LL.D)
-                                    Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
-                                e.onError(databaseError.toException());
-                            }
-                        });
-                    }else{
-                        e.onNext(storeDataList);
-                        e.onComplete();
-                    }
-                }
-            });
-            sObservableMap.put(key, storeObs);
-        }
-        return storeObs;
     }
 
     public Observable<List<ProductData>> findProductContain(final String text){
@@ -198,12 +164,9 @@ public class FirebaseDB {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if(LL.D) Log.d(TAG, "onDataChange: check count for adding : " + dataSnapshot.getChildrenCount());
-                                storeDataList = new ArrayList<ProductData>();
-                                if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
-                                    for(DataSnapshot d : dataSnapshot.getChildren()){
-                                        storeDataList.add(d.getValue(ProductData.class));
-                                    }
-                                }
+                                storeDataList = Observable.fromIterable(dataSnapshot.getChildren())
+                                        .map(data -> data.getValue(ProductData.class))
+                                        .toList().blockingGet();
                                 e.onNext(storeDataList);
                                 e.onComplete();
                             }

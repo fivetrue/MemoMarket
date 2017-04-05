@@ -63,6 +63,8 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         viewHolder.revert.setOnClickListener(v ->
                 mOnClickCheckoutProductListener.onDeleteProduct((CheckOutViewHolder) holder, p)
         );
+
+        viewHolder.scanBarcode.setVisibility(TextUtils.isEmpty(p.getBarcode()) ? View.VISIBLE : View.GONE);
         viewHolder.scanBarcode.setOnClickListener(v ->
                 mOnClickCheckoutProductListener.onScanBarcode((CheckOutViewHolder) holder, p)
         );
@@ -178,6 +180,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         .dontTransform().into(mainImage);
                 productName.setText(product.getName());
                 barcode.setText(product.getBarcode());
+                priceInput.setText(product.getPrice() + "");
                 storeInput.setText(product.getStoreName());
             }
         }

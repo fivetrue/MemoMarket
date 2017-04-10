@@ -44,6 +44,8 @@
 
     <string name="store_product_count">%d products in</string>
 
+    <string name="error_input_product_name">Please input product name</string>
+
     <string name="error_exist_store_name">This store is already exist.</string>
     <string name="error_empty_store_name">Store name is not input.</string>
     <string name="error_network_message">Network error.</string>

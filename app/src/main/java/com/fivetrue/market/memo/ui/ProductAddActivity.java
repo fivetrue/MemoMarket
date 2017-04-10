@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -55,7 +56,6 @@ public class ProductAddActivity extends BaseActivity{
     private View mLayoutInput;
     private ProgressBar mProgressRetrieving;
     private EditText mInput;
-    private View mInputOk;
 
     private TextView mBarcode;
 
@@ -89,7 +89,6 @@ public class ProductAddActivity extends BaseActivity{
         mLayoutInput = findViewById(R.id.layout_product_add_input);
         mProgressRetrieving = (ProgressBar) findViewById(R.id.pb_product_add_retrieving);
         mInput = (EditText) findViewById(R.id.et_product_add);
-        mInputOk = findViewById(R.id.iv_product_input_ok);
 
         mBarcode = (TextView) findViewById(R.id.tv_product_input_barcode);
 
@@ -107,13 +106,16 @@ public class ProductAddActivity extends BaseActivity{
             return false;
         });
         mInput.setOnClickListener(view -> mInput.selectAll());
-
-        mInputOk.setEnabled(false);
-        mInputOk.setOnClickListener(view -> setInputText(mInput.getText().toString().trim()));
-
         mInput.addTextChangedListener(mDataFinder);
 
-        mFabOk.setOnClickListener(view -> findImage());
+        mFabOk.setOnClickListener(view ->{
+            if(mInput.getText().length() > 0){
+                setInputText(mInput.getText().toString().trim());
+                findImage();
+            }else{
+                Snackbar.make(mLayoutInput, R.string.error_input_product_name, Snackbar.LENGTH_SHORT).show();
+            }
+        });
         mFabScan.setOnClickListener(view -> scan());
 
         ((TextView)findViewById(R.id.tv_fragment_product_add)).setTypeface(CommonUtils.getFont(this, "font/Magra.ttf"));
@@ -269,30 +271,22 @@ public class ProductAddActivity extends BaseActivity{
         @Override
         public void afterTextChanged(Editable editable) {
             if(LL.D) Log.d(TAG, "afterTextChanged() called with: editable = [" + editable + "]");
-            if(mInputOk != null){
-                final String text = editable.toString().trim();
-                if(TextUtils.isEmpty(text)){
-                    if(mFabOk.isShown()){
-                        SimpleViewUtils.showView(mFabOk, View.INVISIBLE);
+            final String text = editable.toString().trim();
+            if(TextUtils.isEmpty(text)){
+                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primaryRed)));
+            }else{
+                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primaryGreen)));
+            }
+            if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
+                mProgressRetrieving.setVisibility(View.VISIBLE);
+                DataManager.getInstance(ProductAddActivity.this).findProductName(text).subscribe(new Consumer<List<ProductData>>() {
+                    @Override
+                    public void accept(List<ProductData> storeDatas) throws Exception {
+                        setRetrievedProductList(storeDatas);
                     }
-                    mInputOk.setEnabled(false);
-                }else{
-                    if(!mFabOk.isShown()){
-                        SimpleViewUtils.showView(mFabOk, View.VISIBLE);
-                    }
-                    mInputOk.setEnabled(true);
-                }
-                if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
-                    mProgressRetrieving.setVisibility(View.VISIBLE);
-                    DataManager.getInstance(ProductAddActivity.this).findProductName(text).subscribe(new Consumer<List<ProductData>>() {
-                        @Override
-                        public void accept(List<ProductData> storeDatas) throws Exception {
-                            setRetrievedProductList(storeDatas);
-                        }
-                    });
-                }else{
-                    selectedName = null;
-                }
+                });
+            }else{
+                selectedName = null;
             }
         }
     }

@@ -51,7 +51,7 @@
                     android:id="@+id/et_product_add"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="7"
+                    android:layout_weight="7.5"
                     android:layout_gravity="center_vertical"
                     android:hint="@string/hint_input_product_name"
                     android:textColor="@color/darkGray"
@@ -60,14 +60,16 @@
                     android:imeOptions="actionDone"
                     android:background="@null"/>
 
-                <ImageView
-                    android:id="@+id/iv_product_input_ok"
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab_product_scan"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:padding="5dp"
+                    android:layout_weight="1"
+                    android:layout_margin="3dp"
+                    android:src="@drawable/ic_scan_white_50dp"
                     android:layout_gravity="center_vertical"
-                    android:src="@drawable/selector_ok" />
+                    app:fabSize="mini"
+                    app:backgroundTint="@color/darkBlue"/>
             </LinearLayout>
 
             <TextView
@@ -77,15 +79,6 @@
                 android:layout_gravity="center"
                 android:textSize="10dp"
                 android:textColor="@color/gray"/>
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_product_scan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_scan_white_50dp"
-                android:layout_gravity="center"
-                app:fabSize="mini"
-                app:backgroundTint="@color/darkBlue"/>
 
             <ProgressBar
                 android:id="@+id/pb_product_add_done"
@@ -102,7 +95,6 @@
         android:layout_width="@dimen/fab_size"
         android:layout_height="@dimen/fab_size"
         android:src="@drawable/ic_check_white_50dp"
-        android:visibility="invisible"
         app:layout_anchor="@id/pb_product_add_done"
         app:layout_anchorGravity="center"
         app:backgroundTint="@color/colorPrimary"/>

@@ -180,7 +180,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         .dontTransform().into(mainImage);
                 productName.setText(product.getName());
                 barcode.setText(product.getBarcode());
-                priceInput.setText(product.getPrice() + "");
+                priceInput.setText(product.getPrice() > 0 ? product.getPrice() + "" : "");
                 storeInput.setText(product.getStoreName());
             }
         }

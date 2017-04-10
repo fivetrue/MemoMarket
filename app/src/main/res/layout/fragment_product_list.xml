@@ -16,4 +16,13 @@
         android:layout_gravity="center"
         android:text="@string/no_item"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_fragment_product_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:src="@drawable/ic_cart_checkout_white_50dp"
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal|bottom"/>
+
 </android.support.design.widget.CoordinatorLayout>

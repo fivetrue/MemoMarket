@@ -40,6 +40,7 @@ android {
         versionName BASE_VERSION + "." + VERSION_TYPE
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField(LONG, BUILD_DATE, String.valueOf(System.currentTimeMillis()) + "L")
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -76,6 +77,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:multidex:1.0.0'
+
     /**
      * Google Firebase
      */
@@ -108,6 +111,7 @@ dependencies {
      */
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'io.reactivex.rxjava2:rxjava:2.0.1'
+    compile "com.github.akarnokd:rxjava2-extensions:0.16.3"
 
     /**
      * ImageLoader
@@ -118,6 +122,12 @@ dependencies {
      * ZXing
      */
     compile 'com.journeyapps:zxing-android-embedded:3.4.0'
+
+    /**
+     * Open CVS
+     */
+    compile 'com.opencsv:opencsv:3.9'
+    compile 'org.apache.poi:poi:3.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

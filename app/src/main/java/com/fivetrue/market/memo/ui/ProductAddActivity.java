@@ -48,11 +48,9 @@ import io.realm.Realm;
  * Created by kwonojin on 2017. 3. 5..
  */
 
-public class ProductAddActivity extends BaseActivity implements AdapterView.OnItemClickListener{
+public class ProductAddActivity extends BaseActivity{
 
     private static final String TAG = "ProductAddActivity";
-
-    private View mContainer;
 
     private View mLayoutInput;
     private ProgressBar mProgressRetrieving;
@@ -88,8 +86,6 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
     }
 
     private void initView(){
-        mContainer = findViewById(R.id.layout_product_add);
-
         mLayoutInput = findViewById(R.id.layout_product_add_input);
         mProgressRetrieving = (ProgressBar) findViewById(R.id.pb_product_add_retrieving);
         mInput = (EditText) findViewById(R.id.et_product_add);
@@ -123,12 +119,21 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
         ((TextView)findViewById(R.id.tv_fragment_product_add)).setTypeface(CommonUtils.getFont(this, "font/Magra.ttf"));
     }
 
+    /**
+     * Setting ProductData after When retrieving data from firebase.
+     * @param data
+     */
     private void setProductData(ProductData data){
         mSelectedProductData = data;
         mInput.setText(data.name);
+        mBarcode.setText(data.skuId);
         setInputText(data.name);
     }
 
+    /**
+     * Setting barcode sku after getting sku from Barcode scanner.
+     * @param barcode
+     */
     private void setBarcode(String barcode){
         mScanBarcode = barcode;
         mBarcode.setText(barcode);
@@ -140,6 +145,7 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
                     Snackbar.make(mLayoutInput, throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
                 });
     }
+
 
     private void setInputText(String text){
         if(LL.D) Log.d(TAG, "setInputText() called with: text = [" + text + "]");
@@ -215,19 +221,25 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
     private void setRetrievedProductList(List<ProductData> data){
         mProgressRetrieving.setVisibility(View.INVISIBLE);
         if(data != null && data.size() > 0){
+            if(mPopup == null){
+                mPopup = new ListPopupWindow(this);
+                mPopup.setAnchorView(mLayoutInput);
+            }
+
             if(mProductNameListAdapter == null){
                 mProductNameListAdapter = new ProductNameListAdapter(this, data);
+                mPopup.setAdapter(mProductNameListAdapter);
             }else{
                 mProductNameListAdapter.setData(data);
             }
 
-            if(mPopup == null){
-                mPopup = new ListPopupWindow(this);
-            }
-
-            mPopup.setAdapter(mProductNameListAdapter);
-            mPopup.setOnItemClickListener(this);
-            mPopup.setAnchorView(mLayoutInput);
+            mPopup.setOnItemClickListener((adapterView, view, i, l) -> {
+                if(mProductNameListAdapter != null && mProductNameListAdapter.getItemCount() > i){
+                    ProductData product = mProductNameListAdapter.getItem(i);
+                    if(LL.D) Log.d(TAG, "onItemClick: product = " + product.name);
+                    setProductData(product);
+                }
+            });
 
             if(!mPopup.isShowing()){
                 mPopup.show();
@@ -238,16 +250,6 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
             }
         }
     }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        if(mProductNameListAdapter != null && mProductNameListAdapter.getItemCount() > i){
-            ProductData product = mProductNameListAdapter.getItem(i);
-            if(LL.D) Log.d(TAG, "onItemClick: product = " + product.name);
-            setProductData(product);
-        }
-    }
-
 
     private class FirebaseDataFinder implements TextWatcher {
 
@@ -270,10 +272,14 @@ public class ProductAddActivity extends BaseActivity implements AdapterView.OnIt
             if(mInputOk != null){
                 final String text = editable.toString().trim();
                 if(TextUtils.isEmpty(text)){
-                    SimpleViewUtils.showView(mFabOk, View.INVISIBLE);
+                    if(mFabOk.isShown()){
+                        SimpleViewUtils.showView(mFabOk, View.INVISIBLE);
+                    }
                     mInputOk.setEnabled(false);
                 }else{
-                    SimpleViewUtils.showView(mFabOk, View.VISIBLE);
+                    if(!mFabOk.isShown()){
+                        SimpleViewUtils.showView(mFabOk, View.VISIBLE);
+                    }
                     mInputOk.setEnabled(true);
                 }
                 if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){

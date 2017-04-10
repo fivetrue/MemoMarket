@@ -1,9 +1,12 @@
 package com.fivetrue.market.memo.ui.adapter.product;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -13,21 +16,22 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
+import com.fivetrue.market.memo.utils.MediaScannerUtil;
 
-import java.text.NumberFormat;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import io.reactivex.Observable;
 import io.reactivex.observables.GroupedObservable;
 
 
@@ -35,18 +39,20 @@ import io.reactivex.observables.GroupedObservable;
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<GroupedObservable<Long, Product>> {
+public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<GroupedObservable<String, Product>> {
 
-    private static final String TAG = "TimelineListAdapter";
+    private static final String TAG = "PurchaseListAdapter";
 
     public static final int PRODUCT = 0x01;
     public static final int FOOTER = 0x02;
 
-    private SparseBooleanArray mSelectedItems;
-    private List<GroupedObservable<Long, Product>> mData;
-    private Map<GroupedObservable<Long, Product> , List<Product>> mDataMap = new HashMap<>();
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
 
-    public TimelineListAdapter(List<GroupedObservable<Long, Product>> data){
+    private SparseBooleanArray mSelectedItems;
+    private List<GroupedObservable<String, Product>> mData;
+    private Map<GroupedObservable<String, Product> , List<Product>> mDataMap = new HashMap<>();
+
+    public PurchaseListAdapter(List<GroupedObservable<String, Product>> data){
         this.mData = data;
         mSelectedItems = new SparseBooleanArray();
     }
@@ -57,11 +63,11 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if(viewType == FOOTER){
             View view = inflater.inflate(R.layout.item_product_list_footer, null);
-            RecyclerView.ViewHolder holder = new TimelineListAdapter.ProductFooter(view);
+            RecyclerView.ViewHolder holder = new TimelineFooterHolder(view);
             return holder;
         }else{
             View view = inflater.inflate(R.layout.item_timeline_list_item, null);
-            RecyclerView.ViewHolder holder = new TimelineListAdapter.TimelineHolder(view);
+            RecyclerView.ViewHolder holder = new PurchaseListAdapter.TimelineHolder(view);
             return holder;
         }
     }
@@ -72,16 +78,16 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if(getItemViewType(position) == FOOTER){
 
         }else{
-            onBindProductHolder((TimelineListAdapter.TimelineHolder) holder, position);
+            onBindProductHolder((PurchaseListAdapter.TimelineHolder) holder, position);
         }
     }
 
-    private void onBindFooterHolder(TimelineListAdapter.ProductFooter holder, int position){
+    private void onBindFooterHolder(TimelineFooterHolder holder, int position){
 
     }
 
-    private void onBindProductHolder(final TimelineListAdapter.TimelineHolder holder, final int position){
-        final GroupedObservable<Long, Product> item = getItem(position);
+    private void onBindProductHolder(final PurchaseListAdapter.TimelineHolder holder, final int position){
+        final GroupedObservable<String, Product> item = getItem(position);
         if(holder != null && item != null){
             List<Product> products = mDataMap.get(item);
             if(products == null){
@@ -103,7 +109,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    protected void showPopup(Context context, View view, GroupedObservable<Long, Product> item, int position){
+    protected void showPopup(Context context, View view, GroupedObservable<String, Product> item, int position){
         ListPopupWindow popupWindow = makePopup(context, item, position);
         popupWindow.setContentWidth((int) (((View) view.getParent()).getWidth() * 0.7));
         popupWindow.setAnchorView(view);
@@ -111,15 +117,64 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         popupWindow.show();
     }
 
-    protected ListPopupWindow makePopup(Context context, GroupedObservable<Long, Product> item, int position){
+    protected ListPopupWindow makePopup(Context context, GroupedObservable<String, Product> item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.delete)
-                , context.getString(R.string.checkout)};
+                , context.getString(R.string.export)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
+            switch (i){
+                case 0 :
+                    //TODO : delete
+                    break;
+
+                case 1 :
+                    //TODO : export
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.export)
+                            .setMessage(R.string.export)
+                            .setPositiveButton("Excel", (dialogInterface, i1) -> {
+                                try {
+                                    String filepath = ExportUtil.writeProductToExcelInExternalStorage(context
+                                            , SDF.format(new Date(System.currentTimeMillis()))
+                                            , mDataMap.get(item));
+                                    shareFile(context, filepath, item.getKey());
+                                } catch (ExportUtil.ExportException e) {
+                                    Toast.makeText(context, "Export failure", Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG, "makePopup: ", e);
+                                }
+                                dialogInterface.dismiss();
+
+                            }).setNegativeButton("CSV", (dialogInterface, i1) -> {
+                                 try {
+                                   String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
+                                    , SDF.format(new Date(System.currentTimeMillis()))
+                                    , mDataMap.get(item));
+                                    shareFile(context, filepath, item.getKey());
+                                 } catch (ExportUtil.ExportException e) {
+                                  Toast.makeText(context, "Export failure", Toast.LENGTH_SHORT).show();
+                                  Log.e(TAG, "makePopup: ", e);
+                                 }
+                                 dialogInterface.dismiss();
+                            }).setNeutralButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
+                            .show();
+                    break;
+            }
         });
         return popupWindow;
+    }
+
+    private void shareFile(Context context, String subject, String filePath){
+        MediaScannerUtil.getInstance(context).mediaScanning(filePath)
+                .subscribe(scanData -> {
+                    Log.d(TAG, "makePopup: scan data" + scanData);
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(scanData.path)));
+                    intent.setType("text/*");
+                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.export)));
+                });
     }
 
 
@@ -132,7 +187,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public GroupedObservable<Long, Product> getItem(int pos) {
+    public GroupedObservable<String, Product> getItem(int pos) {
         if(mData.size() > pos){
             return mData.get(pos);
         }
@@ -155,18 +210,18 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public List<GroupedObservable<Long, Product>> getData() {
+    public List<GroupedObservable<String, Product>> getData() {
         return mData;
     }
 
     @Override
-    public void setData(List<GroupedObservable<Long, Product>> data) {
+    public void setData(List<GroupedObservable<String, Product>> data) {
         mData = data;
         notifyDataSetChanged();
     }
 
     @Override
-    public void add(GroupedObservable<Long, Product> data) {
+    public void add(GroupedObservable<String, Product> data) {
         mData.add(data);
         notifyItemInserted(mData.size());
     }
@@ -183,6 +238,9 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public boolean isSelect(int pos) {
+        if(getItemViewType(pos) == FOOTER){
+            return false;
+        }
         return mSelectedItems.get(pos);
     }
 
@@ -209,7 +267,7 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
-    public List<GroupedObservable<Long, Product>> getSelections() {
+    public List<GroupedObservable<String, Product>> getSelections() {
         return null;
     }
 
@@ -232,28 +290,21 @@ public class TimelineListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             more = (ImageView) itemView.findViewById(R.id.iv_item_timeline_list_more);
         }
 
-        public void setData(GroupedObservable<Long, Product> data, List<Product> products){
-            Locale locale = date.getContext().getResources().getConfiguration().locale;
-            String formatted = DateFormat.getBestDateTimePattern(locale, "MM/dd/yyyy");
-            SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-            date.setText(sdf.format(new Date(data.getKey())));
+        public void setData(GroupedObservable<String, Product> data, List<Product> products){
+            date.setText(data.getKey());
             count.setText("( " + products.size() + " )");
             long value = 0;
             for(Product p : products){
                 value += p.getPrice();
             }
             price.setText(CommonUtils.convertToCurrency(value));
-            if(images.getAdapter() == null){
-                images.setAdapter(new ProductImageListAdapter(images.getContext()
-                        , products));
-            }else{
-                ((ProductImageListAdapter)images.getAdapter()).setData(products);
-            }
+            images.setAdapter(new ProductImageListAdapter(images.getContext()
+                    , products));
         }
     }
 
-    public static final class ProductFooter extends RecyclerView.ViewHolder{
-        public ProductFooter(View itemView) {
+    public static final class TimelineFooterHolder extends RecyclerView.ViewHolder{
+        public TimelineFooterHolder(View itemView) {
             super(itemView);
         }
     }

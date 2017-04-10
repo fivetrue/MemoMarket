@@ -1,20 +1,14 @@
 package com.fivetrue.market.memo.ui;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
@@ -23,16 +17,12 @@ import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
-import com.fivetrue.market.memo.ui.fragment.TimelineFragment;
+import com.fivetrue.market.memo.ui.fragment.PurchaseListFragment;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.BottomNavigationBehavior;
 import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
 
 import java.util.ArrayList;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 
 public class MainActivity extends BaseActivity{
@@ -46,13 +36,7 @@ public class MainActivity extends BaseActivity{
     private PagerSlidingTabStrip mTab;
     private ViewPager mViewPager;
 
-    private FloatingActionButton mFabProduct;
-    private FloatingActionButton mFabCheckout;
-
     private MainPagerAdapter mAdapter;
-
-    private Disposable mProductDisposable;
-    private Disposable mCheckOutDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +49,6 @@ public class MainActivity extends BaseActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mProductDisposable.isDisposed()){
-            mProductDisposable.dispose();
-        }
-        if(mCheckOutDisposable.isDisposed()){
-            mCheckOutDisposable.dispose();
-        }
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
     }
 
@@ -78,61 +56,11 @@ public class MainActivity extends BaseActivity{
         getSupportFragmentManager().addOnBackStackChangedListener(this);
 
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
-        fragmentSets.add(new MainPagerAdapter.FragmentSet(TimelineFragment.class, TimelineFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
-        for(int i = 0 ; i < mAdapter.getRealCount() ; i ++){
-            Fragment f = mAdapter.getItem(i);
-            if(f != null){
-             if(f instanceof CheckOutProductFragment){
-                 mCheckOutDisposable = ((CheckOutProductFragment) f).getObservable()
-                         .observeOn(AndroidSchedulers.mainThread())
-                         .map(products -> products.size() > 0)
-                         .subscribe(hasSelection -> updateCheckoutButton(hasSelection));
-             }else if(f instanceof ProductListFragment){
-                 mProductDisposable = ((ProductListFragment) f).getObservable()
-                         .observeOn(AndroidSchedulers.mainThread())
-                         .map(products -> products.size() > 0)
-                         .subscribe(hasSelection -> updateProductButton(hasSelection));
-             }
-            }
-        }
     }
-
-    private void updateProductButton(final boolean hasSelection){
-        if(mFabProduct.getTag() == null
-                || mFabProduct.getTag() instanceof Boolean && ((Boolean) mFabProduct.getTag()) != hasSelection){
-            AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(this,
-                    hasSelection ? R.animator.card_flip_left : R.animator.card_flip_right);
-            set.setTarget(mFabProduct);
-            set.start();
-            mFabProduct.postDelayed(() -> {
-                if(hasSelection){
-                    mFabProduct.setImageResource(R.drawable.ic_cart_loaded_white_50dp);
-                    mFabProduct.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-                }else{
-                    mFabProduct.setImageResource(R.drawable.ic_add_white_20dp);
-                    mFabProduct.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                }
-            }, getResources().getInteger(R.integer.card_flip_time_half));
-        }
-        mFabProduct.setTag(hasSelection);
-    }
-
-    private void updateCheckoutButton(final boolean hasSelection){
-        if(hasSelection){
-            if(!mFabCheckout.isShown()){
-                SimpleViewUtils.showView(mFabCheckout, View.VISIBLE);
-            }
-        }else{
-            if(mFabCheckout.isShown()){
-                SimpleViewUtils.hideView(mFabCheckout, View.GONE);
-            }
-        }
-        mFabCheckout.setTag(hasSelection);
-    }
-
 
     private void initView(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -144,8 +72,6 @@ public class MainActivity extends BaseActivity{
         mTitle.setText(R.string.app_name);
         mTab = (PagerSlidingTabStrip) findViewById(R.id.tab_main);
         mViewPager = (ViewPager) findViewById(R.id.vp_main);
-        mFabProduct = (FloatingActionButton) findViewById(R.id.fab_main_product);
-        mFabCheckout = (FloatingActionButton) findViewById(R.id.fab_main_checkout);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
@@ -156,33 +82,7 @@ public class MainActivity extends BaseActivity{
 
             @Override
             public void onPageSelected(int position) {
-                if(mAdapter != null && mAdapter.getRealCount() > position){
-                    if(mAdapter.getItem(position) instanceof Fragment){
-                        Fragment f = mAdapter.getItem(position);
-                        if(f instanceof ProductListFragment){
-                            if(f instanceof CheckOutProductFragment){
-                                if(mFabCheckout.getTag() != null
-                                        && mFabCheckout.getTag() instanceof Boolean
-                                        && (Boolean) mFabCheckout.getTag()){
-                                    SimpleViewUtils.showView(
-                                            mFabCheckout, View.VISIBLE);
-                                }else{
-                                    SimpleViewUtils.hideView(
-                                            mFabCheckout, View.GONE);
-                                }
-                                SimpleViewUtils.hideView(mFabProduct, View.GONE);
-                            }else{
-                                SimpleViewUtils.showView(mFabProduct, View.VISIBLE);
-                                SimpleViewUtils.hideView(mFabCheckout, View.GONE);
-                            }
 
-                        }else{
-                            SimpleViewUtils.hideView(mFabCheckout, View.GONE);
-                            SimpleViewUtils.hideView(mFabProduct, View.GONE);
-                        }
-
-                    }
-                }
             }
 
             @Override
@@ -190,37 +90,37 @@ public class MainActivity extends BaseActivity{
             }
         });
 
-        mFabProduct.setOnClickListener(view -> {
-            if(mAdapter != null && mViewPager != null){
-                if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
-                    Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
-                    if(f != null
-                            && f instanceof ProductListFragment
-                            && ((ProductListFragment) f).getAdapter().getSelections().size() > 0){
-                        ((ProductListFragment) f).doProducts(findViewById(R.id.layout_main));
-                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-                        return;
-                    }
-                }
-            }
-            startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
-        });
-
-        mFabCheckout.setOnClickListener(view -> {
-            if(view.isShown()){
-                if(mAdapter != null && mViewPager != null){
-                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
-                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
-                        if(f != null
-                                && f instanceof CheckOutProductFragment
-                                && ((CheckOutProductFragment) f).getAdapter().getSelections().size() > 0){
-                            ((CheckOutProductFragment) f).doProducts(findViewById(R.id.layout_main));
-                            return;
-                        }
-                    }
-                }
-            }
-        });
+//        mFabProduct.setOnClickListener(view -> {
+//            if(mAdapter != null && mViewPager != null){
+//                if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+//                    Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+//                    if(f != null
+//                            && f instanceof ProductListFragment
+//                            && ((ProductListFragment) f).getAdapter().getSelections().size() > 0){
+//                        ((ProductListFragment) f).doProducts(findViewById(R.id.layout_main));
+//                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+//                        return;
+//                    }
+//                }
+//            }
+//            startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
+//        });
+//
+//        mFabCheckout.setOnClickListener(view -> {
+//            if(view.isShown()){
+//                if(mAdapter != null && mViewPager != null){
+//                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
+//                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
+//                        if(f != null
+//                                && f instanceof CheckOutProductFragment
+//                                && ((CheckOutProductFragment) f).getAdapter().getSelections().size() > 0){
+//                            ((CheckOutProductFragment) f).doProducts(findViewById(R.id.layout_main));
+//                            return;
+//                        }
+//                    }
+//                }
+//            }
+//        });
 
         mViewPager.setAdapter(mAdapter);
         mTab.setViewPager(mViewPager);
@@ -235,6 +135,18 @@ public class MainActivity extends BaseActivity{
             if(behavior != null && behavior instanceof BottomNavigationBehavior){
                 ((BottomNavigationBehavior) behavior).setLayoutDependsOn(false);
             }
+        }
+    }
+
+    public void movePageToRight(){
+        if(mViewPager != null && mViewPager.getChildCount() - 1 >  mViewPager.getCurrentItem()){
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
+        }
+    }
+
+    public void movePageToLeft(){
+        if(mViewPager != null && mViewPager.getCurrentItem() > 0){
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
         }
     }
 

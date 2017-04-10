@@ -16,8 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:theme="@style/AppTheme.Toolbar"
-            app:titleEnabled="false"
-            app:layout_scrollFlags="enterAlways|enterAlwaysCollapsed|exitUntilCollapsed|scroll|snap">
+            app:titleEnabled="false">
 
             <com.fivetrue.market.memo.view.PagerSlidingTabStrip
                 android:id="@+id/tab_main"
@@ -70,22 +69,4 @@
             android:background="@drawable/common_shadow" />
     </RelativeLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_main_product"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="25dp"
-        android:src="@drawable/ic_add_white_20dp"
-        android:visibility="invisible"
-        android:layout_gravity="center_horizontal|bottom"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_main_checkout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="25dp"
-        android:src="@drawable/ic_cart_checkout_white_50dp"
-        android:visibility="invisible"
-        android:layout_gravity="center_horizontal|bottom"
-        app:backgroundTint="@color/colorPrimaryDark"/>
 </android.support.design.widget.CoordinatorLayout>

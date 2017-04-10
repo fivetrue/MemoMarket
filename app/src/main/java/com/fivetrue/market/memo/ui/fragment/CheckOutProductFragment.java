@@ -8,6 +8,7 @@ import android.view.View;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.product.CheckOutProductListAdapter;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
@@ -32,29 +33,25 @@ public class CheckOutProductFragment extends ProductListFragment{
     }
 
     @Override
-    public void doProducts(View snackbarAnchor) {
+    public void onClickActionButton() {
         if(getAdapter() != null && getActivity() != null){
-            ProductDB.get().executeTransaction(realm -> {
-                long currentMs = System.currentTimeMillis();
-                List<Product> products = getAdapter().getSelections();
-                for(Product p : products){
-                    p.setCheckOutDate(currentMs);
-                }
-                Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), products, currentMs);
-                getActivity().startActivity(intent);
-                getAdapter().clearSelection();
-                publish();
-            });
+            Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), getAdapter().getSelections());
+            getActivity().startActivity(intent);
+            getAdapter().clearSelection();
+            updateFab();
+            if(getActivity() != null && getActivity() instanceof MainActivity){
+                ((MainActivity) getActivity()).movePageToRight();
+            }
         }
     }
 
     @Override
     protected ProductListAdapter makeAdapter(List<Product> productList) {
-        return new CheckOutProductListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
+        ProductListAdapter adapter =  new CheckOutProductListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
             @Override
             public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
                 getAdapter().toggle(holder.getAdapterPosition());
-                publish();
+                updateFab();
             }
 
             @Override
@@ -62,6 +59,8 @@ public class CheckOutProductFragment extends ProductListFragment{
                 return false;
             }
         });
+        adapter.showAddButton(false);
+        return adapter;
     }
 
     @Override
@@ -87,5 +86,15 @@ public class CheckOutProductFragment extends ProductListFragment{
     @Override
     public TabIcon getIconState() {
         return TabIcon.TextWithIcon;
+    }
+
+    @Override
+    protected int getFabIconResource() {
+        return R.drawable.ic_cart_checkout_white_50dp;
+    }
+
+    @Override
+    protected int getFabTintColor() {
+        return R.color.colorPrimaryDark;
     }
 }

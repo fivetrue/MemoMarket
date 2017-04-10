@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_fragment_product_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -16,4 +17,28 @@
         android:layout_gravity="center"
         android:text="@string/no_item"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        app:elevation="8dp">
+        <Spinner
+            android:id="@+id/sp_fragment_timeline"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        </Spinner>
+        <TextView
+            android:id="@+id/tv_fragment_timeline_total"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:textSize="15dp"
+            android:gravity="right|center_vertical"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

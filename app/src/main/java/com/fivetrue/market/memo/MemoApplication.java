@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo;
 
 import android.app.Application;
+import android.support.multidex.MultiDex;
 
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.utils.DataManager;
@@ -17,6 +18,7 @@ public class MemoApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        MultiDex.install(this);
         RealmDB.init(this);
         DataManager.getInstance(this);
     }

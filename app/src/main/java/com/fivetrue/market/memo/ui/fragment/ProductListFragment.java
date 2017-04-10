@@ -1,9 +1,11 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,16 +21,16 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
+import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.subjects.PublishSubject;
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 
 /**
@@ -41,22 +43,20 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     private RecyclerView mRecyclerProduct;
     private ProductListAdapter mProductListAdapter;
-
     private TextView mTextMessage;
+    private FloatingActionButton mFabAction;
 
     private GridLayoutManager mLayoutManager;
 
     private Disposable mProductDisposable;
-
-    private PublishSubject<List<Product>> mProductSelectedPublishSubject = PublishSubject.create();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mProductDisposable = ProductDB.getInstance().getObservable()
                 .map(products ->
-                    Observable.fromIterable(products)
-                            .filter(product -> makeFilter(product)).toList().blockingGet())
+                        Observable.fromIterable(products)
+                                .filter(product -> makeFilter(product)).toList().blockingGet())
                 .subscribe(product -> setProductList(product));
     }
 
@@ -78,16 +78,18 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
+        mFabAction = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list);
 
-        mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
+        mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
         mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
                 switch (mProductListAdapter.getItemViewType(position)){
                     case ProductListAdapter.FOOTER :
-                        return 2;
+                        return 3;
 
                     case ProductListAdapter.PRODUCT:
+                    case ProductListAdapter.PRODUCT_ADD:
                         return 1;
 
                     default:
@@ -97,6 +99,13 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         });
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
+
+        mFabAction.setImageResource(getFabIconResource());
+        mFabAction.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(getFabTintColor())));
+        mFabAction.setOnClickListener(v -> {
+            onClickActionButton();
+        });
+
         ProductDB.getInstance().updatePublish();
     }
 
@@ -136,7 +145,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
             @Override
             public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
                 mProductListAdapter.toggle(holder.getAdapterPosition());
-                publish();
+                updateFab();
             }
 
             @Override
@@ -150,25 +159,25 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         return mProductListAdapter;
     }
 
-    public void doProducts(final View snackbarAnchor){
+    public void onClickActionButton(){
         RealmDB.get().executeTransaction(realm -> {
             final List<Product> products = mProductListAdapter.getSelections();
             for(Product p : products){
                 p.setCheckOut(true);
             }
             mProductListAdapter.clearSelection();
-            publish();
-            if(snackbarAnchor != null){
-                Snackbar.make(snackbarAnchor, R.string.product_moved_completed_message
-                        , Snackbar.LENGTH_LONG)
-                        .setAction(R.string.revert, view -> {
-                            RealmDB.get().executeTransaction(realm1 -> {
-                                for(Product p : products){
-                                    p.setCheckOut(false);
-                                }
-                                publish();
-                            });
-                        }).show();
+            updateFab();
+            Snackbar.make(mRecyclerProduct, R.string.product_moved_completed_message
+                    , Snackbar.LENGTH_LONG)
+                    .setAction(R.string.revert, view -> {
+                        RealmDB.get().executeTransaction(realm1 -> {
+                            for(Product p : products){
+                                p.setCheckOut(false);
+                            }
+                        });
+                    }).show();
+            if(getActivity() != null && getActivity() instanceof MainActivity){
+                ((MainActivity) getActivity()).movePageToRight();
             }
         });
     }
@@ -210,20 +219,22 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     public boolean onBackPressed() {
         if(mProductListAdapter.getSelections().size() > 0){
             mProductListAdapter.clearSelection();
-            publish();
+            updateFab();
             return true;
         }
         return super.onBackPressed();
     }
 
-    public void publish(){
-        if(mProductListAdapter != null){
-            mProductSelectedPublishSubject.onNext(mProductListAdapter.getSelections());
+    protected void updateFab(){
+        if(mProductListAdapter.getSelections().size() > 0){
+            if(!mFabAction.isShown()){
+                SimpleViewUtils.showView(mFabAction, View.VISIBLE);
+            }
+        }else{
+            if(mFabAction.isShown()){
+                SimpleViewUtils.hideView(mFabAction, View.GONE);
+            }
         }
-    }
-
-    public Observable<List<Product>> getObservable(){
-        return mProductSelectedPublishSubject;
     }
 
     private static class ProductItemAnimator extends DefaultItemAnimator{
@@ -239,9 +250,17 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         }
     }
 
-    public static Bundle makeArgument(Context context){
+    public static Bundle makeArgument(Context scontext){
         Bundle b = new Bundle();
         return b;
+    }
+
+    protected int getFabIconResource(){
+        return R.drawable.ic_cart_loaded_white_50dp;
+    }
+
+    protected int getFabTintColor(){
+        return R.color.colorAccent;
     }
 
 }

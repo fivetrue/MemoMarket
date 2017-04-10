@@ -32,12 +32,12 @@ public class ProductCheckOutActivity extends BaseActivity{
 
     private static final String TAG = "ProductCheckOutActivity";
 
-    public static final String KEY_CHECKOUT_DATE = "checkout_date";
+    private static final String KEY_CHECK_OUT_ITEMS = "checkout_items";
 
     private RecyclerView mRecyclerView;
     private CheckOutListAdapter mAdapter;
-
     private LinearLayoutManager mLayoutManager;
+
 
     private long mCheckOutMillis;
 
@@ -52,10 +52,21 @@ public class ProductCheckOutActivity extends BaseActivity{
     }
 
     private void initData(){
-        mCheckOutMillis = getIntent().getLongExtra(KEY_CHECKOUT_DATE, 0);
-        mAdapter = new CheckOutListAdapter(Observable.fromIterable(ProductDB.getInstance().getProducts())
-                .filter(product -> product.isCheckOut() && product.getCheckOutDate() == mCheckOutMillis)
-                .toList().blockingGet(), new CheckOutListAdapter.OnClickCheckoutProductListener() {
+        long[] targetMillis = getIntent().getLongArrayExtra(KEY_CHECK_OUT_ITEMS);
+        List<Product> productList = Observable.fromIterable(ProductDB.getInstance().getProducts())
+                .filter(product -> {
+                    if(product.isCheckOut()){
+                        for(long l : targetMillis){
+                            if(l == product.getCheckInDate()){
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }).toList().blockingGet();
+
+        mCheckOutMillis = System.currentTimeMillis();
+        mAdapter = new CheckOutListAdapter(productList, new CheckOutListAdapter.OnClickCheckoutProductListener() {
             @Override
             public void onAcceptProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
                 if(holder != null){
@@ -69,6 +80,7 @@ public class ProductCheckOutActivity extends BaseActivity{
                                 product.setPrice(value);
                                 product.setStoreName(store);
                                 product.setBarcode(barcode);
+                                product.setCheckOutDate(mCheckOutMillis);
                                 FirebaseDB.getInstance(ProductCheckOutActivity.this)
                                         .addProduct(product).addOnCompleteListener(task -> {
                                     mAdapter.getData().remove(holder.getAdapterPosition());
@@ -125,9 +137,17 @@ public class ProductCheckOutActivity extends BaseActivity{
     }
 
 
-    public static Intent makeIntent(Context context, List<Product> products, long ms){
+    public static Intent makeIntent(Context context, List<Product> products){
         Intent intent = new Intent(context, ProductCheckOutActivity.class);
-        intent.putExtra(KEY_CHECKOUT_DATE, ms);
+        List<Long> list = Observable.fromIterable(products)
+                .map(product -> product.getCheckInDate())
+                .toList().blockingGet();
+
+        long[] array = new long[list.size()];
+        for(int i = 0 ; i < list.size() ; i ++){
+            array[i] = list.get(i);
+        }
+        intent.putExtra(KEY_CHECK_OUT_ITEMS, array);
         return intent;
     }
 

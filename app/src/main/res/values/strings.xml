@@ -41,6 +41,8 @@
     <string name="no_item">No Item</string>
 
     <string name="scan_barcode">Scan barcode</string>
+    <string name="scan_barcode_message">If you scan a barcode, you can add it as a barcode when you add the next same item.</string>
+    <string name="scan_barcode_canceled">Canceled Scan barcode</string>
 
     <string name="store_product_count">%d products in</string>
 

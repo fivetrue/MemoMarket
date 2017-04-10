@@ -33,7 +33,6 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public interface OnClickCheckoutProductListener{
         void onAcceptProduct(CheckOutViewHolder holder, Product product);
         void onDeleteProduct(CheckOutViewHolder holder, Product product);
-        void onScanBarcode(CheckOutViewHolder holder, Product product);
     }
 
     private List<Product> mProducts;
@@ -62,11 +61,6 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         viewHolder.setData(p);
         viewHolder.revert.setOnClickListener(v ->
                 mOnClickCheckoutProductListener.onDeleteProduct((CheckOutViewHolder) holder, p)
-        );
-
-        viewHolder.scanBarcode.setVisibility(TextUtils.isEmpty(p.getBarcode()) ? View.VISIBLE : View.GONE);
-        viewHolder.scanBarcode.setOnClickListener(v ->
-                mOnClickCheckoutProductListener.onScanBarcode((CheckOutViewHolder) holder, p)
         );
 
         viewHolder.accept.setOnClickListener(view ->
@@ -158,7 +152,6 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public EditText priceInput;
         public EditText storeInput;
         private FloatingActionButton revert;
-        private FloatingActionButton scanBarcode;
         private FloatingActionButton accept;
 
         public CheckOutViewHolder(View view){
@@ -170,7 +163,6 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             priceInput = (EditText) view.findViewById(R.id.et_item_checkout_price);
             storeInput = (EditText) view.findViewById(R.id.et_item_checkout_store);
             revert = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_revert);
-            scanBarcode = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_scan_barcode);
             accept = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_accept);
         }
 

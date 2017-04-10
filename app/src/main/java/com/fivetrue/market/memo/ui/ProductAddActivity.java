@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -161,13 +162,20 @@ public class ProductAddActivity extends BaseActivity{
     }
 
     private void scan(){
-        IntentIntegrator integrator = new IntentIntegrator(this);
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-        integrator.setPrompt(getString(R.string.scan_barcode));
-        integrator.setCameraId(0);  // Use a specific camera of the device
-        integrator.setBeepEnabled(false);
-        integrator.setBarcodeImageEnabled(true);
-        integrator.initiateScan();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.scan_barcode)
+                .setMessage(R.string.scan_barcode_message)
+                .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                    IntentIntegrator integrator = new IntentIntegrator(this);
+                    integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+                    integrator.setPrompt(getString(R.string.scan_barcode));
+                    integrator.setCameraId(0);  // Use a specific camera of the device
+                    integrator.setBeepEnabled(false);
+                    integrator.setBarcodeImageEnabled(true);
+                    integrator.initiateScan();
+                }).setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
+                dialogInterface.dismiss();
+        }).show();
     }
 
     private void findImage(){
@@ -297,7 +305,7 @@ public class ProductAddActivity extends BaseActivity{
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if(result != null) {
             if(result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.scan_barcode_canceled, Toast.LENGTH_LONG).show();
             } else {
                 setBarcode(result.getContents());
             }

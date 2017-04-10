@@ -111,18 +111,6 @@ public class ProductCheckOutActivity extends BaseActivity{
                     }
                 });
             }
-
-            @Override
-            public void onScanBarcode(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
-                mProductForBarcode = product;
-                IntentIntegrator integrator = new IntentIntegrator(ProductCheckOutActivity.this);
-                integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-                integrator.setPrompt(getString(R.string.scan_barcode));
-                integrator.setCameraId(0);  // Use a specific camera of the device
-                integrator.setBeepEnabled(false);
-                integrator.setBarcodeImageEnabled(true);
-                integrator.initiateScan();
-            }
         });
     }
 

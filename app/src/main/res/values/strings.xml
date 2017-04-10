@@ -11,7 +11,7 @@
     <string name="delete">Delete</string>
     <string name="revert">Revert</string>
     <string name="cart">Cart</string>
-    <string name="checkout">Check out</string>
+    <string name="go_cart">Go Cart</string>
     <string name="purchase_list">Purchase list</string>
     <string name="shopping_basket">Shopping Basket</string>
     <string name="product">Product</string>

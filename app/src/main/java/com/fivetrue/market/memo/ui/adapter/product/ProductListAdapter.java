@@ -132,7 +132,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.delete)
-                , context.getString(R.string.checkout)};
+                , context.getString(R.string.go_cart)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();

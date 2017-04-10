@@ -3,7 +3,9 @@ package com.fivetrue.market.memo.ui.adapter.product;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +79,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         .toList().blockingGet();
 
                 StoreNameListAdapter adapter = new StoreNameListAdapter(view.getContext(), data);
-                ListPopupWindow popupWindow = new ListPopupWindow(view.getContext());
+                final ListPopupWindow popupWindow = new ListPopupWindow(view.getContext());
                 popupWindow.setAdapter(adapter);
                 popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
                     popupWindow.dismiss();
@@ -87,6 +89,24 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 });
                 popupWindow.setAnchorView(view);
                 popupWindow.show();
+                viewHolder.storeInput.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if(popupWindow != null){
+                            popupWindow.dismiss();
+                        }
+                    }
+                });
             }
         });
     }

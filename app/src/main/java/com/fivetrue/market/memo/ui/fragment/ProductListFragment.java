@@ -1,12 +1,12 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,15 +15,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
+import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
+import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
 
@@ -112,7 +114,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     protected boolean makeFilter(Product p){
         boolean b = false;
         if(p != null){
-            b = !p.isCheckOut();
+            b = p.getCheckOutDate() == 0;
         }
         return b;
     }
@@ -150,6 +152,13 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
             @Override
             public boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                if(item != null && getActivity() != null){
+                    Toast.makeText(getActivity()
+                            , String.format(getString(R.string.product_registered_date)
+                                    , CommonUtils.getDate(getActivity(), "MM dd yyyy HH"
+                                            , item.getCheckInDate())), Toast.LENGTH_LONG).show();
+                    return true;
+                }
                 return false;
             }
         });
@@ -160,26 +169,13 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     }
 
     public void onClickActionButton(){
-        RealmDB.get().executeTransaction(realm -> {
-            final List<Product> products = mProductListAdapter.getSelections();
-            for(Product p : products){
-                p.setCheckOut(true);
-            }
-            mProductListAdapter.clearSelection();
-            updateFab();
-            Snackbar.make(mRecyclerProduct, R.string.product_moved_completed_message
-                    , Snackbar.LENGTH_LONG)
-                    .setAction(R.string.revert, view -> {
-                        RealmDB.get().executeTransaction(realm1 -> {
-                            for(Product p : products){
-                                p.setCheckOut(false);
-                            }
-                        });
-                    }).show();
-            if(getActivity() != null && getActivity() instanceof MainActivity){
-                ((MainActivity) getActivity()).movePageToRight();
-            }
-        });
+        Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), getAdapter().getSelections());
+        getActivity().startActivity(intent);
+        getAdapter().clearSelection();
+        updateFab();
+        if(getActivity() != null && getActivity() instanceof MainActivity){
+            ((MainActivity) getActivity()).movePageToRight();
+        }
     }
 
     @Override
@@ -197,7 +193,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     @Override
     public int getImageResource() {
-        return R.drawable.selector_product;
+        return R.drawable.selector_cart_loaded;
     }
 
     @Override
@@ -250,17 +246,17 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         }
     }
 
-    public static Bundle makeArgument(Context scontext){
+    public static Bundle makeArgument(Context context){
         Bundle b = new Bundle();
         return b;
     }
 
     protected int getFabIconResource(){
-        return R.drawable.ic_cart_loaded_white_50dp;
+        return R.drawable.ic_cart_checkout_white_50dp;
     }
 
     protected int getFabTintColor(){
-        return R.color.colorAccent;
+        return R.color.colorPrimary;
     }
 
 }

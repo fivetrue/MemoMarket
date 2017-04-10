@@ -11,7 +11,6 @@ public class Product extends RealmObject{
     private String name;
     private String barcode;
     private long price;
-    private boolean checkOut;
     private String storeName;
     private String imageUrl;
     private long checkInDate;
@@ -39,14 +38,6 @@ public class Product extends RealmObject{
 
     public void setPrice(long price) {
         this.price = price;
-    }
-
-    public boolean isCheckOut() {
-        return checkOut;
-    }
-
-    public void setCheckOut(boolean checkOut) {
-        this.checkOut = checkOut;
     }
 
     public String getImageUrl() {

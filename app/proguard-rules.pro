@@ -25,10 +25,31 @@
 # Platform used when running on Java 8 VMs. Will not be used at runtime.
 -dontwarn retrofit2.Platform$Java8
 # Retain generic type information for use by reflection by converters and adapters.
--dontwarn org.apache.**
+-dontwarn org.apache.*
+-dontwarn com.vungle.**
+
 
 -keepattributes Signature
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
--keep org.apache.** { **; }
+-keepattributes Signature
+
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
+
+# Gson specific classes
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
+
+# Application classes that will be serialized/deserialized over Gson
+-keep class com.google.gson.examples.android.model.** { *; }
+
+-keep class com.google.firebase.** { *; }
+-keep class android.support.** { *; }
+-keep class android.webkit.** { *; }
+
+-keep class com.vungle.** { *; }
+-keep class javax.inject.*
+
+-keep com.fivetrue.market.memo.model.** { *; }

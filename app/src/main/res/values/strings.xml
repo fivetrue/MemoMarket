@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Shopping Basket Memo</string>
+    <string name="app_name">ShoppingBasket Memo</string>
 
     <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
     <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
@@ -11,7 +11,7 @@
     <string name="delete">Delete</string>
     <string name="revert">Revert</string>
     <string name="cart">Cart</string>
-    <string name="go_cart">Go Cart</string>
+    <string name="buy">Buy</string>
     <string name="purchase_list">Purchase list</string>
     <string name="product">Product</string>
     <string name="settings">Settings</string>
@@ -22,6 +22,7 @@
     <string name="excel">Excel</string>
     <string name="csv">CSV</string>
 
+    <string name="all">All</string>
     <string name="day">Day</string>
     <string name="week">Week</string>
     <string name="month">Month</string>
@@ -33,6 +34,7 @@
     <string name="add_item">Add Item</string>
     <string name="product_count"> %d products</string>
     <string name="total_product_count">Total %d products</string>
+    <string name="product_registered_date">Registered %s</string>
 
     <string name="hint_input_product_name">Input name of product</string>
     <string name="register_product">Register Product</string>

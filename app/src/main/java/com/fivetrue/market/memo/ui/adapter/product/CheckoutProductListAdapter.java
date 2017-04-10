@@ -31,7 +31,6 @@ public class CheckOutProductListAdapter extends ProductListAdapter {
             switch (i){
                 case 0 :
                     RealmDB.get().executeTransaction(realm -> {
-                        item.setCheckOut(false);
                         notifyItemRemoved(position);
                         clearSelection();
                     });

@@ -8,20 +8,16 @@ import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.ProductData;
-import com.fivetrue.market.memo.model.dto.StoreData;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.model.vo.Store;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +25,6 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.subjects.PublishSubject;
 
 
 /**
@@ -45,10 +40,7 @@ public class FirebaseDB {
 
     private static final String NODE_CONFIG = "config";
     private static final String NODE_MARKET = "market";
-//    private static final String NODE_STORE = "store";
     private static final String NODE_PRODUCT = "product";
-
-    private PublishSubject<ConfigData> mConfigDataPublishSubject;
 
     private Context mContext;
 
@@ -63,7 +55,6 @@ public class FirebaseDB {
 
     private FirebaseDB(Context context){
         mContext = context;
-        mConfigDataPublishSubject = PublishSubject.create();
     }
 
 
@@ -107,37 +98,43 @@ public class FirebaseDB {
         return observable;
     }
 
-    public Observable<ProductData> findSkuID(String sku){
+    public Observable<ProductData> findBarcode(String barcode){
         return Observable.create(e -> {
-            FirebaseDatabase.getInstance().getReference(NODE_MARKET)
-                    .child(NODE_PRODUCT).orderByChild("skuId").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(LL.D)
-                        Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
-                    if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
-                        List<ProductData> dataList = Observable.fromIterable(dataSnapshot.getChildren())
-                                .map(data -> data.getValue(ProductData.class))
-                                .filter(productData -> !TextUtils.isEmpty(productData.skuId) && productData.skuId.equalsIgnoreCase(sku))
-                                .toList().blockingGet();
-                        if(dataList != null && dataList.size() > 0){
-                            e.onNext(dataList.get(0));
-                            e.onComplete();
+            Product product = ProductDB.getInstance().findBarcode(barcode);
+            if(product != null){
+                e.onNext(new ProductData(product));
+                e.onComplete();
+            }else{
+                FirebaseDatabase.getInstance().getReference(NODE_MARKET)
+                        .child(NODE_PRODUCT).orderByChild("barcode").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(LL.D)
+                            Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
+                        if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
+                            List<ProductData> dataList = Observable.fromIterable(dataSnapshot.getChildren())
+                                    .map(data -> data.getValue(ProductData.class))
+                                    .filter(productData -> !TextUtils.isEmpty(productData.barcode) && productData.barcode.equalsIgnoreCase(barcode))
+                                    .toList().blockingGet();
+                            if(dataList != null && dataList.size() > 0){
+                                e.onNext(dataList.get(0));
+                                e.onComplete();
+                            }else{
+                                e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
+                            }
                         }else{
                             e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
                         }
-                    }else{
-                        e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
                     }
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    if(LL.D)
-                        Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
-                    e.onError(databaseError.toException());
-                }
-            });
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        if(LL.D)
+                            Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
+                        e.onError(databaseError.toException());
+                    }
+                });
+            }
         });
     }
 

@@ -15,7 +15,7 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
 
-    def BASE_VERSION = "0.0.0"
+    def BASE_VERSION = "0.0"
     def VERSION_CODE = 1
     def VERSION_TYPE = "ALPHA"  // Set this to BETA, RELEASE, etc.
 
@@ -37,7 +37,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 25
         versionCode VERSION_CODE
-        versionName BASE_VERSION + "." + VERSION_TYPE
+        versionName BASE_VERSION + "." + VERSION_CODE + VERSION_TYPE
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField(LONG, BUILD_DATE, String.valueOf(System.currentTimeMillis()) + "L")
         multiDexEnabled true

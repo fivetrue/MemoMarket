@@ -63,6 +63,9 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
         return get().where(Product.class).findAllSorted("checkInDate");
     }
 
+    public Product findBarcode(String barcode){
+        return get().where(Product.class).equalTo("barcode", barcode).findFirst();
+    }
 
     public Observable<List<Product>> getObservable(){
         return mProductPublishSubject;

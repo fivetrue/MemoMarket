@@ -123,7 +123,7 @@ public class ProductAddActivity extends BaseActivity{
     private void setProductData(ProductData data){
         mSelectedProductData = data;
         mInput.setText(data.name);
-        mBarcode.setText(data.skuId);
+        mBarcode.setText(data.barcode);
         setInputText(data.name);
     }
 
@@ -135,11 +135,12 @@ public class ProductAddActivity extends BaseActivity{
         mScanBarcode = barcode;
         mBarcode.setText(barcode);
         mFabScan.setVisibility(View.GONE);
-        FirebaseDB.getInstance(this).findSkuID(mScanBarcode)
+        FirebaseDB.getInstance(this).findBarcode(mScanBarcode)
                 .subscribe(productData -> {
-                        setProductData(productData);
+                    setProductData(productData);
+                    findImage();
                 }, throwable -> {
-                    Snackbar.make(mLayoutInput, throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mLayoutInput, throwable.getMessage(), Snackbar.LENGTH_LONG).show();
                 });
     }
 
@@ -207,7 +208,7 @@ public class ProductAddActivity extends BaseActivity{
                 product.setImageUrl(imageUrl);
                 product.setBarcode(mScanBarcode);
                 if(mSelectedProductData != null && mSelectedProductData.name.equalsIgnoreCase(text)){
-                    product.setBarcode(mSelectedProductData.skuId);
+                    product.setBarcode(mSelectedProductData.barcode);
                     product.setStoreName(mSelectedProductData.storeName);
                     product.setPrice(mSelectedProductData.price);
                 }
@@ -224,7 +225,7 @@ public class ProductAddActivity extends BaseActivity{
 
     private void setRetrievedProductList(List<ProductData> data){
         mProgressRetrieving.setVisibility(View.INVISIBLE);
-        if(data != null && data.size() > 0){
+        if(data != null && data.size() > 0 && !isFinishing()){
             if(mPopup == null){
                 mPopup = new ListPopupWindow(this);
                 mPopup.setAnchorView(mLayoutInput);

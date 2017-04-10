@@ -9,6 +9,8 @@ import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
@@ -16,9 +18,11 @@ import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.product.CheckOutListAdapter;
+import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -55,11 +59,9 @@ public class ProductCheckOutActivity extends BaseActivity{
         long[] targetMillis = getIntent().getLongArrayExtra(KEY_CHECK_OUT_ITEMS);
         List<Product> productList = Observable.fromIterable(ProductDB.getInstance().getProducts())
                 .filter(product -> {
-                    if(product.isCheckOut()){
-                        for(long l : targetMillis){
-                            if(l == product.getCheckInDate()){
-                                return true;
-                            }
+                    for(long l : targetMillis){
+                        if(l == product.getCheckInDate()){
+                            return true;
                         }
                     }
                     return false;
@@ -81,17 +83,21 @@ public class ProductCheckOutActivity extends BaseActivity{
                                 product.setStoreName(store);
                                 product.setBarcode(barcode);
                                 product.setCheckOutDate(mCheckOutMillis);
+                                SimpleViewUtils.hideView(holder.accept, View.GONE);
+                                SimpleViewUtils.showView(holder.progressBar, View.VISIBLE);
                                 FirebaseDB.getInstance(ProductCheckOutActivity.this)
                                         .addProduct(product).addOnCompleteListener(task -> {
-                                    mAdapter.getData().remove(holder.getAdapterPosition());
-                                    mAdapter.notifyItemRemoved(holder.getAdapterPosition());
+                                    if(mAdapter != null && mAdapter.getData().size() > holder.getAdapterPosition()){
+                                        mAdapter.getData().remove(holder.getAdapterPosition());
+                                        mAdapter.notifyItemRemoved(holder.getAdapterPosition());
+                                    }
                                     if(mAdapter.getItemCount() == 0){
                                         finish();
                                     }
                                 });
                             });
                         }catch (Exception e){
-
+                            Log.w(TAG, "onAcceptProduct: ", e);
                         }
                     }else{
                         Toast.makeText(ProductCheckOutActivity.this, R.string.product_has_no_price_message, Toast.LENGTH_SHORT).show();
@@ -124,6 +130,11 @@ public class ProductCheckOutActivity extends BaseActivity{
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    public static Intent makeIntent(Context context, Product product){
+        ArrayList<Product> array = new ArrayList<>();
+        array.add(product);
+        return makeIntent(context, array);
+    }
 
     public static Intent makeIntent(Context context, List<Product> products){
         Intent intent = new Intent(context, ProductCheckOutActivity.class);

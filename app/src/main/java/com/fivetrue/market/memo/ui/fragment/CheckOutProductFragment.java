@@ -27,7 +27,7 @@ public class CheckOutProductFragment extends ProductListFragment{
     protected boolean makeFilter(Product p) {
         boolean b = false;
         if(p != null){
-            b = p.isCheckOut() && p.getCheckOutDate() == 0;
+            b = p.getCheckOutDate() == 0;
         }
         return b;
     }

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.disposables.Disposable;
 import io.reactivex.observables.GroupedObservable;
 
 
@@ -51,6 +52,8 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private SparseBooleanArray mSelectedItems;
     private List<GroupedObservable<String, Product>> mData;
     private Map<GroupedObservable<String, Product> , List<Product>> mDataMap = new HashMap<>();
+
+    private Disposable mScannerDisposable;
 
     public PurchaseListAdapter(List<GroupedObservable<String, Product>> data){
         this.mData = data;
@@ -133,7 +136,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                                     String filepath = ExportUtil.writeProductToExcelInExternalStorage(context
                                             , SDF.format(new Date(System.currentTimeMillis()))
                                             , mDataMap.get(item));
-                                    shareFile(context, filepath, item.getKey());
+                                    shareFile(context, item.getKey(), filepath);
                                 } catch (ExportUtil.ExportException e) {
                                     Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
                                     Log.e(TAG, "makePopup: ", e);
@@ -145,7 +148,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
                                     , SDF.format(new Date(System.currentTimeMillis()))
                                     , mDataMap.get(item));
-                            shareFile(context, filepath, item.getKey());
+                            shareFile(context, item.getKey(), filepath);
                         } catch (ExportUtil.ExportException e) {
                             Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "makePopup: ", e);
@@ -160,7 +163,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void shareFile(Context context, String subject, String filePath){
-        MediaScannerUtil.getInstance(context).mediaScanning(filePath)
+        mScannerDisposable = MediaScannerUtil.getInstance(context).mediaScanning(filePath)
                 .subscribe(scanData -> {
                     Log.d(TAG, "makePopup: scan data" + scanData);
                     Intent intent = new Intent(Intent.ACTION_SEND);
@@ -168,6 +171,9 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(scanData.path)));
                     intent.setType("text/*");
                     context.startActivity(Intent.createChooser(intent, context.getString(R.string.export)));
+                    if(!mScannerDisposable.isDisposed()){
+                        mScannerDisposable.dispose();
+                    }
                 });
     }
 

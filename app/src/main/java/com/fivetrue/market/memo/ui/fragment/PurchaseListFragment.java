@@ -96,7 +96,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter(getString(android.R.string.selectAll), Filter.Value.ALL));
+        filters.add(new Filter(getString(R.string.all), Filter.Value.ALL));
         filters.add(new Filter(getString(R.string.day), Filter.Value.DAY));
         filters.add(new Filter(getString(R.string.week), Filter.Value.WEEK));
         filters.add(new Filter(getString(R.string.month), Filter.Value.MONTH));
@@ -148,7 +148,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
     }
 
     private boolean filter(Product product){
-        return product.isCheckOut() && product.getCheckOutDate() > 0;
+        return product.getCheckOutDate() > 0;
     }
 
     private int sort(Product t1, Product t2){
@@ -161,33 +161,22 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
             Locale locale = getActivity().getResources().getConfiguration().locale;
             switch (filter.value){
                 case ALL:{
-                    String formatted = DateFormat.getBestDateTimePattern(locale, "MM dd yyyy HH");
-                    SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-                    return sdf.format(new Date(product.getCheckOutDate()));
+                    return CommonUtils.getDate(getActivity(), "MM dd yyyy HH", product.getCheckOutDate());
                 }
                 case DAY:{
-                    String formatted = DateFormat.getBestDateTimePattern(locale, "MM dd yyyy");
-                    SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-                    return sdf.format(new Date(product.getCheckOutDate()));
+                    return CommonUtils.getDate(getActivity(), "MM dd yyyy", product.getCheckOutDate());
                 }
                 case WEEK:{
-                    String formatted = DateFormat.getBestDateTimePattern(locale, "W");
-                    SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-                    String week = sdf.format(new Date(product.getCheckOutDate()));
-                    formatted = DateFormat.getBestDateTimePattern(locale, "MM yyyy");
-                    sdf = new SimpleDateFormat(formatted);
-                    return String.format(getActivity().getString(R.string.date_week), sdf.format(new Date(product.getCheckOutDate())), week);
+                    String week = CommonUtils.getDate(getActivity(), "W", product.getCheckOutDate());
+                    return String.format(getActivity().getString(R.string.date_week)
+                            , CommonUtils.getDate(getActivity(), "MM yyyy", product.getCheckOutDate()), week);
                 }
                 case MONTH:{
-                    String formatted = DateFormat.getBestDateTimePattern(locale, "MM yyyy");
-                    SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-                    return sdf.format(new Date(product.getCheckOutDate()));
+                    return CommonUtils.getDate(getActivity(), "MM yyyy", product.getCheckOutDate());
                 }
 
                 case YEAR:{
-                    String formatted = DateFormat.getBestDateTimePattern(locale, "yyyy");
-                    SimpleDateFormat sdf = new SimpleDateFormat(formatted);
-                    return sdf.format(new Date(product.getCheckOutDate()));
+                    return CommonUtils.getDate(getActivity(), "yyyy", product.getCheckOutDate());
                 }
             }
         }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -171,7 +172,8 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public EditText priceInput;
         public EditText storeInput;
         private FloatingActionButton revert;
-        private FloatingActionButton accept;
+        public FloatingActionButton accept;
+        public ProgressBar progressBar;
 
         public CheckOutViewHolder(View view){
             super(view);
@@ -183,6 +185,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             storeInput = (EditText) view.findViewById(R.id.et_item_checkout_store);
             revert = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_revert);
             accept = (FloatingActionButton) view.findViewById(R.id.fab_item_checkout_accept);
+            progressBar = (ProgressBar) view.findViewById(R.id.pb_item_checkout);
         }
 
         public void setData(Product product){

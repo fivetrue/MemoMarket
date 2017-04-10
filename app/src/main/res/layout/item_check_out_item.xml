@@ -96,4 +96,12 @@
             app:backgroundTint="@color/primaryRed"
             app:fabSize="mini"/>
     </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/pb_item_checkout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_anchor="@id/fab_item_checkout_accept"
+        app:layout_anchorGravity="center"/>
 </android.support.design.widget.CoordinatorLayout>

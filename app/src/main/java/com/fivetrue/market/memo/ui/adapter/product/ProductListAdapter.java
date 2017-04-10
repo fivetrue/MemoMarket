@@ -20,6 +20,7 @@ import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
+import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.ArrayList;
@@ -132,25 +133,23 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.delete)
-                , context.getString(R.string.go_cart)};
+                , context.getString(R.string.buy)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
-            Toast.makeText(view1.getContext()
-                    , String.format("%s \"%s\"", listItems[i], item.getName())
-                    , Toast.LENGTH_SHORT).show();
             switch (i){
                 case 0 :
                     RealmDB.get().executeTransaction(realm -> {
                         item.deleteFromRealm();
                         notifyItemRemoved(position);
+                        Toast.makeText(view1.getContext()
+                                , String.format("%s \"%s\"", listItems[i], item.getName())
+                                , Toast.LENGTH_SHORT).show();
                     });
                     break;
                 case 1 :
-                    RealmDB.get().executeTransaction(realm -> {
-                        item.setCheckOut(true);
-                        notifyItemRemoved(position);
-                    });
+                    Intent intent = ProductCheckOutActivity.makeIntent(context, item);
+                    context.startActivity(intent);
                     break;
             }
             clearSelection();

@@ -57,7 +57,7 @@ public class MainActivity extends BaseActivity{
 
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
-        fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
+//        fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
     }

@@ -45,7 +45,8 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
     private RecyclerView mRecyclerView;
     private Spinner mSpinner;
     private TextView mNoItem;
-    private TextView mTotalValue;
+    private TextView mTotalPrice;
+    private TextView mTotalCount;
 
     private PurchaseListAdapter mAdapter;
     private ArrayAdapter<Filter> mSpinnerAdapter;
@@ -88,7 +89,8 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_fragment_timeline);
         mNoItem = (TextView) view.findViewById(R.id.tv_fragment_timeline);
-        mTotalValue = (TextView) view.findViewById(R.id.tv_fragment_timeline_total);
+        mTotalPrice = (TextView) view.findViewById(R.id.tv_fragment_timeline_total_price);
+        mTotalCount = (TextView) view.findViewById(R.id.tv_fragment_timeline_total_count);
         mSpinner = (Spinner) view.findViewById(R.id.sp_fragment_timeline);
         mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -133,7 +135,14 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         MathFlowable.sumLong(Flowable.fromIterable(ProductDB.getInstance().getProducts())
                 .filter(product -> filter(product))
                 .map(product -> product.getPrice()))
-                .subscribe(aLong -> mTotalValue.setText(CommonUtils.convertToCurrency(aLong)));
+                .subscribe(aLong -> mTotalPrice.setText(CommonUtils.convertToCurrency(aLong)));
+
+        Flowable.fromIterable(ProductDB.getInstance().getProducts())
+                .filter(product -> filter(product))
+                .count()
+                .subscribe(aLong
+                        -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
+
 
         validation();
     }

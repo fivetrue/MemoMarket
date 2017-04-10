@@ -286,7 +286,8 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
             date.setText(data.getKey());
-            count.setText("( " + products.size() + " )");
+            count.setText(String.format(count.getResources().getString(R.string.product_count)
+                    , products.size()));
             long value = 0;
             for(Product p : products){
                 value += p.getPrice();

@@ -137,7 +137,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
             Toast.makeText(view1.getContext()
-                    , String.format("%s %s", listItems[i], item.getName())
+                    , String.format("%s \"%s\"", listItems[i], item.getName())
                     , Toast.LENGTH_SHORT).show();
             switch (i){
                 case 0 :

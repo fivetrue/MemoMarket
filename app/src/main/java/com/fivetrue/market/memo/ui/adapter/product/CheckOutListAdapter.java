@@ -18,7 +18,6 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
-import com.fivetrue.market.memo.ui.adapter.store.StoreNameListAdapter;
 
 import java.util.List;
 

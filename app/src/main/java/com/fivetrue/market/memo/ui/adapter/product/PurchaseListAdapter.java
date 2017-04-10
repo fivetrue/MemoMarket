@@ -119,45 +119,39 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     protected ListPopupWindow makePopup(Context context, GroupedObservable<String, Product> item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
-        String [] listItems = {context.getString(R.string.delete)
-                , context.getString(R.string.export)};
+        String [] listItems = {context.getString(R.string.export)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    //TODO : delete
-                    break;
-
-                case 1 :
-                    //TODO : export
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.export)
                             .setMessage(R.string.export)
-                            .setPositiveButton("Excel", (dialogInterface, i1) -> {
+                            .setPositiveButton(R.string.excel, (dialogInterface, i1) -> {
                                 try {
                                     String filepath = ExportUtil.writeProductToExcelInExternalStorage(context
                                             , SDF.format(new Date(System.currentTimeMillis()))
                                             , mDataMap.get(item));
                                     shareFile(context, filepath, item.getKey());
                                 } catch (ExportUtil.ExportException e) {
-                                    Toast.makeText(context, "Export failure", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
                                     Log.e(TAG, "makePopup: ", e);
                                 }
                                 dialogInterface.dismiss();
 
-                            }).setNegativeButton("CSV", (dialogInterface, i1) -> {
-                                 try {
-                                   String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
+                            }).setNegativeButton(R.string.csv, (dialogInterface, i1) -> {
+                        try {
+                            String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
                                     , SDF.format(new Date(System.currentTimeMillis()))
                                     , mDataMap.get(item));
-                                    shareFile(context, filepath, item.getKey());
-                                 } catch (ExportUtil.ExportException e) {
-                                  Toast.makeText(context, "Export failure", Toast.LENGTH_SHORT).show();
-                                  Log.e(TAG, "makePopup: ", e);
-                                 }
-                                 dialogInterface.dismiss();
-                            }).setNeutralButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
+                            shareFile(context, filepath, item.getKey());
+                        } catch (ExportUtil.ExportException e) {
+                            Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "makePopup: ", e);
+                        }
+                        dialogInterface.dismiss();
+                    }).setNeutralButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
                             .show();
                     break;
             }

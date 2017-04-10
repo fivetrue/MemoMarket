@@ -94,7 +94,7 @@ public class ProductCheckOutActivity extends BaseActivity{
 
                         }
                     }else{
-                        Toast.makeText(ProductCheckOutActivity.this, R.string.product_has_no_price, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProductCheckOutActivity.this, R.string.product_has_no_price_message, Toast.LENGTH_SHORT).show();
                     }
 
                 }

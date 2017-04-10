@@ -38,7 +38,7 @@ public class CheckOutProductListAdapter extends ProductListAdapter {
                     break;
             }
             Toast.makeText(view1.getContext()
-                    , String.format("%s %s", listItems[i], item.getName())
+                    , String.format("%s \"%s\"", listItems[i], item.getName())
                     , Toast.LENGTH_SHORT).show();
         });
         return popupWindow;

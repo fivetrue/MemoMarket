@@ -65,10 +65,11 @@ public class ExportUtil {
 
             List<String[]> list = Observable.fromIterable(objects)
                     .map(object -> {
-                        String[] data = new String[3];
+                        String[] data = new String[4];
                         data[0] = getDate(object);
                         data[1] = getName(object);
-                        data[2] = getPrice(object);
+                        data[2] = getStore(object);
+                        data[3] = getPrice(object);
                         return data;
                     }).toList().blockingGet();
 
@@ -122,10 +123,11 @@ public class ExportUtil {
 
         List<String[]> list = Observable.fromIterable(objects)
                 .map(object -> {
-                    String[] data = new String[3];
+                    String[] data = new String[4];
                     data[0] = getDate(object);
                     data[1] = getName(object);
-                    data[2] = getPrice(object);
+                    data[2] = getStore(object);
+                    data[3] = getPrice(object);
                     return data;
                 }).toList().blockingGet();
 
@@ -163,16 +165,17 @@ public class ExportUtil {
 
     private static String[] makeHeaderFields(Context context){
         return new String[]{context.getString(R.string.date)
-                , context.getString(R.string.used)
+                , context.getString(R.string.product)
+                , context.getString(R.string.store)
                 , context.getString(R.string.price)};
     }
 
     private static String getName(Product product){
-        String name = null;
-        if(!TextUtils.isEmpty(product.getStoreName())){
-            name = product.getStoreName();
-        }
-        return !TextUtils.isEmpty(name) ? name + "-" + product.getName() : product.getName();
+        return product.getName();
+    }
+
+    private static String getStore(Product product){
+        return !TextUtils.isEmpty(product.getStoreName()) ? product.getStoreName() : "";
     }
 
     private static String getDate(Product product){

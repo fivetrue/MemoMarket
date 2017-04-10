@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.ui.adapter.store;
+package com.fivetrue.market.memo.ui.adapter.product;
 
 import android.content.Context;
 import android.view.LayoutInflater;

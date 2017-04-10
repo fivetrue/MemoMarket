@@ -12,12 +12,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,8 +24,6 @@ import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.database.product.ProductDB;
-import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
@@ -44,7 +39,6 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 /**
  * Created by kwonojin on 2017. 3. 5..
@@ -114,7 +108,7 @@ public class ProductAddActivity extends BaseActivity{
                 setInputText(mInput.getText().toString().trim());
                 findImage();
             }else{
-                Snackbar.make(mLayoutInput, R.string.error_input_product_name, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(mLayoutInput, R.string.error_input_product_name_message, Snackbar.LENGTH_SHORT).show();
             }
         });
         mFabScan.setOnClickListener(view -> scan());
@@ -223,7 +217,7 @@ public class ProductAddActivity extends BaseActivity{
         }else{
             SimpleViewUtils.showView(mProgressDone, View.INVISIBLE);
             SimpleViewUtils.hideView(mFabOk, View.VISIBLE);
-            Snackbar.make(mLayoutInput, R.string.error_empty_product_name, Snackbar.LENGTH_SHORT)
+            Snackbar.make(mLayoutInput, R.string.error_input_product_name_message, Snackbar.LENGTH_SHORT)
                     .setAction(android.R.string.ok, view -> mInput.findFocus()).show();
         }
     }

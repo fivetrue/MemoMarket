@@ -30,6 +30,7 @@
 
     <string name="date_week" formatted="false">%s %s Week</string>
     <string name="date">Date</string>
+    <string name="average">AVG %s</string>
 
     <string name="add_item">Add Item</string>
     <string name="product_count"> %d products</string>

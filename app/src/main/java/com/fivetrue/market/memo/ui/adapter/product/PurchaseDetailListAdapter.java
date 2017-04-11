@@ -7,14 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.DataManager;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -24,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hu.akarnokd.rxjava2.math.MathFlowable;
+import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observables.GroupedObservable;
 import io.reactivex.schedulers.Schedulers;
@@ -45,7 +49,7 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
         boolean onLongClickItem(PurchaseDetailHolder holder, List<Product> item);
     }
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("M/d");
 
     private SparseBooleanArray mSelectedItems;
     private List<GroupedObservable<String, Product>> mData;
@@ -211,12 +215,14 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
         public final View layout;
         public final ImageView image;
         public final GraphView graph;
+        public final TextView avg;
 
         public PurchaseDetailHolder(View itemView) {
             super(itemView);
             layout = itemView.findViewById(R.id.layout_purchase_detail_list_item);
             image = (ImageView) itemView.findViewById(R.id.iv_item_purchase_detail_list_item);
             graph = (GraphView) itemView.findViewById(R.id.graph_item_purchase_detail_list_item);
+            avg = (TextView) itemView.findViewById(R.id.tv_item_purchase_detail_list_item);
         }
 
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
@@ -243,12 +249,29 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
             DataPoint[] dataPoints = new DataPoint[products.size()];
             for(int i = 0 ; i < products.size() ; i ++){
                 Product p = products.get(i);
-                dataPoints[i] = new DataPoint(i + 1, p.getPrice());
+                dataPoints[i] = new DataPoint(p.getCheckOutDate(), p.getPrice());
             }
             LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dataPoints);
             series.setBackgroundColor(image.getResources().getColor(android.R.color.white));
-            graph.setTitleColor(image.getResources().getColor(R.color.primaryBlue));
+            series.setDrawBackground(false);
+            series.setThickness(2);
+
+            MathFlowable.averageDouble(Flowable.fromIterable(products).map(product -> product.getPrice()))
+                    .subscribe(aDouble -> avg.setText(avg.getContext().getString(R.string.average, CommonUtils.convertToCurrency(aDouble.longValue()))));
+
+            graph.setTitleColor(image.getResources().getColor(R.color.darkBlue));
             graph.setTitle(data.getKey() + " (" + products.size() + ")");
+            graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter(){
+                @Override
+                public String formatLabel(double value, boolean isValueX) {
+                    if (isValueX) {
+                        return SDF.format(new Date((long) value));
+                    } else {
+                        // show currency for y values
+                        return CommonUtils.convertToCurrency((long) value);
+                    }
+                }
+            });
             graph.addSeries(series);
         }
     }

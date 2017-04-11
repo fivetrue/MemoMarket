@@ -23,6 +23,7 @@
 
     <string name="date_week" formatted="false">%s %s 주</string>
     <string name="date">날짜</string>
+    <string name="average">평균 %s</string>
 
     <string name="add_item">상품추가</string>
     <string name="product_count"> %d 개의 상품</string>

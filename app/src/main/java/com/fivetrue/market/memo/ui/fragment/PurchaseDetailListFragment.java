@@ -167,7 +167,6 @@ public class PurchaseDetailListFragment extends BaseFragment{
     private String groupBy(Product product){
         if(getActivity() != null){
             Filter filter = mSpinnerAdapter.getItem(mSpinner.getSelectedItemPosition());
-            Locale locale = getActivity().getResources().getConfiguration().locale;
             switch (filter.value){
                 case PRODUCT:{
                     return product.getName();

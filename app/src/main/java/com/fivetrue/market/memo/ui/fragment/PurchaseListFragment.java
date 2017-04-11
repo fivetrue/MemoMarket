@@ -115,6 +115,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
 
             }
         });
+        view.findViewById(R.id.layout_fragment_purchase_list_bottom).setOnClickListener(null);
         ProductDB.getInstance().updatePublish();
     }
 

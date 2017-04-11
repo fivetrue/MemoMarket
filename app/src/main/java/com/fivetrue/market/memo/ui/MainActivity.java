@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
@@ -90,38 +91,6 @@ public class MainActivity extends BaseActivity{
             }
         });
 
-//        mFabProduct.setOnClickListener(view -> {
-//            if(mAdapter != null && mViewPager != null){
-//                if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
-//                    Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
-//                    if(f != null
-//                            && f instanceof ProductListFragment
-//                            && ((ProductListFragment) f).getAdapter().getSelections().size() > 0){
-//                        ((ProductListFragment) f).doProducts(findViewById(R.id.layout_main));
-//                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-//                        return;
-//                    }
-//                }
-//            }
-//            startActivity(new Intent(MainActivity.this, ProductAddActivity.class));
-//        });
-//
-//        mFabCheckout.setOnClickListener(view -> {
-//            if(view.isShown()){
-//                if(mAdapter != null && mViewPager != null){
-//                    if(mAdapter.getRealCount() > mViewPager.getCurrentItem()){
-//                        Fragment f = mAdapter.getItem(mViewPager.getCurrentItem());
-//                        if(f != null
-//                                && f instanceof CheckOutProductFragment
-//                                && ((CheckOutProductFragment) f).getAdapter().getSelections().size() > 0){
-//                            ((CheckOutProductFragment) f).doProducts(findViewById(R.id.layout_main));
-//                            return;
-//                        }
-//                    }
-//                }
-//            }
-//        });
-
         mViewPager.setAdapter(mAdapter);
         mTab.setViewPager(mViewPager);
 
@@ -164,13 +133,9 @@ public class MainActivity extends BaseActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case android.R.id.home :
-                if(getCurrentFragmentManager().getBackStackEntryCount() > 0){
-                    popFragment(getCurrentFragmentManager());
-                }else{
-                    //TODO : Something
-                    finish();
-                }
+            case R.id.action_setting :
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
 
             default:

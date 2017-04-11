@@ -18,6 +18,7 @@
         android:text="@string/no_item"/>
 
     <LinearLayout
+        android:id="@+id/layout_fragment_purchase_list_bottom"
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:layout_gravity="bottom"

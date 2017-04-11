@@ -48,6 +48,7 @@
                     android:textColor="@android:color/white"
                     android:textAllCaps="true"
                     android:textStyle="bold"
+                    android:textSize="17dp"
                     android:layout_gravity="center" />
             </android.support.v7.widget.Toolbar>
         </android.support.design.widget.CollapsingToolbarLayout>

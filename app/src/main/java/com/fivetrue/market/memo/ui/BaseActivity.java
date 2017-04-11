@@ -11,6 +11,7 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.fivetrue.market.memo.MemoApplication;
@@ -209,6 +210,20 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     @Override
     public void onBackStackChanged() {
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home :
+                if(getCurrentFragmentManager().getBackStackEntryCount() > 0){
+                    popFragment(getCurrentFragmentManager());
+                }else{
+                    onBackPressed();
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public MemoApplication getApp(){

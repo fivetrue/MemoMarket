@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,5 +83,41 @@ public abstract class BaseFragment extends Fragment {
 
     public boolean onBackPressed(){
         return false;
+    }
+
+    public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack
+            , int enterAnim, int exitAnim, Object sharedTransition, Pair<View, String>... pair){
+        BaseFragment f = null;
+        try {
+            f = (BaseFragment) cls.newInstance();
+            if(sharedTransition != null){
+                f.setSharedElementEnterTransition(sharedTransition);
+                f.setSharedElementReturnTransition(sharedTransition);
+            }
+        } catch (java.lang.InstantiationException e) {
+            Log.e(TAG, "addFragment: ", e);
+        } catch (IllegalAccessException e) {
+            Log.e(TAG, "addFragment: ", e);
+        }
+        if(f != null){
+            if(arguments != null){
+                f.setArguments(arguments);
+            }
+            FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+            ft.setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim);
+            ft.replace(anchorLayout, f, f.getTitle(getActivity()));
+            if(pair != null && pair.length > 0){
+                for(Pair<View, String> p : pair){
+                    ft.addSharedElement(p.first, p.second);
+                }
+            }
+            if(addBackstack){
+                ft.addToBackStack(f.getTitle(getActivity()));
+                ft.setBreadCrumbTitle(f.getTitle(getActivity()));
+                ft.setBreadCrumbShortTitle(f.getSubTitle(getActivity()));
+            }
+            ft.commitAllowingStateLoss();
+        }
+        return f;
     }
 }

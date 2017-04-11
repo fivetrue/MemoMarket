@@ -1,11 +1,11 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,26 +17,27 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.PurchaseListAdapter;
+import com.fivetrue.market.memo.ui.adapter.product.PurchaseDetailListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.view.PagerTabContent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import hu.akarnokd.rxjava2.math.MathFlowable;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observables.GroupedObservable;
 
 /**
  * Created by kwonojin on 2017. 2. 7..
  */
 
-public class PurchaseListFragment extends BaseFragment implements PagerTabContent{
+public class PurchaseDetailListFragment extends BaseFragment{
 
     private static final String TAG = "PurchaseListFragment";
+
+    private static final String KEY_PURCHASE_ITEMS = "purchase_items";
 
     private RecyclerView mRecyclerView;
     private Spinner mSpinner;
@@ -44,29 +45,39 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
     private TextView mTotalPrice;
     private TextView mTotalCount;
 
-    private PurchaseListAdapter mAdapter;
+    private PurchaseDetailListAdapter mAdapter;
     private ArrayAdapter<Filter> mSpinnerAdapter;
 
     private LinearLayoutManager mLayoutManager;
 
-    private Disposable mDisposable;
-
+    private long[] mPurchaseItemCheckouts;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDisposable = ProductDB.getInstance()
-                .getObservable()
-                .map(products ->
-                    Observable.fromIterable(products)
-                            .filter(product -> filter(product))
-                            .sorted((product, t1) -> sort(product, t1))
-                            .groupBy(product -> groupBy(product)).toList().blockingGet()
+    }
 
-                )
-                .subscribe(product -> {
-                    setData(product);
-                });
+    private void loadData(){
+        List<GroupedObservable<String,Product>> list = Observable.fromIterable(getProducts())
+                .sorted((product, t1) -> sort(product, t1))
+                .groupBy(product -> groupBy(product)).toList().blockingGet();
+        setData(list);
+    }
+
+    private List<Product> getProducts(){
+        mPurchaseItemCheckouts = getArguments().getLongArray(KEY_PURCHASE_ITEMS);
+        List<Product> list = Flowable.fromIterable(ProductDB.getInstance().getProducts())
+                .filter(product -> product.getCheckOutDate() > 0)
+                .filter(product -> {
+                    for(long l : mPurchaseItemCheckouts){
+                        if(product.getCheckOutDate() == l){
+                            return true;
+                        }
+                    }
+                    return false;
+                }).toList().blockingGet();
+        Log.d(TAG, "getProducts() returned: " + list);
+        return list;
     }
 
     @Override
@@ -92,11 +103,8 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter(getString(R.string.all), Filter.Value.ALL));
-        filters.add(new Filter(getString(R.string.day), Filter.Value.DAY));
-        filters.add(new Filter(getString(R.string.week), Filter.Value.WEEK));
-        filters.add(new Filter(getString(R.string.month), Filter.Value.MONTH));
-        filters.add(new Filter(getString(R.string.year), Filter.Value.YEAR));
+        filters.add(new Filter(getString(R.string.product), Filter.Value.PRODUCT));
+        filters.add(new Filter(getString(R.string.store), Filter.Value.STORE));
 
         mSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, filters);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -107,7 +115,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ProductDB.getInstance().updatePublish();
+                loadData();
             }
 
             @Override
@@ -115,25 +123,20 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
 
             }
         });
-        ProductDB.getInstance().updatePublish();
+        loadData();
     }
 
     public void setData(List<GroupedObservable<String, Product>> data){
         if(data != null){
             if(mAdapter == null){
-                mAdapter = new PurchaseListAdapter(data, new PurchaseListAdapter.OnPurchaseItemListener() {
+                mAdapter = new PurchaseDetailListAdapter(data, new PurchaseDetailListAdapter.OnPurchaseItemListener() {
                     @Override
-                    public void onClickItem(PurchaseListAdapter.PurchaseHolder holder, List<Product> items) {
-                        if(getActivity() != null && items != null){
-                            Bundle arg = PurchaseDetailListFragment.makeArgument(getActivity(), items);
-                            addFragment(PurchaseDetailListFragment.class, arg
-                                    , R.id.layout_fragment_purchase_list, true
-                                    , android.R.anim.slide_in_left, android.R.anim.slide_out_right, null, null);
-                        }
+                    public void onClickItem(PurchaseDetailListAdapter.PurchaseDetailHolder holder, List<Product> items) {
+
                     }
 
                     @Override
-                    public boolean onLongClickItem(PurchaseListAdapter.PurchaseHolder holder, List<Product> item) {
+                    public boolean onLongClickItem(PurchaseDetailListAdapter.PurchaseDetailHolder holder, List<Product> item) {
                         return false;
                     }
                 });
@@ -143,13 +146,11 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
             }
         }
 
-        MathFlowable.sumLong(Flowable.fromIterable(ProductDB.getInstance().getProducts())
-                .filter(product -> filter(product))
+        MathFlowable.sumLong(Flowable.fromIterable(getProducts())
                 .map(product -> product.getPrice()))
                 .subscribe(aLong -> mTotalPrice.setText(CommonUtils.convertToCurrency(aLong)));
 
-        Flowable.fromIterable(ProductDB.getInstance().getProducts())
-                .filter(product -> filter(product))
+        Flowable.fromIterable(getProducts())
                 .count()
                 .subscribe(aLong
                         -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
@@ -158,35 +159,21 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         validation();
     }
 
-    private boolean filter(Product product){
-        return product.getCheckOutDate() > 0;
-    }
 
     private int sort(Product t1, Product t2){
-        return t1.getCheckOutDate() < t2.getCheckOutDate() ? 1 : -1;
+        return t1.getCheckOutDate() < t2.getCheckOutDate() ? -1 : 1;
     }
 
     private String groupBy(Product product){
         if(getActivity() != null){
             Filter filter = mSpinnerAdapter.getItem(mSpinner.getSelectedItemPosition());
+            Locale locale = getActivity().getResources().getConfiguration().locale;
             switch (filter.value){
-                case ALL:{
-                    return CommonUtils.getDate(getActivity(), "MM dd yyyy HH", product.getCheckOutDate());
+                case PRODUCT:{
+                    return product.getName();
                 }
-                case DAY:{
-                    return CommonUtils.getDate(getActivity(), "MM dd yyyy", product.getCheckOutDate());
-                }
-                case WEEK:{
-                    String week = CommonUtils.getDate(getActivity(), "W", product.getCheckOutDate());
-                    return String.format(getActivity().getString(R.string.date_week)
-                            , CommonUtils.getDate(getActivity(), "MM yyyy", product.getCheckOutDate()), week);
-                }
-                case MONTH:{
-                    return CommonUtils.getDate(getActivity(), "MM yyyy", product.getCheckOutDate());
-                }
-
-                case YEAR:{
-                    return CommonUtils.getDate(getActivity(), "yyyy", product.getCheckOutDate());
+                case STORE:{
+                    return product.getStoreName();
                 }
             }
         }
@@ -204,9 +191,6 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mDisposable != null && !mDisposable.isDisposed()){
-            mDisposable.dispose();
-        }
     }
 
     @Override
@@ -229,28 +213,22 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         return R.drawable.selector_feed;
     }
 
-    @Override
-    public String getTabTitle(Context context) {
-        return getTitle(context);
-    }
+    public static Bundle makeArgument(Context context, List<Product> products){
+        List<Long> list = Observable.fromIterable(products)
+                .map(product -> product.getCheckOutDate())
+                .toList().blockingGet();
 
-    @Override
-    public Drawable getTabDrawable(Context context) {
-        return context.getDrawable(getImageResource());
-    }
-
-    @Override
-    public TabIcon getIconState() {
-        return TabIcon.TextWithIcon;
-    }
-
-    public static Bundle makeArgument(Context context){
-        Bundle b = new Bundle();
-        return b;
+        long[] array = new long[list.size()];
+        for(int i = 0 ; i < list.size() ; i ++){
+            array[i] = list.get(i);
+        }
+        Bundle arg = new Bundle();
+        arg.putLongArray(KEY_PURCHASE_ITEMS, array);
+        return arg;
     }
 
     private static class Filter{
-        enum Value { ALL, DAY, WEEK, MONTH, YEAR }
+        enum Value {PRODUCT, STORE}
         public final String name;
         public final Value value;
         public Filter(String name, Value value){
@@ -262,13 +240,5 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         public String toString() {
             return name;
         }
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        if(getChildFragmentManager().getBackStackEntryCount() > 0){
-            return getChildFragmentManager().popBackStackImmediate();
-        }
-        return super.onBackPressed();
     }
 }

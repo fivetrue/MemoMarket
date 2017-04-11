@@ -128,6 +128,7 @@ dependencies {
      */
     compile 'com.opencsv:opencsv:3.9'
     compile 'org.apache.poi:poi:3.9'
+    compile 'com.jjoe64:graphview:4.2.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

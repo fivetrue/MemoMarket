@@ -47,6 +47,11 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static final int PRODUCT = 0x01;
     public static final int FOOTER = 0x02;
 
+    public interface OnPurchaseItemListener {
+        void onClickItem(PurchaseListAdapter.PurchaseHolder holder, List<Product> items);
+        boolean onLongClickItem(PurchaseListAdapter.PurchaseHolder holder, List<Product> item);
+    }
+
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
 
     private SparseBooleanArray mSelectedItems;
@@ -55,9 +60,12 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private Disposable mScannerDisposable;
 
-    public PurchaseListAdapter(List<GroupedObservable<String, Product>> data){
+    private OnPurchaseItemListener mOnPurchaseItemListener;
+
+    public PurchaseListAdapter(List<GroupedObservable<String, Product>> data, OnPurchaseItemListener ll){
         this.mData = data;
         mSelectedItems = new SparseBooleanArray();
+        mOnPurchaseItemListener = ll;
     }
 
 
@@ -70,7 +78,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return holder;
         }else{
             View view = inflater.inflate(R.layout.item_timeline_list_item, null);
-            RecyclerView.ViewHolder holder = new PurchaseListAdapter.TimelineHolder(view);
+            RecyclerView.ViewHolder holder = new PurchaseHolder(view);
             return holder;
         }
     }
@@ -81,7 +89,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if(getItemViewType(position) == FOOTER){
 
         }else{
-            onBindProductHolder((PurchaseListAdapter.TimelineHolder) holder, position);
+            onBindProductHolder((PurchaseHolder) holder, position);
         }
     }
 
@@ -89,7 +97,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     }
 
-    private void onBindProductHolder(final PurchaseListAdapter.TimelineHolder holder, final int position){
+    private void onBindProductHolder(final PurchaseHolder holder, final int position){
         final GroupedObservable<String, Product> item = getItem(position);
         if(holder != null && item != null){
             List<Product> products = mDataMap.get(item);
@@ -100,10 +108,22 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
             holder.setData(item, products);
             holder.layout.setOnClickListener(view -> {
+                if(mOnPurchaseItemListener != null){
+                    mOnPurchaseItemListener.onClickItem(holder, mDataMap.get(item));
+                }
             });
 
             holder.layout.setOnLongClickListener(view -> {
+                if(mOnPurchaseItemListener != null){
+                    return mOnPurchaseItemListener.onLongClickItem(holder, mDataMap.get(item));
+                }
                 return false;
+            });
+
+            holder.images.setOnItemClickListener((adapterView, view, i, l) -> {
+                if(mOnPurchaseItemListener != null){
+                    mOnPurchaseItemListener.onClickItem(holder, mDataMap.get(item));
+                }
             });
 
             holder.more.setOnClickListener(view -> {
@@ -271,7 +291,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return null;
     }
 
-    public static final class TimelineHolder extends RecyclerView.ViewHolder{
+    public static final class PurchaseHolder extends RecyclerView.ViewHolder{
 
         public final View layout;
         public final GridView images;
@@ -280,7 +300,7 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public final TextView price;
         public final ImageView more;
 
-        public TimelineHolder(View itemView) {
+        public PurchaseHolder(View itemView) {
             super(itemView);
             layout = itemView.findViewById(R.id.layout_item_timeline_list_layout);
             images = (GridView) itemView.findViewById(R.id.gv_item_timeline_list_images);

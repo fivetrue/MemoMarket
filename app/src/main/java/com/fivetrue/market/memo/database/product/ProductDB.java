@@ -12,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
+import io.realm.RealmQuery;
 
 /**
  * Created by kwonojin on 2017. 3. 28..

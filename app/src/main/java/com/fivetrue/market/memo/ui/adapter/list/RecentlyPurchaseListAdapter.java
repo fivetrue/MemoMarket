@@ -10,6 +10,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ import java.util.List;
  */
 
 public class RecentlyPurchaseListAdapter extends ProductListAdapter {
+
+    private static final String TAG = "RecentlyPurchaseListAda";
 
     public RecentlyPurchaseListAdapter(List<Product> data, OnProductItemListener ll) {
         super(data, ll);
@@ -54,6 +57,7 @@ public class RecentlyPurchaseListAdapter extends ProductListAdapter {
                             .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
                                 dialogInterface.dismiss();
                                 ProductDB.get().executeTransaction(realm -> {
+                                    TrackingUtil.getInstance().deleteProduct(item.getName(), TAG);
                                     item.deleteFromRealm();
                                 });
                             }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())

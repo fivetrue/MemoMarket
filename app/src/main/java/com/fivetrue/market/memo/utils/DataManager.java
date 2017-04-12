@@ -32,8 +32,6 @@ public class DataManager {
 
     private FirebaseDB mFirebaseDB;
 
-    private ImageService mImageService;
-
     private Context mContext;
 
     private static DataManager sInstance;
@@ -77,11 +75,11 @@ public class DataManager {
     }
 
     public Observable<ImageEntry> findImage(ConfigData config, final String q){
+        Log.i(TAG, "findImage: q = " + q);
         if(LL.D) Log.d(TAG, "findImage() called with: config = [" + config + "], q = [" + q + "]");
-        if(mImageService == null){
-            mImageService = NetworkServiceProvider.getImageService();
-        }
-        return mImageService.getImageList(config.msKey, q, "en-us");
+        return NetworkServiceProvider.getInstance()
+                .getImageService()
+                .getImageList(config.msKey, q, "en-us");
     }
 
 }

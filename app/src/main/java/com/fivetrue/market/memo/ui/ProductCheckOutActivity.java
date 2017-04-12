@@ -19,6 +19,7 @@ import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.list.CheckOutListAdapter;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -86,6 +87,11 @@ public class ProductCheckOutActivity extends BaseActivity{
 
                                 SimpleViewUtils.hideView(holder.accept, View.GONE);
                                 SimpleViewUtils.showView(holder.progressBar, View.VISIBLE);
+                                TrackingUtil.getInstance().checkoutProduct(product.getName()
+                                        , product.getBarcode()
+                                        , product.getPrice()
+                                        , product.getStoreName());
+
                                 FirebaseDB.getInstance(ProductCheckOutActivity.this)
                                         .addProduct(product).addOnCompleteListener(task -> {
                                     if(mAdapter != null && mAdapter.getData().size() > holder.getAdapterPosition()){

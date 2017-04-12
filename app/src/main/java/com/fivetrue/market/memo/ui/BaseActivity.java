@@ -17,6 +17,7 @@ import android.view.View;
 import com.fivetrue.market.memo.MemoApplication;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 
 /**
  * Created by kwonojin on 2017. 1. 23..
@@ -40,6 +41,7 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     @Override
     protected void onStart() {
         super.onStart();
+        TrackingUtil.getInstance().currentScreen(this, getClass().getSimpleName(), null);
     }
 
     @Override

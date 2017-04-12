@@ -103,8 +103,7 @@ public class RecentlyPurchaseListFragment extends BaseFragment{
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
         mTextMessage.setOnClickListener(v -> {
             if(getActivity() != null) {
-                Intent intent = new Intent(getActivity(), ProductAddActivity.class);
-                startActivity(intent);
+                ProductAddActivity.startProductAdd(view.getContext(), TAG);
                 if (getActivity() instanceof MainActivity) {
                     ((MainActivity) getActivity()).closeDrawer();
                     ((MainActivity) getActivity()).movePageToLeft();

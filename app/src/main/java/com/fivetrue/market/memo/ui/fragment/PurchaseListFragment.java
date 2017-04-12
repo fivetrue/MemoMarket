@@ -96,6 +96,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mRecyclerView.setLayoutManager(mLayoutManager);
         mNoItem.setOnClickListener(v -> {
             if(getActivity() != null){
+                ProductAddActivity.startProductAdd(view.getContext(), TAG);
                 Intent intent = new Intent(getActivity(), ProductAddActivity.class);
                 startActivity(intent);
                 if(getActivity() instanceof MainActivity){

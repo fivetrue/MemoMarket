@@ -25,7 +25,7 @@
 
     <color name="colorPrimary">@color/primaryRed</color>
     <color name="colorPrimaryDark">@color/darkRed</color>
-    <color name="colorAccent">@color/primaryGreen</color>
+    <color name="colorAccent">@color/primaryBlue</color>
 
     <color name="indicatorColor">@color/colorAccent</color>
 

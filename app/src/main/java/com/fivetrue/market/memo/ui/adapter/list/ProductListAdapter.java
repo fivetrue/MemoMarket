@@ -24,6 +24,8 @@ import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.utils.TrackingUtil;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +97,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private void onBindProductAddHolder(ProductListAdapter.ProductAddHolder holder, int position){
         holder.layout.setOnClickListener(view -> {
-            Intent intent = new Intent(view.getContext(), ProductAddActivity.class);
-            view.getContext().startActivity(intent);
+            ProductAddActivity.startProductAdd(view.getContext(), TAG);
         });
 
     }
@@ -135,14 +136,18 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {
+                context.getString(R.string.buy),
                 context.getString(R.string.duplicate)
-                , context.getString(R.string.delete)
-                , context.getString(R.string.buy)};
+                , context.getString(R.string.delete)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
             switch (i){
                 case 0 :
+                    Intent intent = ProductCheckOutActivity.makeIntent(context, item);
+                    context.startActivity(intent);
+                    break;
+                case 1 :
                     Product p = new Product();
                     p.setName(item.getName());
                     p.setStoreName(item.getStoreName());
@@ -151,8 +156,9 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     p.setImageUrl(item.getImageUrl());
                     p.setCheckInDate(System.currentTimeMillis());
                     ProductDB.getInstance().add(p);
+
                     break;
-                case 1 :
+                case 2 :
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.delete)
                             .setMessage(R.string.delete_product_message)
@@ -162,16 +168,13 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                     Toast.makeText(view1.getContext()
                                             , String.format("%s \"%s\"", listItems[i], item.getName())
                                             , Toast.LENGTH_SHORT).show();
+                                    TrackingUtil.getInstance().deleteProduct(item.getName(), TAG);
                                     item.deleteFromRealm();
                                     notifyItemRemoved(position);
                                 });
                             }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
                             .show();
 
-                    break;
-                case 2 :
-                    Intent intent = ProductCheckOutActivity.makeIntent(context, item);
-                    context.startActivity(intent);
                     break;
             }
             clearSelection();

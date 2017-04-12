@@ -187,6 +187,7 @@ public class ExportUtil {
     }
 
     public static void export(Context context, final String fileName, final List<Product> products){
+        TrackingUtil.getInstance().exportEventLog(fileName, products.size());
         new AlertDialog.Builder(context)
                 .setTitle(R.string.export)
                 .setMessage(R.string.export_data_message)

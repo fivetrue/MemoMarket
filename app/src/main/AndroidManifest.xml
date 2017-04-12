@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -40,6 +41,13 @@
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             tools:replace="screenOrientation" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_cart_checkout_white_50dp" />
+
+        <meta-data android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
 
     </application>
 

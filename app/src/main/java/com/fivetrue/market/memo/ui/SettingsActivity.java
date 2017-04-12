@@ -14,6 +14,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.ExportUtil;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 
 
 import io.reactivex.Observable;
@@ -59,6 +60,7 @@ public class SettingsActivity extends BaseActivity {
                         builder.setTitle(android.R.string.dialog_alert_title)
                                 .setMessage(R.string.reset_data_message)
                                 .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                                    TrackingUtil.getInstance().resetDataEventLog(ProductDB.getInstance().getProducts().size());
                                     ProductDB.get().executeTransaction(realm -> {
                                         ProductDB.get().deleteAll();
                                         dialogInterface.dismiss();

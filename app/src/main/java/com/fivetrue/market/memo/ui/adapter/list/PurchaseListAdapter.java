@@ -18,6 +18,7 @@ import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

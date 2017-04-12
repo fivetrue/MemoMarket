@@ -1,5 +1,6 @@
 package com.fivetrue.market.memo.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import com.fivetrue.market.memo.ui.adapter.list.ProductNameListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.DataManager;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -134,6 +136,7 @@ public class ProductAddActivity extends BaseActivity{
         mScanBarcode = barcode;
         mBarcode.setText(barcode);
         mFabScan.setVisibility(View.GONE);
+        TrackingUtil.getInstance().scanBarcode(barcode);
         DataManager.getInstance(this).findBarcode(mScanBarcode)
                 .subscribe(productData -> {
                     setProductData(productData.get(0));
@@ -179,6 +182,7 @@ public class ProductAddActivity extends BaseActivity{
             SimpleViewUtils.showView(mProgressDone, View.VISIBLE);
             SimpleViewUtils.hideView(mFabOk, View.GONE);
             DataManager.getInstance(this).getConfig().subscribe(configData ->
+
                     DataManager.getInstance(ProductAddActivity.this).findImage(configData, text)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.newThread())
@@ -211,6 +215,11 @@ public class ProductAddActivity extends BaseActivity{
                     product.setStoreName(mSelectedProductData.storeName);
                     product.setPrice(mSelectedProductData.price);
                 }
+                TrackingUtil.getInstance().addProduct(product.getName()
+                        , product.getBarcode()
+                        , product.getPrice()
+                        , product.getStoreName());
+
                 realm.insertOrUpdate(product);
                 finish();
             });
@@ -281,12 +290,9 @@ public class ProductAddActivity extends BaseActivity{
             }
             if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
                 mProgressRetrieving.setVisibility(View.VISIBLE);
-                DataManager.getInstance(ProductAddActivity.this).findProductName(text).subscribe(new Consumer<List<ProductData>>() {
-                    @Override
-                    public void accept(List<ProductData> storeDatas) throws Exception {
-                        setRetrievedProductList(storeDatas);
-                    }
-                });
+                DataManager.getInstance(ProductAddActivity.this).findProductName(text).subscribe(storeDatas -> {
+                    setRetrievedProductList(storeDatas);
+                }, throwable -> TrackingUtil.getInstance().report(throwable));
             }else{
                 selectedName = null;
             }
@@ -306,5 +312,12 @@ public class ProductAddActivity extends BaseActivity{
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    public static void startProductAdd(Context context, String where){
+        Log.i(TAG, "startProductAdd: where : " + where);
+        TrackingUtil.getInstance().startProductAdd(where);
+        Intent intent = new Intent(context, ProductAddActivity.class);
+        context.startActivity(intent);
     }
 }

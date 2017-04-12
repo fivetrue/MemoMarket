@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.ui.adapter.product;
+package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
 import android.content.Intent;

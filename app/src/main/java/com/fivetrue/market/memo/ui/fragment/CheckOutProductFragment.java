@@ -3,15 +3,13 @@ package com.fivetrue.market.memo.ui.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
-import com.fivetrue.market.memo.ui.adapter.product.CheckOutProductListAdapter;
-import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.CheckOutProductListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
 
 import java.util.List;
 

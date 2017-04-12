@@ -1,12 +1,8 @@
-package com.fivetrue.market.memo.ui.adapter.product;
+package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,23 +12,19 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.MediaScannerUtil;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observables.GroupedObservable;
 
 
@@ -57,8 +49,6 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private SparseBooleanArray mSelectedItems;
     private List<GroupedObservable<String, Product>> mData;
     private Map<GroupedObservable<String, Product> , List<Product>> mDataMap = new HashMap<>();
-
-    private Disposable mScannerDisposable;
 
     private OnPurchaseItemListener mOnPurchaseItemListener;
 
@@ -148,55 +138,14 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    new AlertDialog.Builder(context)
-                            .setTitle(R.string.export)
-                            .setMessage(R.string.export)
-                            .setPositiveButton(R.string.excel, (dialogInterface, i1) -> {
-                                try {
-                                    String filepath = ExportUtil.writeProductToExcelInExternalStorage(context
-                                            , SDF.format(new Date(System.currentTimeMillis()))
-                                            , mDataMap.get(item));
-                                    shareFile(context, item.getKey(), filepath);
-                                } catch (ExportUtil.ExportException e) {
-                                    Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
-                                    Log.e(TAG, "makePopup: ", e);
-                                }
-                                dialogInterface.dismiss();
-
-                            }).setNegativeButton(R.string.csv, (dialogInterface, i1) -> {
-                        try {
-                            String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
-                                    , SDF.format(new Date(System.currentTimeMillis()))
-                                    , mDataMap.get(item));
-                            shareFile(context, item.getKey(), filepath);
-                        } catch (ExportUtil.ExportException e) {
-                            Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
-                            Log.e(TAG, "makePopup: ", e);
-                        }
-                        dialogInterface.dismiss();
-                    }).setNeutralButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
-                            .show();
+                    ExportUtil.export(context
+                            , SDF.format(new Date(System.currentTimeMillis()))
+                            ,  mDataMap.get(item));
                     break;
             }
         });
         return popupWindow;
     }
-
-    private void shareFile(Context context, String subject, String filePath){
-        mScannerDisposable = MediaScannerUtil.getInstance(context).mediaScanning(filePath)
-                .subscribe(scanData -> {
-                    Log.d(TAG, "makePopup: scan data" + scanData);
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(scanData.path)));
-                    intent.setType("text/*");
-                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.export)));
-                    if(!mScannerDisposable.isDisposed()){
-                        mScannerDisposable.dispose();
-                    }
-                });
-    }
-
 
     @Override
     public int getItemViewType(int position) {

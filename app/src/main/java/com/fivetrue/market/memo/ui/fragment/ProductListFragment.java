@@ -24,7 +24,7 @@ import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
-import com.fivetrue.market.memo.ui.adapter.product.ProductListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;

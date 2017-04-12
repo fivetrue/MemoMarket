@@ -1,7 +1,6 @@
-package com.fivetrue.market.memo.ui.adapter.product;
+package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.List;
@@ -18,14 +16,14 @@ import java.util.List;
  * Created by kwonojin on 2017. 2. 26..
  */
 
-public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterImpl<ProductData> {
+public class StoreNameListAdapter extends BaseAdapter implements BaseAdapterImpl<String> {
 
-    private static final String TAG = "ProductNameListAdapter";
+    private static final String TAG = "StoreNameListAdapter";
 
     private Context mContext;
-    private List<ProductData> mData;
+    private List<String> mData;
 
-    public ProductNameListAdapter(Context context, List<ProductData> list){
+    public StoreNameListAdapter(Context context, List<String> list){
         this.mContext = context;
         this.mData = list;
     }
@@ -43,7 +41,7 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         Holder holder = new Holder();
-        ProductData product = getItem(i);
+        String store = getItem(i);
         if(view == null){
             LayoutInflater inflater = LayoutInflater.from(mContext);
             view = inflater.inflate(R.layout.item_store_list_popup, null);
@@ -59,12 +57,12 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
             }
         }
 
-        holder.name.setText(product.name);
+        holder.name.setText(store);
         return view;
     }
 
     @Override
-    public ProductData getItem(int pos) {
+    public String getItem(int pos) {
         return mData.get(pos);
     }
 
@@ -74,19 +72,18 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     }
 
     @Override
-    public List<ProductData> getData() {
+    public List<String> getData() {
         return mData;
     }
 
-    public void setData(List<ProductData> data){
+    public void setData(List<String> data){
         this.mData = data;
         notifyDataSetChanged();
     }
 
     @Override
-    public void add(ProductData data) {
-        mData.add(data);
-        notifyDataSetChanged();
+    public void add(String data) {
+
     }
 
     @Override
@@ -115,7 +112,7 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     }
 
     @Override
-    public List<ProductData> getSelections() {
+    public List<String> getSelections() {
         return null;
     }
 

@@ -36,6 +36,8 @@
     <string name="product_count"> %d products</string>
     <string name="total_product_count">Total %d products</string>
     <string name="product_registered_date">Registered %s</string>
+    <string name="reset_data">Reset Data</string>
+    <string name="data">Data</string>
 
     <string name="hint_input_product_name">Input name of product</string>
     <string name="register_product">Register Product</string>
@@ -55,4 +57,8 @@
     <string name="product_has_no_price_message">Please set the price of the product.</string>
 
     <string name="permission_denied_alert_message">Can not using Application denied permission. Really You want to denied permission?</string>
+
+    <string name="reset_data_message">All saved data will be deleted.</string>
+    <string name="export_data_message">You can save / share data in the form below.</string>
+
 </resources>

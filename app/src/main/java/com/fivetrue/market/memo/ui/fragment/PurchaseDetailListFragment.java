@@ -17,12 +17,11 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.PurchaseDetailListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.PurchaseDetailListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import hu.akarnokd.rxjava2.math.MathFlowable;
 import io.reactivex.Flowable;

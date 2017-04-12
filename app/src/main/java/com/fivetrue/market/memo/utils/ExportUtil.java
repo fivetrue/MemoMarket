@@ -1,12 +1,18 @@
 package com.fivetrue.market.memo.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.ui.SettingsActivity;
 import com.opencsv.CSVWriter;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -24,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by kwonojin on 2017. 4. 7..
@@ -33,12 +40,12 @@ public class ExportUtil {
 
     private static final String TAG = "ExportUtil";
 
-    public static final String CSV_FILE_DIRECTORY = "/memo/csv/";
-    public static final String EXCEL_FILE_DIRECTORY = "/memo/excel/";
+    public static final String CSV_FILE_DIRECTORY = "/shoppingmemo/csv/";
+    public static final String EXCEL_FILE_DIRECTORY = "/shoppingmemo/excel/";
     public static final String FILE_CSV = ".csv";
     public static final String FILE_EXCEL = ".xlsx";
 
-    private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd");
+    private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 
     public static String writeProductsToCVSInExternalStorage(Context context, String fileName, List<Product> objects) throws ExportException {
         new File(Environment.getExternalStorageDirectory(), CSV_FILE_DIRECTORY).mkdirs();
@@ -51,6 +58,9 @@ public class ExportUtil {
 
     public static String writeProductsToCVS(Context context, File file, List<Product> objects) throws ExportException {
         if (file != null && objects != null) {
+            Log.i(TAG, "writeProductsToCVS: product count " + objects.size());
+            Log.i(TAG, "writeProductsToCVS: file path " + file);
+
             if (!file.exists()) {
                 try {
                     if (file.createNewFile()){
@@ -89,6 +99,7 @@ public class ExportUtil {
             Log.i(TAG, "writeProductsToCVS: finish write, try to close");
             try {
                 cw.close();
+                Log.i(TAG, "writeProductsToCVS: Completed " + file);
             } catch (IOException e) {
                 Log.e(TAG, "writeProductsToCVS: ", e);
                 throw new ExportException("FAIL : close ", e.getCause());
@@ -110,11 +121,11 @@ public class ExportUtil {
 
 
     public static String writeProductToExcel(Context context, File file, List<Product> objects) throws ExportException {
-
+        Log.i(TAG, "writeProductToExcel: product count " + objects.size());
+        Log.i(TAG, "writeProductToExcel: file path " + file);
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet(file.getName());
         int rowCount = 0;
-        Log.i(TAG, "writeProductToExcel: make header row : " + rowCount);
         Row row = sheet.createRow(rowCount);
         String[] header = makeHeaderFields(context);
         for(int i = 0 ; i < header.length ; i++){
@@ -145,6 +156,7 @@ public class ExportUtil {
         try {
             outFile = new FileOutputStream(file);
             workbook.write(outFile);
+            Log.i(TAG, "writeProductToExcel: Completed");
         } catch (FileNotFoundException e) {
             Log.e(TAG, "writeProductToExcel: FILE NOT FOUND", e);
             throw new ExportException("FILE NOT FOUND", e.getCause());
@@ -163,6 +175,62 @@ public class ExportUtil {
         return file.getAbsolutePath();
     }
 
+    public static void shareFile(Context context, String subject, String filePath){
+        MediaScannerUtil.getInstance(context).mediaScanning(filePath, scanData -> {
+            Log.d(TAG, "makePopup: scan data" + scanData);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(scanData.path)));
+            intent.setType("text/*");
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.export)));
+        });
+    }
+
+    public static void export(Context context, final String fileName, final List<Product> products){
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.export)
+                .setMessage(R.string.export_data_message)
+                .setPositiveButton(R.string.excel, (dialogInterface, i1) -> {
+
+                    try {
+                        String filepath = ExportUtil.writeProductToExcelInExternalStorage(context
+                                , fileName
+                                , products);
+
+                        ExportUtil.shareFile(context
+                                , fileName
+                                , filepath);
+
+                    } catch (ExportUtil.ExportException e) {
+                        Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "export : ", e);
+                    }
+                    dialogInterface.dismiss();
+
+                }).setNegativeButton(R.string.csv, (dialogInterface, i1) -> {
+            try {
+                String filepath = ExportUtil.writeProductsToCVSInExternalStorage(context
+                        , fileName
+                        , products);
+
+                ExportUtil.shareFile(context
+                        , fileName
+                        , filepath);
+
+            } catch (ExportUtil.ExportException e) {
+                Toast.makeText(context, R.string.error_export_failed_message, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "export : ", e);
+            }
+            dialogInterface.dismiss();
+        }).setNeutralButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
+                .show();
+    }
+
+    public static String getDate(long ms){
+        return SDF.format(new Date(ms));
+
+    }
+
     private static String[] makeHeaderFields(Context context){
         return new String[]{context.getString(R.string.date)
                 , context.getString(R.string.product)
@@ -179,7 +247,7 @@ public class ExportUtil {
     }
 
     private static String getDate(Product product){
-        return SDF.format(new Date(product.getCheckOutDate()));
+        return getDate(product.getCheckOutDate());
     }
 
     private static String getPrice(Product product){

@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.ui.adapter.product;
+package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
 import android.support.v7.widget.ListPopupWindow;

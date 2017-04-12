@@ -27,7 +27,7 @@ import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.ProductNameListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.ProductNameListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.DataManager;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;

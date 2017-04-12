@@ -16,7 +16,6 @@ import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
-import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.PurchaseListFragment;
 import com.fivetrue.market.memo.utils.CommonUtils;

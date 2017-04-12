@@ -17,7 +17,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.CheckOutListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.CheckOutListAdapter;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.adapter.product.PurchaseListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.PurchaseListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
 

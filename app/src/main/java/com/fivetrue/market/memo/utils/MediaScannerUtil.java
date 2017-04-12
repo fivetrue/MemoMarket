@@ -4,14 +4,17 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-
 /**
  * Created by kwonojin on 2017. 4. 7..
  */
 
 public class MediaScannerUtil {
+
+    private static final String TAG = "MediaScannerUtil";
+
+    public interface OnScanCompleteListener{
+        void onCompleted(ScanData scanData);
+    }
     private Context mContext;
 
     private String mPath;
@@ -19,13 +22,11 @@ public class MediaScannerUtil {
     private MediaScannerConnection mMediaScanner;
     private MediaScannerConnection.MediaScannerConnectionClient mMediaScannerClient;
 
-    private PublishSubject<ScanData> mPublishSubject = PublishSubject.create();
-
     private static MediaScannerUtil sInstance;
 
     public static MediaScannerUtil getInstance(Context context) {
         if(sInstance == null){
-            sInstance = new MediaScannerUtil(context);
+            sInstance = new MediaScannerUtil(context.getApplicationContext());
         }
         return sInstance;
     }
@@ -34,7 +35,7 @@ public class MediaScannerUtil {
         mContext = context;
     }
 
-    public Observable<ScanData> mediaScanning(final String path) {
+    public void mediaScanning(final String path, final OnScanCompleteListener ll) {
         if (mMediaScanner == null) {
             mMediaScannerClient = new MediaScannerConnection.MediaScannerConnectionClient() {
 
@@ -47,8 +48,7 @@ public class MediaScannerUtil {
                 @Override
                 public void onScanCompleted(String s, Uri uri) {
                     mMediaScanner.disconnect();
-                    mPublishSubject.onNext(new ScanData(s, uri));
-                    mPublishSubject.publish();
+                    ll.onCompleted(new ScanData(s, uri));
                 }
 
             };
@@ -56,7 +56,6 @@ public class MediaScannerUtil {
         }
         mPath = path;
         mMediaScanner.connect();
-        return mPublishSubject;
     }
 
     public static final class ScanData {

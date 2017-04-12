@@ -29,6 +29,8 @@
     <string name="product_count"> %d 개의 상품</string>
     <string name="total_product_count">총 %d 개의 상품</string>
     <string name="product_registered_date">%s에 등록됨</string>
+    <string name="reset_data">데이터 초기화</string>
+    <string name="data">데이터</string>
 
     <string name="hint_input_product_name">상품이름 입력</string>
     <string name="register_product">상품 등록</string>
@@ -47,4 +49,6 @@
     <string name="product_has_no_price_message">상품의 가격을 설정해 주세요.</string>
 
     <string name="permission_denied_alert_message">권한을 거부하면 앱을 사용 할 수 없습니다. 정말 권한을 거부하겠습니까?</string>
+    <string name="reset_data_message">모든 저장된 데이터가 삭제 됩니다.</string>
+    <string name="export_data_message">데이터를 아래 형태로 저장/공유 할 수 있습니다.</string>
 </resources>

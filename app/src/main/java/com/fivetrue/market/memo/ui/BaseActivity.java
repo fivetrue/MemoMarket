@@ -216,14 +216,18 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home :
-                if(getCurrentFragmentManager().getBackStackEntryCount() > 0){
-                    popFragment(getCurrentFragmentManager());
-                }else{
-                    onBackPressed();
-                }
-                break;
+                onClickHome();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void onClickHome(){
+        if(getCurrentFragmentManager().getBackStackEntryCount() > 0){
+            popFragment(getCurrentFragmentManager());
+        }else{
+            onBackPressed();
+        }
     }
 
     public MemoApplication getApp(){

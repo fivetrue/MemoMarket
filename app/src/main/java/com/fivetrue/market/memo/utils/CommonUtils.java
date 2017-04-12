@@ -1,7 +1,9 @@
 package com.fivetrue.market.memo.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.text.format.DateFormat;
 
 import java.text.NumberFormat;
@@ -33,5 +35,14 @@ public class CommonUtils {
         String formatted = DateFormat.getBestDateTimePattern(locale, pattern);
         SimpleDateFormat sdf = new SimpleDateFormat(formatted);
         return sdf.format(new Date(millis));
+    }
+
+    public static void goStore(Context context){
+        final String appPackageName = context.getPackageName(); // getPackageName() from Context or Activity object
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+        }
     }
 }

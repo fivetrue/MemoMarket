@@ -228,11 +228,13 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
             DataManager.getInstance(layout.getContext())
                     .getConfig().subscribe(configData -> {
+
                 DataManager.getInstance(layout.getContext())
                         .findImage(configData, data.getKey())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.newThread())
                         .subscribe(imageEntry -> {
+
                             String imageUrl = null;
                             if(imageEntry != null
                                     && imageEntry.getValue() != null && imageEntry.getValue().size() > 0){
@@ -242,6 +244,7 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
                                     .load(imageUrl)
                                     .placeholder(R.drawable.ic_product_gray_50dp)
                                     .dontTransform().into(image);
+
                         }, throwable -> {
                             Log.e(TAG, "setData: ", throwable);
                         });

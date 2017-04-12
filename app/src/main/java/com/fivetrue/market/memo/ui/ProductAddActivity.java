@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.ImageEntry;
@@ -135,9 +134,9 @@ public class ProductAddActivity extends BaseActivity{
         mScanBarcode = barcode;
         mBarcode.setText(barcode);
         mFabScan.setVisibility(View.GONE);
-        FirebaseDB.getInstance(this).findBarcode(mScanBarcode)
+        DataManager.getInstance(this).findBarcode(mScanBarcode)
                 .subscribe(productData -> {
-                    setProductData(productData);
+                    setProductData(productData.get(0));
                     findImage();
                 }, throwable -> {
                     Snackbar.make(mLayoutInput, throwable.getMessage(), Snackbar.LENGTH_LONG).show();

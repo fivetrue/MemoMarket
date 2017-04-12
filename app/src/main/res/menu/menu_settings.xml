@@ -7,12 +7,10 @@
         <menu>
             <item android:id="@+id/menu_setting_reset_data"
                 android:title="@string/reset_data"
-                android:icon="@drawable/ic_clear_data_white_20dp"
-                android:checkable="true"/>
+                android:icon="@drawable/ic_clear_data_white_20dp"/>
             <item android:id="@+id/menu_setting_export_data"
                 android:title="@string/export"
-                android:icon="@drawable/ic_export_white_20dp"
-                android:checkable="true"/>
+                android:icon="@drawable/ic_export_white_20dp"/>
         </menu>
     </item>
 

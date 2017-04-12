@@ -8,7 +8,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
-import com.fivetrue.market.memo.ui.adapter.list.CheckOutProductListAdapter;
+import com.fivetrue.market.memo.ui.adapter.list.RecentlyPurchaseListAdapter;
 import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public class CheckOutProductFragment extends ProductListFragment{
 
     @Override
     protected ProductListAdapter makeAdapter(List<Product> productList) {
-        ProductListAdapter adapter =  new CheckOutProductListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
+        ProductListAdapter adapter =  new RecentlyPurchaseListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
             @Override
             public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
                 getAdapter().toggle(holder.getAdapterPosition());

@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.vo.Product;
@@ -98,46 +97,39 @@ public class FirebaseDB {
         return observable;
     }
 
-    public Observable<ProductData> findBarcode(String barcode){
+    public Observable<List<ProductData>> findBarcode(String barcode){
         return Observable.create(e -> {
-            Product product = ProductDB.getInstance().findBarcode(barcode);
-            if(product != null){
-                e.onNext(new ProductData(product));
-                e.onComplete();
-            }else{
-                FirebaseDatabase.getInstance().getReference(NODE_MARKET)
-                        .child(NODE_PRODUCT).orderByChild("barcode").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(LL.D)
-                            Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
-                        if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
-                            List<ProductData> dataList = Observable.fromIterable(dataSnapshot.getChildren())
-                                    .map(data -> data.getValue(ProductData.class))
-                                    .filter(productData -> !TextUtils.isEmpty(productData.barcode) && productData.barcode.equalsIgnoreCase(barcode))
-                                    .toList().blockingGet();
-                            if(dataList != null && dataList.size() > 0){
-                                e.onNext(dataList.get(0));
-                                e.onComplete();
-                            }else{
-                                e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
-                            }
+            FirebaseDatabase.getInstance().getReference(NODE_MARKET)
+                    .child(NODE_PRODUCT).orderByChild("barcode").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(LL.D)
+                        Log.d(TAG, "onDataChange() called with: dataSnapshot = [" + dataSnapshot + "]");
+                    if(dataSnapshot != null && dataSnapshot.getChildrenCount() > 0){
+                        List<ProductData> dataList = Observable.fromIterable(dataSnapshot.getChildren())
+                                .map(data -> data.getValue(ProductData.class))
+                                .filter(productData -> !TextUtils.isEmpty(productData.barcode) && productData.barcode.equalsIgnoreCase(barcode))
+                                .toList().blockingGet();
+                        if(dataList != null && dataList.size() > 0){
+                            e.onNext(dataList);
+                            e.onComplete();
                         }else{
                             e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
                         }
+                    }else{
+                        e.onError(new Resources.NotFoundException(mContext.getString(R.string.error_empty_product_barcode)));
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        if(LL.D)
-                            Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
-                        e.onError(databaseError.toException());
-                    }
-                });
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    if(LL.D)
+                        Log.d(TAG, "onCancelled() called with: databaseError = [" + databaseError + "]");
+                    e.onError(databaseError.toException());
+                }
+            });
         });
     }
-
 
     public Task<Void> addProduct(Product product){
         ProductData data = new ProductData(product);

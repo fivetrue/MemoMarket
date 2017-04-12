@@ -2,6 +2,7 @@
     <string name="app_name">장바구니 메모</string>
 
     <string name="delete">삭제</string>
+    <string name="duplicate">복제</string>
     <string name="revert">되돌리기</string>
     <string name="cart">카트</string>
     <string name="buy">구매</string>
@@ -11,6 +12,7 @@
     <string name="price">가격</string>
     <string name="store">구매처</string>
     <string name="export">내보내기</string>
+    <string name="info">정보</string>
 
     <string name="excel">Excel</string>
     <string name="csv">CSV</string>
@@ -29,13 +31,17 @@
     <string name="product_count"> %d 개의 상품</string>
     <string name="total_product_count">총 %d 개의 상품</string>
     <string name="product_registered_date">%s에 등록됨</string>
+    <string name="product_purchased_date">%s에 구매됨</string>
     <string name="reset_data">데이터 초기화</string>
     <string name="data">데이터</string>
+    <string name="recently_purchase_list">최근 구매목록</string>
+    <string name="recently_purchase_top_message" formatted="false">마지막 구매 %s.\n총 %d 개의 상품</string>
 
     <string name="hint_input_product_name">상품이름 입력</string>
     <string name="register_product">상품 등록</string>
 
-    <string name="no_item">등록된 상품이 없습니다.</string>
+    <string name="purchases_no_item">구매한 상품이 없습니다.\n상품을 추가하세요.</string>
+    <string name="recently_no_item">최근 구매한 상품이 없습니다.\n상품을 추가하세요.</string>
 
     <string name="scan_barcode">바코드 스캔</string>
     <string name="scan_barcode_message">바코드를 스캔하면 다음에 동일한 항목을 추가 할 때 바코드로 추가 할 수 있습니다.</string>
@@ -50,5 +56,7 @@
 
     <string name="permission_denied_alert_message">권한을 거부하면 앱을 사용 할 수 없습니다. 정말 권한을 거부하겠습니까?</string>
     <string name="reset_data_message">모든 저장된 데이터가 삭제 됩니다.</string>
+    <string name="delete_product_message">해당 상품이 삭제 됩니다.</string>
+    <string name="delete_purchase_product_message">해당 상품이 삭제됩니다. 삭제 시 구매내역에서도 삭제됩니다.</string>
     <string name="export_data_message">데이터를 아래 형태로 저장/공유 할 수 있습니다.</string>
 </resources>

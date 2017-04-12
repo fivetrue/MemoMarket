@@ -2,6 +2,7 @@ package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
@@ -132,22 +134,42 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
-        String [] listItems = {context.getString(R.string.delete)
+        String [] listItems = {
+                context.getString(R.string.duplicate)
+                , context.getString(R.string.delete)
                 , context.getString(R.string.buy)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    RealmDB.get().executeTransaction(realm -> {
-                        item.deleteFromRealm();
-                        notifyItemRemoved(position);
-                        Toast.makeText(view1.getContext()
-                                , String.format("%s \"%s\"", listItems[i], item.getName())
-                                , Toast.LENGTH_SHORT).show();
-                    });
+                    Product p = new Product();
+                    p.setName(item.getName());
+                    p.setStoreName(item.getStoreName());
+                    p.setBarcode(item.getBarcode());
+                    p.setPrice(item.getPrice());
+                    p.setImageUrl(item.getImageUrl());
+                    p.setCheckInDate(System.currentTimeMillis());
+                    ProductDB.getInstance().add(p);
                     break;
                 case 1 :
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.delete)
+                            .setMessage(R.string.delete_product_message)
+                            .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
+                                dialogInterface.dismiss();
+                                RealmDB.get().executeTransaction(realm -> {
+                                    Toast.makeText(view1.getContext()
+                                            , String.format("%s \"%s\"", listItems[i], item.getName())
+                                            , Toast.LENGTH_SHORT).show();
+                                    item.deleteFromRealm();
+                                    notifyItemRemoved(position);
+                                });
+                            }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
+                            .show();
+
+                    break;
+                case 2 :
                     Intent intent = ProductCheckOutActivity.makeIntent(context, item);
                     context.startActivity(intent);
                     break;

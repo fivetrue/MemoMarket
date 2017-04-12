@@ -9,6 +9,7 @@
     <string name="bottom_navigator_behavior" translatable="false">com.fivetrue.market.memo.view.BottomNavigationBehavior</string>
 
     <string name="delete">Delete</string>
+    <string name="duplicate">Duplicate</string>
     <string name="revert">Revert</string>
     <string name="cart">Cart</string>
     <string name="buy">Buy</string>
@@ -18,6 +19,7 @@
     <string name="price">Price</string>
     <string name="store">Store</string>
     <string name="export">Export</string>
+    <string name="info">Info</string>
 
     <string name="excel">Excel</string>
     <string name="csv">CSV</string>
@@ -35,14 +37,18 @@
     <string name="add_item">Add Item</string>
     <string name="product_count"> %d products</string>
     <string name="total_product_count">Total %d products</string>
-    <string name="product_registered_date">Registered %s</string>
+    <string name="product_registered_date">Registered %s Items</string>
+    <string name="product_purchased_date">Purchased %s</string>
     <string name="reset_data">Reset Data</string>
     <string name="data">Data</string>
+    <string name="recently_purchase_list">Recently Purchase List</string>
+    <string name="recently_purchase_top_message" formatted="false">Last purchase %s.\nTotal %d</string>
 
     <string name="hint_input_product_name">Input name of product</string>
     <string name="register_product">Register Product</string>
 
-    <string name="no_item">There are no registered products.</string>
+    <string name="purchases_no_item">There are no products to purchase\nPlease add items.</string>
+    <string name="recently_no_item">No recent purchases\nPlease add items.</string>
 
     <string name="scan_barcode">Scan barcode</string>
     <string name="scan_barcode_message">If you scan a barcode, you can add it as a barcode when you add the next same item.</string>
@@ -59,6 +65,8 @@
     <string name="permission_denied_alert_message">Can not using Application denied permission. Really You want to denied permission?</string>
 
     <string name="reset_data_message">All saved data will be deleted.</string>
+    <string name="delete_product_message">This Product will be deleted.</string>
+    <string name="delete_purchase_product_message">The item will be deleted. When you delete it, it will also be deleted from your Purchase list.</string>
     <string name="export_data_message">You can save / share data in the form below.</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -126,7 +127,7 @@ public class PurchaseDetailListFragment extends BaseFragment{
     }
 
     public void setData(List<GroupedObservable<String, Product>> data){
-        if(data != null){
+        if(data != null && data.size() > 0){
             if(mAdapter == null){
                 mAdapter = new PurchaseDetailListAdapter(data, new PurchaseDetailListAdapter.OnPurchaseItemListener() {
                     @Override
@@ -143,19 +144,20 @@ public class PurchaseDetailListFragment extends BaseFragment{
             }else{
                 mAdapter.setData(data);
             }
+            MathFlowable.sumLong(Flowable.fromIterable(getProducts())
+                    .map(product -> product.getPrice()))
+                    .subscribe(aLong -> mTotalPrice.setText(CommonUtils.convertToCurrency(aLong)));
+
+            Flowable.fromIterable(getProducts())
+                    .count()
+                    .subscribe(aLong
+                            -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
+
+
+            validation();
+        }else{
+            getFragmentManager().popBackStackImmediate();
         }
-
-        MathFlowable.sumLong(Flowable.fromIterable(getProducts())
-                .map(product -> product.getPrice()))
-                .subscribe(aLong -> mTotalPrice.setText(CommonUtils.convertToCurrency(aLong)));
-
-        Flowable.fromIterable(getProducts())
-                .count()
-                .subscribe(aLong
-                        -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
-
-
-        validation();
     }
 
 

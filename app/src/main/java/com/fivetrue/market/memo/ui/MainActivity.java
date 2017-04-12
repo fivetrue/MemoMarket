@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
+import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
@@ -29,13 +34,12 @@ public class MainActivity extends BaseActivity{
 
     private static final String TAG = "MainActivity";
 
-    private MaterialMenuDrawable mMaterialMenuDrawable;
-
+    private DrawerLayout mDrawerLayout;
     private TextView mTitle;
-
     private PagerSlidingTabStrip mTab;
     private ViewPager mViewPager;
 
+    private ActionBarDrawerToggle mToggle;
     private MainPagerAdapter mAdapter;
 
     @Override
@@ -66,6 +70,12 @@ public class MainActivity extends BaseActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cart_return_white_20dp);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_main);
+        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.setDrawerListener(mToggle);
 
         mTitle = (TextView) findViewById(R.id.tv_main_title);
         mTitle.setTypeface(CommonUtils.getFont(this,  "font/DroidSansMono.ttf"));
@@ -93,10 +103,6 @@ public class MainActivity extends BaseActivity{
         mViewPager.setAdapter(mAdapter);
         mTab.setViewPager(mViewPager);
 
-        mMaterialMenuDrawable = new MaterialMenuDrawable(this, getResources().getColor(android.R.color.white), MaterialMenuDrawable.Stroke.THIN);
-        toolbar.setNavigationIcon(mMaterialMenuDrawable);
-        mMaterialMenuDrawable.setIconState(MaterialMenuDrawable.IconState.X);
-
         if(mTab.getLayoutParams() instanceof CoordinatorLayout.LayoutParams){
             CoordinatorLayout.Behavior behavior =
                     ((CoordinatorLayout.LayoutParams) mTab.getLayoutParams()).getBehavior();
@@ -118,6 +124,29 @@ public class MainActivity extends BaseActivity{
         }
     }
 
+    public void closeDrawer(){
+        if(mDrawerLayout != null){
+            if(LL.D) Log.d(TAG, "closeDrawer() try to close drawer");
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
+
+    public void openDrawer(){
+        if(mDrawerLayout != null){
+            if(LL.D) Log.d(TAG, "openDrawer() try to open drawer");
+            mDrawerLayout.openDrawer(GravityCompat.START);
+        }
+    }
+
+    public boolean isOpenDrawer(){
+        if(mDrawerLayout != null){
+            boolean b = mDrawerLayout.isDrawerOpen(GravityCompat.START);
+            if(LL.D) Log.d(TAG, "isOpenDrawer() returned: " + b);
+            return b;
+        }
+        return false;
+    }
+
     @Override
     public int getDefaultFragmentAnchor() {
         return R.id.layout_main_anchor;
@@ -137,6 +166,10 @@ public class MainActivity extends BaseActivity{
                 startActivity(intent);
                 break;
 
+            case R.id.action_info :
+                CommonUtils.goStore(this);
+                break;
+
             default:
                 if(getSupportFragmentManager().getFragments() != null){
                     for(Fragment f : getSupportFragmentManager().getFragments()){
@@ -153,6 +186,11 @@ public class MainActivity extends BaseActivity{
 
     @Override
     public void onBackStackChanged() {
+        if(mDrawerLayout != null && mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+            return;
+        }
+
         FragmentManager fm = getCurrentFragmentManager();
         if(fm.getBackStackEntryCount() > 0){
             FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
@@ -161,46 +199,19 @@ public class MainActivity extends BaseActivity{
             }else{
                 mTitle.setText(R.string.app_name);
             }
-            animateActionBarMenu(MaterialMenuDrawable.IconState.ARROW);
         }else{
             mTitle.setText(R.string.app_name);
-            animateActionBarMenu(MaterialMenuDrawable.IconState.X);
         }
     }
 
-    private void animateActionBarMenu(MaterialMenuDrawable.IconState state){
-        if(state != null && mMaterialMenuDrawable != null){
-            ValueAnimator animator = null;
-            switch (state){
-                case X:{
-                    if (mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.X){
-                        animator = ValueAnimator.ofFloat(0, 1);
-                        animator.addUpdateListener(valueAnimator -> {
-                            float value = (Float)valueAnimator.getAnimatedValue();
-                            mMaterialMenuDrawable.setTransformationOffset(
-                                    MaterialMenuDrawable.AnimationState.ARROW_X,
-                                    value);
-                        });
-                    }
-                }
-                break;
-
-                case ARROW: {
-                    if(mMaterialMenuDrawable.getIconState() != MaterialMenuDrawable.IconState.ARROW){
-                        animator = ValueAnimator.ofFloat(1, 0);
-                        animator.addUpdateListener(valueAnimator -> {
-                            float value = (Float)valueAnimator.getAnimatedValue();
-                            mMaterialMenuDrawable.setTransformationOffset(
-                                    MaterialMenuDrawable.AnimationState.ARROW_X,
-                                    value);
-                        });
-                    }
-                }
-            }
-            if(animator != null){
-                animator.setDuration(250).start();
-            }
+    @Override
+    protected void onClickHome() {
+        if(isOpenDrawer()){
+            closeDrawer();
+        }else{
+            openDrawer();
         }
+//        super.onClickHome();
     }
 
     @Override

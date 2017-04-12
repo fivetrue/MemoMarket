@@ -83,6 +83,7 @@ public class ProductCheckOutActivity extends BaseActivity{
                                 product.setStoreName(store);
                                 product.setBarcode(barcode);
                                 product.setCheckOutDate(mCheckOutMillis);
+
                                 SimpleViewUtils.hideView(holder.accept, View.GONE);
                                 SimpleViewUtils.showView(holder.progressBar, View.VISIBLE);
                                 FirebaseDB.getInstance(ProductCheckOutActivity.this)

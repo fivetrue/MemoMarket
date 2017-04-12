@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.ui.MainActivity;
+import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.adapter.list.PurchaseListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
@@ -38,6 +41,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
 
     private static final String TAG = "PurchaseListFragment";
 
+    private View mBottomView;
     private RecyclerView mRecyclerView;
     private Spinner mSpinner;
     private TextView mNoItem;
@@ -90,6 +94,17 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mSpinner = (Spinner) view.findViewById(R.id.sp_fragment_purchase_list);
         mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mNoItem.setOnClickListener(v -> {
+            if(getActivity() != null){
+                Intent intent = new Intent(getActivity(), ProductAddActivity.class);
+                startActivity(intent);
+                if(getActivity() instanceof MainActivity){
+                    ((MainActivity) getActivity()).movePageToLeft();
+                }
+            }
+        });
+
+        mBottomView = view.findViewById(R.id.layout_fragment_purchase_list_bottom);
 
         List<Filter> filters = new ArrayList<>();
         filters.add(new Filter(getString(R.string.all), Filter.Value.ALL));
@@ -115,7 +130,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
 
             }
         });
-        view.findViewById(R.id.layout_fragment_purchase_list_bottom).setOnClickListener(null);
+        mBottomView.setOnClickListener(null);
         ProductDB.getInstance().updatePublish();
     }
 
@@ -154,7 +169,6 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
                 .count()
                 .subscribe(aLong
                         -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
-
 
         validation();
     }
@@ -198,6 +212,10 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         if(mNoItem != null){
             mNoItem.setVisibility(mAdapter != null && mAdapter.getItemCount() -1 > 0
                     ? View.GONE : View.VISIBLE);
+        }
+        if(mBottomView != null){
+            mBottomView.setVisibility(mAdapter != null && mAdapter.getItemCount() -1 > 0
+                    ? View.VISIBLE : View.GONE);
         }
     }
 

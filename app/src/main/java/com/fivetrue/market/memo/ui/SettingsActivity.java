@@ -59,7 +59,10 @@ public class SettingsActivity extends BaseActivity {
                         builder.setTitle(android.R.string.dialog_alert_title)
                                 .setMessage(R.string.reset_data_message)
                                 .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
-                                    dialogInterface.dismiss();
+                                    ProductDB.get().executeTransaction(realm -> {
+                                        ProductDB.get().deleteAll();
+                                        dialogInterface.dismiss();
+                                    });
                                 }).setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
                             dialogInterface.dismiss();
                         }).show();

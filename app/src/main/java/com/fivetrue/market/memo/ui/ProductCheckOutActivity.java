@@ -76,7 +76,7 @@ public class ProductCheckOutActivity extends BaseActivity{
                     String price = holder.priceInput.getText().toString();
                     String store = holder.storeInput.getText().toString();
                     String barcode = holder.barcode.getText().toString();
-                    if(!TextUtils.isEmpty(price)){
+                    if(!TextUtils.isEmpty(price) && !TextUtils.isEmpty(store)){
                         try{
                             long value = Long.parseLong(price.trim());
                             ProductDB.get().executeTransaction(realm -> {
@@ -92,16 +92,15 @@ public class ProductCheckOutActivity extends BaseActivity{
                                         , product.getPrice()
                                         , product.getStoreName());
 
-                                FirebaseDB.getInstance(ProductCheckOutActivity.this)
-                                        .addProduct(product).addOnCompleteListener(task -> {
-                                    if(mAdapter != null && mAdapter.getData().size() > holder.getAdapterPosition()){
-                                        mAdapter.getData().remove(holder.getAdapterPosition());
-                                        mAdapter.notifyItemRemoved(holder.getAdapterPosition());
-                                    }
-                                    if(mAdapter.getItemCount() == 0){
-                                        finish();
-                                    }
-                                });
+                                if(!TextUtils.isEmpty(product.getBarcode())){
+                                    FirebaseDB.getInstance(ProductCheckOutActivity.this)
+                                            .addProduct(product).addOnCompleteListener(task -> {
+                                        arrangeProduct(holder);
+                                    });
+                                }else{
+                                    arrangeProduct(holder);
+                                }
+
                             });
                         }catch (Exception e){
                             Log.w(TAG, "onAcceptProduct: ", e);
@@ -117,14 +116,20 @@ public class ProductCheckOutActivity extends BaseActivity{
             public void onDeleteProduct(CheckOutListAdapter.CheckOutViewHolder holder, Product product) {
                 ProductDB.get().executeTransaction(realm -> {
                     product.setCheckOutDate(0);
-                    mAdapter.getData().remove(holder.getAdapterPosition());
-                    mAdapter.notifyItemRemoved(holder.getAdapterPosition());
-                    if(mAdapter.getItemCount() == 0){
-                        finish();
-                    }
+                    arrangeProduct(holder);
                 });
             }
         });
+    }
+
+    private void arrangeProduct(CheckOutListAdapter.CheckOutViewHolder holder){
+        if(mAdapter != null && mAdapter.getData().size() > holder.getAdapterPosition()){
+            mAdapter.getData().remove(holder.getAdapterPosition());
+            mAdapter.notifyItemRemoved(holder.getAdapterPosition());
+        }
+        if(mAdapter.getItemCount() == 0){
+            finish();
+        }
     }
 
     private void initView(){

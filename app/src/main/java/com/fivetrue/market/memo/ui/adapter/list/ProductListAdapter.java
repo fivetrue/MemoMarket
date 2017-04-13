@@ -97,7 +97,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private void onBindProductAddHolder(ProductListAdapter.ProductAddHolder holder, int position){
         holder.layout.setOnClickListener(view -> {
-            ProductAddActivity.startProductAdd(view.getContext(), TAG);
+            view.getContext().startActivity(ProductAddActivity.makeIntent(view.getContext(), TAG));
         });
 
     }

@@ -5,14 +5,13 @@ import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.database.FirebaseDB;
-import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.net.NetworkServiceProvider;
-import com.fivetrue.market.memo.net.service.ImageService;
+import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +48,10 @@ public class DataManager {
     }
 
     public Observable<ConfigData> getConfig(){
+        ConfigData data = DefaultPreferenceUtil.getConfigData(mContext);
+        if(data != null){
+            return Observable.just(data);
+        }
         return mFirebaseDB.getConfig();
     }
 

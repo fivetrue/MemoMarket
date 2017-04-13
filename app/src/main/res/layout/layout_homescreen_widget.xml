@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/layout_home_widget_top"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:gravity="center_vertical"
@@ -40,6 +41,7 @@
         android:id="@+id/lv_home_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/layout_home_widget_top"
         android:background="@android:color/white"
         android:elevation="3dp"/>
 

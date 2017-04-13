@@ -132,16 +132,17 @@ public class ProductAddActivity extends BaseActivity{
      * Setting barcode sku after getting sku from Barcode scanner.
      * @param barcode
      */
-    private void setBarcode(String barcode){
-        mScanBarcode = barcode;
-        mBarcode.setText(barcode);
+    private void setBarcode(IntentResult barcode){
+        mScanBarcode = barcode.getContents();
+        mBarcode.setText(barcode.getContents());
         mFabScan.setVisibility(View.GONE);
-        TrackingUtil.getInstance().scanBarcode(barcode);
+        TrackingUtil.getInstance().scanBarcode(barcode.getContents());
         DataManager.getInstance(this).findBarcode(mScanBarcode)
                 .subscribe(productData -> {
                     setProductData(productData.get(0));
                     findImage();
                 }, throwable -> {
+                    mInput.findFocus();
                     Snackbar.make(mLayoutInput, throwable.getMessage(), Snackbar.LENGTH_LONG).show();
                 });
     }
@@ -284,13 +285,18 @@ public class ProductAddActivity extends BaseActivity{
             if(LL.D) Log.d(TAG, "afterTextChanged() called with: editable = [" + editable + "]");
             final String text = editable.toString().trim();
             if(TextUtils.isEmpty(text)){
-                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primaryRed)));
+                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
             }else{
-                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primaryGreen)));
+                mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
             }
-            if(!TextUtils.isEmpty(text) && !(selectedName != null && selectedName.equals(text))){
+            if(!TextUtils.isEmpty(text)
+                    && !(selectedName != null && selectedName.equals(text))
+                    && TextUtils.isEmpty(mBarcode.getText())){
                 mProgressRetrieving.setVisibility(View.VISIBLE);
-                DataManager.getInstance(ProductAddActivity.this).findProductName(text).subscribe(storeDatas -> {
+                DataManager.getInstance(ProductAddActivity.this)
+                        .findProductName(text)
+                        .distinct()
+                        .subscribe(storeDatas -> {
                     setRetrievedProductList(storeDatas);
                 }, throwable -> TrackingUtil.getInstance().report(throwable));
             }else{
@@ -307,17 +313,17 @@ public class ProductAddActivity extends BaseActivity{
             if(result.getContents() == null) {
                 Toast.makeText(this, R.string.scan_barcode_canceled, Toast.LENGTH_LONG).show();
             } else {
-                setBarcode(result.getContents());
+                setBarcode(result);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
-    public static void startProductAdd(Context context, String where){
+    public static Intent makeIntent(Context context, String where){
         Log.i(TAG, "startProductAdd: where : " + where);
         TrackingUtil.getInstance().startProductAdd(where);
         Intent intent = new Intent(context, ProductAddActivity.class);
-        context.startActivity(intent);
+        return intent;
     }
 }

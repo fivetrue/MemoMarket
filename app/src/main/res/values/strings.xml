@@ -60,7 +60,7 @@
     <string name="error_empty_product_barcode">Unregistered barcode. When the product is purchased, the barcode is registered on the server.</string>
 
     <string name="product_moved_completed_message">Item has been moved to cart.</string>
-    <string name="product_has_no_price_message">Please set the price of the product.</string>
+    <string name="product_has_no_price_message">Please set the price or store of the product.</string>
 
     <string name="permission_denied_alert_message">Can not using Application denied permission. Really You want to denied permission?</string>
 

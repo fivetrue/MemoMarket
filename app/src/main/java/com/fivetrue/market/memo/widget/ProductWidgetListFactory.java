@@ -1,8 +1,8 @@
 package com.fivetrue.market.memo.widget;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -31,16 +31,13 @@ public class ProductWidgetListFactory extends AbsRemoteViewsFactory<ProductDB.Sh
     }
 
     @Override
-    protected void onView(RemoteViews remoteViews, ProductDB.ShareableProduct data) {
+    protected void onView(RemoteViews remoteViews, ProductDB.ShareableProduct data, int position) {
         if(LL.D)
             Log.d(TAG, "onView() called with: remoteViews = [" + remoteViews + "], data = [" + data + "]");
         remoteViews.setTextViewText(R.id.tv_item_homescreen_widget_list, data.getName());
-
-        Intent intent = new Intent(getContext(), HomeScreenWidget.class);
-        intent.setAction(HomeScreenWidget.ACTION_CHECKOUT_PRODUCT);
-        intent.putExtra(HomeScreenWidget.KEY_PRODUCT_CHECK_IN_DATE, data.getCheckInDate());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        remoteViews.setOnClickPendingIntent(R.id.tv_item_homescreen_widget_list, pendingIntent);
+        Intent fillInIntent = new Intent();
+        fillInIntent.putExtra(HomeScreenWidget.KEY_LIST_POSITION, position);
+        remoteViews.setOnClickFillInIntent(R.id.tv_item_homescreen_widget_list, fillInIntent);
     }
 
     @Override

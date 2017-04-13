@@ -31,7 +31,7 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
                 AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
-    abstract protected void onView(RemoteViews remoteViews, T data);
+    abstract protected void onView(RemoteViews remoteViews, T data, int pos);
 
     protected int getListRowLayoutId(){
         throw new IllegalStateException("Must be implements getListRowLayoutId");
@@ -62,7 +62,7 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
         T item = getItem(position);
         RemoteViews remoteView = new RemoteViews(
                 mContext.getPackageName(), getListRowLayoutId());
-        onView(remoteView, item);
+        onView(remoteView, item, position);
         return remoteView;
     }
 

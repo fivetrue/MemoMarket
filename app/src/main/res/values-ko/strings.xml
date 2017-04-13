@@ -52,7 +52,7 @@
     <string name="error_empty_product_barcode">등록되지 않은 바코드입니다. 상품이 구매목록으로 이동 할 때 바코드가 서버에 등록됩니다.</string>
 
     <string name="product_moved_completed_message">상품이 카트로 이동 되었습니다.</string>
-    <string name="product_has_no_price_message">상품의 가격을 설정해 주세요.</string>
+    <string name="product_has_no_price_message">상품의 가격과 구매처를 설정해 주세요.</string>
 
     <string name="permission_denied_alert_message">권한을 거부하면 앱을 사용 할 수 없습니다. 정말 권한을 거부하겠습니까?</string>
     <string name="reset_data_message">모든 저장된 데이터가 삭제 됩니다.</string>

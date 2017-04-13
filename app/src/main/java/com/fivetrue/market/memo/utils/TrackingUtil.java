@@ -109,4 +109,10 @@ public class TrackingUtil {
         b.putString("barcode", barcode);
         FirebaseAnalytics.getInstance(mContext).logEvent("ScanBarcode", b);
     }
+
+    public void startApp(String where){
+        Bundle b = new Bundle();
+        b.putString("Where", where);
+        FirebaseAnalytics.getInstance(mContext).logEvent("StartAPP", b);
+    }
 }

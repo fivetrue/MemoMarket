@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
+import com.fivetrue.market.memo.database.product.ProductDB;
 
 import io.realm.DynamicRealm;
 import io.realm.Realm;
@@ -30,5 +31,7 @@ public class RealmDB {
                 .migration(new RealmDBMigration()) // 예외 발생대신에 마이그레이션을 수행하기
                 .build();
         Realm.setDefaultConfiguration(config);
+
+        ProductDB.init(context);
     }
 }

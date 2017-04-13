@@ -35,9 +35,6 @@ public class RecentlyPurchaseListAdapter extends ProductListAdapter {
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
-            Toast.makeText(view1.getContext()
-                    , String.format("%s \"%s\"", listItems[i], item.getName())
-                    , Toast.LENGTH_SHORT).show();
             switch (i){
                 case 0 :
                     Product product = new Product();
@@ -48,6 +45,9 @@ public class RecentlyPurchaseListAdapter extends ProductListAdapter {
                     product.setPrice(item.getPrice());
                     product.setCheckInDate(System.currentTimeMillis());
                     ProductDB.getInstance().add(product);
+                    Toast.makeText(view1.getContext()
+                            , String.format("%s \"%s\"", listItems[i], item.getName())
+                            , Toast.LENGTH_SHORT).show();
                     break;
 
                 case 1 :
@@ -56,6 +56,9 @@ public class RecentlyPurchaseListAdapter extends ProductListAdapter {
                             .setMessage(R.string.delete_purchase_product_message)
                             .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
                                 dialogInterface.dismiss();
+                                Toast.makeText(view1.getContext()
+                                        , String.format("%s \"%s\"", listItems[i], item.getName())
+                                        , Toast.LENGTH_SHORT).show();
                                 ProductDB.get().executeTransaction(realm -> {
                                     TrackingUtil.getInstance().deleteProduct(item.getName(), TAG);
                                     item.deleteFromRealm();

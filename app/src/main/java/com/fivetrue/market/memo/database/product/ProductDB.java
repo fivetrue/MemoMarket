@@ -1,5 +1,7 @@
 package com.fivetrue.market.memo.database.product;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
@@ -24,16 +26,19 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     private static ProductDB sInstance;
 
+    private Context mContext;
     private PublishSubject<List<Product>> mProductPublishSubject;
 
+    public static void init(Context context){
+        sInstance = new ProductDB(context.getApplicationContext());
+    }
+
     public static ProductDB getInstance(){
-        if(sInstance == null){
-            sInstance = new ProductDB();
-        }
         return sInstance;
     }
 
-    private ProductDB(){
+    private ProductDB(Context context){
+        mContext = context;
         mProductPublishSubject = PublishSubject.create();
         get().addChangeListener(this);
     }
@@ -42,21 +47,18 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
     public void add(Product product){
         get().executeTransaction(realm -> {
             get().insert(product);
-            updatePublish();
         });
     }
 
     public void add(List<Product> products){
         get().executeTransaction(realm -> {
             get().insert(products);
-            updatePublish();
         });
     }
 
     public void delete(Product product){
         get().executeTransaction(realm -> {
             product.deleteFromRealm();
-            updatePublish();
         });
     }
 
@@ -85,5 +87,11 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
     public void onChange(Realm element) {
         if(LL.D) Log.d(TAG, "onChange() called with: element = [" + element + "]");
         updatePublish();
+        updateIntent();
+    }
+
+    private void updateIntent(){
+        Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
+        mContext.sendBroadcast(intent);
     }
 }

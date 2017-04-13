@@ -15,6 +15,7 @@ import android.widget.RemoteViews;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
+import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.SplashActivity;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 
@@ -27,9 +28,13 @@ public class HomeScreenWidget extends AppWidgetProvider {
 
     private static final String TAG = "HomeScreenWidget";
 
-    private static final String ACTION_APP_START = "com.fivetrue.market.memo.widget.app.start";
-    private static final String ACTION_ADD_PRODUCT = "com.fivetrue.market.memo.widget.product.add";
-    private static final String ACTION_WIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
+    public static final String ACTION_APP_START = "com.fivetrue.market.memo.widget.app.start";
+    public static final String ACTION_ADD_PRODUCT = "com.fivetrue.market.memo.widget.product.add";
+    public static final String ACTION_CHECKOUT_PRODUCT = "com.fivetrue.market.memo.widget.product.checkout";
+    public static final String ACTION_WIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
+
+    public static final String KEY_PRODUCT_CHECK_IN_DATE = "product_check_in_date";
+
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -57,14 +62,16 @@ public class HomeScreenWidget extends AppWidgetProvider {
             listIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             listIntent.setData(Uri.parse(listIntent.toUri(Intent.URI_INTENT_SCHEME)));
             remoteViews.setRemoteAdapter(R.id.lv_home_widget, listIntent);
-
-            appWidgetManager.updateAppWidget(widgetId, remoteViews);
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.lv_home_widget);
+            appWidgetManager.updateAppWidget( new ComponentName( context, getClass()),
+                    remoteViews);
         }
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+        onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass())));
     }
 
     @Override
@@ -75,11 +82,15 @@ public class HomeScreenWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass())));
     }
 
     @Override
     public void onDisabled(Context context) {
         super.onDisabled(context);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass())));
     }
 
     @Override
@@ -97,13 +108,13 @@ public class HomeScreenWidget extends AppWidgetProvider {
             if(!TextUtils.isEmpty(action)){
                 if(ACTION_ADD_PRODUCT.equalsIgnoreCase(action)){
                     onClickAddProduct(context, intent);
+                }else if(ACTION_CHECKOUT_PRODUCT.equalsIgnoreCase(action)){
+                    onClickCheckoutProduct(context, intent);
                 }else if(ACTION_APP_START.equalsIgnoreCase(action)){
                     onStartApp(context, intent);
-                }else{
+                }else {
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                    onUpdate(context, appWidgetManager
-                            , appWidgetManager
-                                    .getAppWidgetIds(new ComponentName(context, HomeScreenWidget.class)));
+                    onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass())));
                 }
             }
         }
@@ -114,6 +125,19 @@ public class HomeScreenWidget extends AppWidgetProvider {
             Log.d(TAG, "onClickAddProduct() called with: context = [" + context + "], intent = [" + intent + "]");
         ProductAddActivity.startProductAdd(context, TAG);
     }
+
+    private void onClickCheckoutProduct(Context context, Intent intent){
+        if(LL.D)
+            Log.d(TAG, "onClickAddProduct() called with: context = [" + context + "], intent = [" + intent + "]");
+        long date = intent.getLongExtra(KEY_PRODUCT_CHECK_IN_DATE, 0);
+        if(date > 0){
+            Intent activityIntent = ProductCheckOutActivity.makeIntent(context, TAG, date);
+            context.startActivity(activityIntent);
+
+        }
+    }
+
+
 
     private void onStartApp(Context context, Intent intent){
         if(LL.D)

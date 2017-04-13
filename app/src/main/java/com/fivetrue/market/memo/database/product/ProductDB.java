@@ -8,13 +8,13 @@ import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmQuery;
 
 /**
  * Created by kwonojin on 2017. 3. 28..
@@ -28,6 +28,7 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     private Context mContext;
     private PublishSubject<List<Product>> mProductPublishSubject;
+    private List<ShareableProduct> mShareableProducts = new ArrayList<>();
 
     public static void init(Context context){
         sInstance = new ProductDB(context.getApplicationContext());
@@ -80,18 +81,46 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     public void updatePublish(){
         if(LL.D) Log.d(TAG, "updatePublish() called");
-        mProductPublishSubject.onNext(getProducts());
+        List<Product> products = getProducts();
+        mProductPublishSubject.onNext(products);
+        updateWidgetIntent(products);
     }
 
     @Override
     public void onChange(Realm element) {
         if(LL.D) Log.d(TAG, "onChange() called with: element = [" + element + "]");
         updatePublish();
-        updateIntent();
     }
 
-    private void updateIntent(){
-        Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
-        mContext.sendBroadcast(intent);
+    public List<ShareableProduct> getShareableProducts(){
+        return mShareableProducts;
+    }
+
+    private void updateWidgetIntent(List<Product> products){
+        Observable.fromIterable(products)
+                .filter(product -> product.getCheckOutDate() == 0)
+                .map(product -> new ShareableProduct(product))
+                .toList().subscribe(shareableProducts -> {
+            mShareableProducts = shareableProducts;
+            Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
+            mContext.sendBroadcast(intent);
+        });
+    }
+
+    public static final class ShareableProduct{
+        private final String name;
+        private final long checkInDate;
+
+        public ShareableProduct(Product product) {
+            this.name = product.getName();
+            this.checkInDate = product.getCheckInDate();
+        }
+        public String getName() {
+            return name;
+        }
+
+        public long getCheckInDate() {
+            return checkInDate;
+        }
     }
 }

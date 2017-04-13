@@ -3,7 +3,6 @@ package com.fivetrue.market.memo.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -11,6 +10,7 @@ import android.widget.RemoteViewsService;
 import com.fivetrue.market.memo.LL;
 
 import java.util.List;
+
 
 /**
  * Created by kwonojin on 2017. 4. 13..
@@ -29,10 +29,7 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
         mContext = context;
         mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
-        mData = makeListData();
     }
-
-    abstract protected List<T> makeListData();
 
     abstract protected void onView(RemoteViews remoteViews, T data);
 
@@ -59,28 +56,30 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
     public T getItem(int pos){
         return mData.get(pos);
     }
-    /*
-    *Similar to getView of Adapter where instead of View
-    *we return RemoteViews
-    *
-    */
+
     @Override
     public RemoteViews getViewAt(int position) {
+        T item = getItem(position);
         RemoteViews remoteView = new RemoteViews(
                 mContext.getPackageName(), getListRowLayoutId());
-        T item = getItem(position);
-        new Handler(mContext.getMainLooper()).post(() -> onView(remoteView, item));
+        onView(remoteView, item);
         return remoteView;
     }
 
     @Override
     public void onCreate() {
+        if(LL.D) Log.d(TAG, "onCreate() called");
 
     }
 
     @Override
-    public void onDataSetChanged() {
+    public void onDataSetChanged(){
 
+    }
+
+    protected void setData(List<T> data){
+        if(LL.D) Log.d(TAG, "setData() called with: data = [" + data + "]");
+        mData = data;
     }
 
     @Override

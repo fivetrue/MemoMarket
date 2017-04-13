@@ -33,7 +33,7 @@ public class CheckOutProductFragment extends ProductListFragment{
     @Override
     public void onClickActionButton() {
         if(getAdapter() != null && getActivity() != null){
-            Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), getAdapter().getSelections());
+            Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), TAG, getAdapter().getSelections());
             getActivity().startActivity(intent);
             getAdapter().clearSelection();
             updateFab();

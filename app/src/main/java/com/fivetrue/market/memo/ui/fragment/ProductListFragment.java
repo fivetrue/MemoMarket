@@ -169,7 +169,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     }
 
     public void onClickActionButton(){
-        Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), getAdapter().getSelections());
+        Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), TAG, getAdapter().getSelections());
         getActivity().startActivity(intent);
         getAdapter().clearSelection();
         updateFab();

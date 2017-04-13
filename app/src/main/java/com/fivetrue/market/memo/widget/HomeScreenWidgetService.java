@@ -10,7 +10,7 @@ import android.widget.RemoteViewsService;
 public class HomeScreenWidgetService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return(new HomeRemoteViewsFactory(this.getApplicationContext(),
+        return(new ProductWidgetListFactory(this.getApplicationContext(),
                 intent));
     }
 }

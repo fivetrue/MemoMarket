@@ -95,6 +95,12 @@ public class TrackingUtil {
         FirebaseAnalytics.getInstance(mContext).logEvent("AddProduct", b);
     }
 
+    public void startProductCheckout(String where){
+        Bundle b = new Bundle();
+        b.putString("Where", where);
+        FirebaseAnalytics.getInstance(mContext).logEvent("StartProductCheckout", b);
+    }
+
     public void checkoutProduct(String name, String barcode, long price, String store){
         Bundle b = new Bundle();
         b.putString("Name", name);

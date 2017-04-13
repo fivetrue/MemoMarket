@@ -137,14 +137,20 @@ public class ProductCheckOutActivity extends BaseActivity{
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    public static Intent makeIntent(Context context, Product product){
+    public static Intent makeIntent(Context context, String where, Product product){
         ArrayList<Product> array = new ArrayList<>();
         array.add(product);
-        return makeIntent(context, array);
+        return makeIntent(context, where, array);
     }
 
-    public static Intent makeIntent(Context context, List<Product> products){
+    public static Intent makeIntent(Context context, String where, long... array){
+        TrackingUtil.getInstance().startProductCheckout(where);
         Intent intent = new Intent(context, ProductCheckOutActivity.class);
+        intent.putExtra(KEY_CHECK_OUT_ITEMS, array);
+        return intent;
+    }
+
+    public static Intent makeIntent(Context context, String where, List<Product> products){
         List<Long> list = Observable.fromIterable(products)
                 .map(product -> product.getCheckInDate())
                 .toList().blockingGet();
@@ -153,8 +159,7 @@ public class ProductCheckOutActivity extends BaseActivity{
         for(int i = 0 ; i < list.size() ; i ++){
             array[i] = list.get(i);
         }
-        intent.putExtra(KEY_CHECK_OUT_ITEMS, array);
-        return intent;
+        return makeIntent(context, where, array);
     }
 
     @Override

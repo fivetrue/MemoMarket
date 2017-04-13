@@ -144,7 +144,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    Intent intent = ProductCheckOutActivity.makeIntent(context, item);
+                    Intent intent = ProductCheckOutActivity.makeIntent(context, TAG, item);
                     context.startActivity(intent);
                     break;
                 case 1 :

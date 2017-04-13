@@ -31,11 +31,13 @@
 
         <activity android:name=".ui.ProductAddActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Transparent"/>
+            android:theme="@style/AppTheme.Transparent"
+            android:windowSoftInputMode="adjustNothing"/>
 
         <activity android:name=".ui.ProductCheckOutActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Transparent" />
+            android:theme="@style/AppTheme.Transparent"
+            android:windowSoftInputMode="adjustNothing"/>
 
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"

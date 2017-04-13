@@ -3,13 +3,16 @@ package com.fivetrue.market.memo.ui.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
+import com.fivetrue.market.memo.ui.adapter.list.ProductCheckoutListAdapter;
 import com.fivetrue.market.memo.ui.adapter.list.RecentlyPurchaseListAdapter;
 import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
+import com.fivetrue.market.memo.utils.CommonUtils;
 
 import java.util.List;
 
@@ -25,7 +28,11 @@ public class CheckOutProductFragment extends ProductListFragment{
     protected boolean makeFilter(Product p) {
         boolean b = false;
         if(p != null){
-            b = p.getCheckOutDate() == 0;
+            b = p.getCheckOutDate() > 0 &&
+                    CommonUtils.getDate(getActivity()
+                            , "MM dd yyyy", p.getCheckOutDate())
+                            .equals(CommonUtils.getDate(getActivity()
+                                    , "MM dd yyyy",System.currentTimeMillis()));
         }
         return b;
     }
@@ -45,15 +52,23 @@ public class CheckOutProductFragment extends ProductListFragment{
 
     @Override
     protected ProductListAdapter makeAdapter(List<Product> productList) {
-        ProductListAdapter adapter =  new RecentlyPurchaseListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
+        ProductListAdapter adapter =  new ProductCheckoutListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
             @Override
             public void onClickItem(ProductListAdapter.ProductHolder holder, Product item) {
-                getAdapter().toggle(holder.getAdapterPosition());
-                updateFab();
+
             }
 
             @Override
             public boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item) {
+                if(item != null){
+                    if(item != null && getActivity() != null){
+                        Toast.makeText(getActivity()
+                                , String.format(getString(R.string.product_purchased_date)
+                                        , CommonUtils.getDate(getActivity(), "MM dd yyyy HH"
+                                                , item.getCheckInDate())), Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+                }
                 return false;
             }
         });
@@ -63,12 +78,12 @@ public class CheckOutProductFragment extends ProductListFragment{
 
     @Override
     public String getTitle(Context context) {
-        return context.getString(R.string.cart);
+        return context.getString(R.string.purchase_list);
     }
 
     @Override
     public int getImageResource() {
-        return R.drawable.selector_cart_loaded;
+        return R.drawable.selector_feed;
     }
 
     @Override
@@ -86,13 +101,4 @@ public class CheckOutProductFragment extends ProductListFragment{
         return TabIcon.TextWithIcon;
     }
 
-    @Override
-    protected int getFabIconResource() {
-        return R.drawable.ic_cart_checkout_white_50dp;
-    }
-
-    @Override
-    protected int getFabTintColor() {
-        return R.color.colorPrimaryDark;
-    }
 }

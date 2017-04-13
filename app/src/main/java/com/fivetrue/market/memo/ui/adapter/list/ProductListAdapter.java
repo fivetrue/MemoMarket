@@ -102,7 +102,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     }
 
-    private void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
+    protected void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
         final Product item = getItem(position);
         if(holder != null && item != null){
             holder.setProduct(item, isSelect(position));

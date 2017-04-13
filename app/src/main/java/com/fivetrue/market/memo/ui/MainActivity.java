@@ -16,11 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
+import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
 import com.fivetrue.market.memo.ui.fragment.PurchaseListFragment;
 import com.fivetrue.market.memo.utils.CommonUtils;
@@ -61,8 +61,8 @@ public class MainActivity extends BaseActivity{
 
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
-//        fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
-        fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
+//        fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
     }
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-6669013618691184~6843117953</string>
+    <string name="admob_product_add_bottom" translatable="false">ca-app-pub-6669013618691184/8319851151</string> <!--300x250 -->
+    <string name="admob_product_checkout_bottom" translatable="false">ca-app-pub-6669013618691184/9796584356</string> <!--300x250 -->
+    <string name="admob_product_list_bottom" translatable="false">ca-app-pub-6669013618691184/9964707952</string> <!--300x250 -->
+
+    <string name="market_google_api_key" translatable="false">AIzaSyA7eHZcWoTphPpciLGYYPZQZboxqBXuwLc</string>
+</resources>

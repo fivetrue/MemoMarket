@@ -1,7 +1,6 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -79,7 +78,7 @@ public class RecentlyPurchaseListFragment extends BaseFragment{
         super.onViewCreated(view, savedInstanceState);
 
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_recently_product_list);
-        mTopMessage = (TextView) view.findViewById(R.id.tv_fragment_recently_product_list_top);
+        mTopMessage = (TextView) view.findViewById(R.id.tv_navi_header_top);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_recently_product_list);
 
         mLayoutManager = new GridLayoutManager(getActivity(), 2, GridLayoutManager.VERTICAL, false);
@@ -105,7 +104,6 @@ public class RecentlyPurchaseListFragment extends BaseFragment{
             if(getActivity() != null) {
                 v.getContext().startActivity(ProductAddActivity.makeIntent(view.getContext(), TAG));
                 if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).closeDrawer();
                     ((MainActivity) getActivity()).movePageToLeft();
                 }
             }

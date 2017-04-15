@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_bar_height"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center"
+        android:elevation="5dp">
+
+        <TextView
+            android:id="@+id/tv_navi_header_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:gravity="center"
+            android:textSize="14dp"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+</LinearLayout>

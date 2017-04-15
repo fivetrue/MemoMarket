@@ -18,7 +18,6 @@ import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.TrackingUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -133,7 +132,8 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     protected ListPopupWindow makePopup(Context context, GroupedObservable<String, Product> item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
-        String [] listItems = {context.getString(R.string.export)};
+        String [] listItems = {context.getString(R.string.export)
+                ,context.getString(R.string.send)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
@@ -142,6 +142,9 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     ExportUtil.export(context
                             , SDF.format(new Date(System.currentTimeMillis()))
                             ,  mDataMap.get(item));
+                    break;
+                case 1 :
+                    ExportUtil.send(context, item.getKey(), mDataMap.get(item));
                     break;
             }
         });

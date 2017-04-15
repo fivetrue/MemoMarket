@@ -11,6 +11,7 @@ import android.support.v7.widget.SnapHelper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
@@ -18,6 +19,7 @@ import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.list.CheckOutListAdapter;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -43,6 +45,7 @@ public class ProductCheckOutActivity extends BaseActivity{
     private CheckOutListAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
+    private FrameLayout mLayoutAd;
 
     private long mCheckOutMillis;
 
@@ -135,11 +138,24 @@ public class ProductCheckOutActivity extends BaseActivity{
     private void initView(){
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_checkout_list);
         mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mLayoutAd = (FrameLayout) findViewById(R.id.layout_ad_product_checkout);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new FadeInAnimator());
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        AdUtil.getInstance().addAdView(mLayoutAd, AdUtil.AD_PRODUCT_CHECK_OUT, false);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AdUtil.getInstance().detachAdView(AdUtil.AD_PRODUCT_CHECK_OUT);
     }
 
     public static Intent makeIntent(Context context, String where, Product product){

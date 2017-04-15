@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -92,7 +94,6 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     private void onBindFooterHolder(ProductFooterHolder holder, int position){
-
     }
 
     private void onBindProductAddHolder(ProductListAdapter.ProductAddHolder holder, int position){
@@ -356,9 +357,11 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public static final class ProductFooterHolder extends RecyclerView.ViewHolder{
 
+        public FrameLayout layout;
 
         public ProductFooterHolder(View itemView) {
             super(itemView);
+            layout = (FrameLayout) itemView.findViewById(R.id.layout_item_product_list_footer);
         }
     }
 }

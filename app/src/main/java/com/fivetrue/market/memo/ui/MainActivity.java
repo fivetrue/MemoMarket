@@ -1,9 +1,9 @@
 package com.fivetrue.market.memo.ui;
 
-import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.LL;
@@ -29,17 +30,14 @@ import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
 
 import java.util.ArrayList;
 
-
-public class MainActivity extends BaseActivity{
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
-    private DrawerLayout mDrawerLayout;
     private TextView mTitle;
     private PagerSlidingTabStrip mTab;
     private ViewPager mViewPager;
 
-    private ActionBarDrawerToggle mToggle;
     private MainPagerAdapter mAdapter;
 
     @Override
@@ -62,7 +60,7 @@ public class MainActivity extends BaseActivity{
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
-//        fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
+        fragmentSets.add(new MainPagerAdapter.FragmentSet(PurchaseListFragment.class, PurchaseListFragment.makeArgument(this)));
         mAdapter = new MainPagerAdapter(getSupportFragmentManager(), fragmentSets);
     }
 
@@ -71,11 +69,6 @@ public class MainActivity extends BaseActivity{
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cart_return_white_20dp);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_main);
-        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.setDrawerListener(mToggle);
 
         mTitle = (TextView) findViewById(R.id.tv_main_title);
         mTitle.setTypeface(CommonUtils.getFont(this,  "font/DroidSansMono.ttf"));
@@ -124,27 +117,10 @@ public class MainActivity extends BaseActivity{
         }
     }
 
-    public void closeDrawer(){
-        if(mDrawerLayout != null){
-            if(LL.D) Log.d(TAG, "closeDrawer() try to close drawer");
-            mDrawerLayout.closeDrawer(GravityCompat.START);
+    public void movePageToPosition(int pos){
+        if(mViewPager != null && mViewPager.getCurrentItem() > pos){
+            mViewPager.setCurrentItem(pos);
         }
-    }
-
-    public void openDrawer(){
-        if(mDrawerLayout != null){
-            if(LL.D) Log.d(TAG, "openDrawer() try to open drawer");
-            mDrawerLayout.openDrawer(GravityCompat.START);
-        }
-    }
-
-    public boolean isOpenDrawer(){
-        if(mDrawerLayout != null){
-            boolean b = mDrawerLayout.isDrawerOpen(GravityCompat.START);
-            if(LL.D) Log.d(TAG, "isOpenDrawer() returned: " + b);
-            return b;
-        }
-        return false;
     }
 
     @Override
@@ -186,11 +162,6 @@ public class MainActivity extends BaseActivity{
 
     @Override
     public void onBackStackChanged() {
-        if(mDrawerLayout != null && mDrawerLayout.isDrawerOpen(GravityCompat.START)){
-            mDrawerLayout.closeDrawer(GravityCompat.START);
-            return;
-        }
-
         FragmentManager fm = getCurrentFragmentManager();
         if(fm.getBackStackEntryCount() > 0){
             FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
@@ -202,16 +173,6 @@ public class MainActivity extends BaseActivity{
         }else{
             mTitle.setText(R.string.app_name);
         }
-    }
-
-    @Override
-    protected void onClickHome() {
-        if(isOpenDrawer()){
-            closeDrawer();
-        }else{
-            openDrawer();
-        }
-//        super.onClickHome();
     }
 
     @Override

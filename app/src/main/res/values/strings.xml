@@ -15,11 +15,13 @@
     <string name="buy">Buy</string>
     <string name="purchase_list">Purchase list</string>
     <string name="product">Product</string>
+    <string name="purchase_product">Purchase product</string>
     <string name="settings">Settings</string>
     <string name="price">Price</string>
     <string name="store">Store</string>
     <string name="export">Export</string>
     <string name="info">Info</string>
+    <string name="send">Send</string>
 
     <string name="excel">Excel</string>
     <string name="csv">CSV</string>
@@ -43,6 +45,7 @@
     <string name="data">Data</string>
     <string name="recently_purchase_list">Recently Purchase List</string>
     <string name="recently_purchase_top_message" formatted="false">Last purchase %s.\nTotal %d</string>
+    <string name="previous_purchase">Previous purchase list</string>
 
     <string name="hint_input_product_name">Input name of product</string>
     <string name="register_product">Register Product</string>

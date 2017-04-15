@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
+import com.fivetrue.market.memo.net.service.GoogleApiService;
+import com.fivetrue.market.memo.net.service.GoogleImageService;
 import com.fivetrue.market.memo.net.service.ImageService;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
@@ -40,10 +42,14 @@ public class NetworkServiceProvider {
     }
 
     private static final String API_MS_SEARCH_IMAGE_HOST = "https://api.cognitive.microsoft.com";
+    private static final String API_GOOGLE = "https://www.google.com";
+    private static final String API_GOOGLE_APIS = "https://www.googleapis.com";
 
     private Context mContext;
     private Cache mCache;
     private OkHttpClient mForceCacheHttpClient;
+    private OkHttpClient mNormalCacheHttpClient;
+    private OkHttpClient mGoogleImageCacheHttpClient;
 
     private static NetworkServiceProvider sInstance;
 
@@ -62,6 +68,16 @@ public class NetworkServiceProvider {
         initHttpClient();
     }
 
+    public GoogleImageService getGoogleImageService(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API_GOOGLE)
+                .client(mGoogleImageCacheHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit.create(GoogleImageService.class);
+    }
+
 
     public ImageService getImageService(){
         Retrofit retrofit = new Retrofit.Builder()
@@ -73,8 +89,28 @@ public class NetworkServiceProvider {
         return retrofit.create(ImageService.class);
     }
 
+    public GoogleApiService getGoogleApiService(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(mNormalCacheHttpClient)
+                .baseUrl(API_GOOGLE_APIS)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit.create(GoogleApiService.class);
+    }
+
     private void initHttpClient(){
+        initNormalCacheHttpClient();
         initForceCacheHttpClient();
+    }
+
+    private void initNormalCacheHttpClient(){
+        mNormalCacheHttpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(new NormalCacheControlInterceptor())
+                .connectTimeout(1, TimeUnit.MINUTES)
+                .cache(mCache)
+                .retryOnConnectionFailure(true)
+                .build();
     }
 
     private void initForceCacheHttpClient(){
@@ -84,9 +120,49 @@ public class NetworkServiceProvider {
                 .cache(mCache)
                 .retryOnConnectionFailure(true)
                 .build();
+
+        mGoogleImageCacheHttpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(new GoogleImageCacheControlInterceptor())
+                .connectTimeout(1, TimeUnit.MINUTES)
+                .cache(mCache)
+                .retryOnConnectionFailure(true)
+                .build();
+    }
+
+    private static class NormalCacheControlInterceptor implements Interceptor {
+
+        private static final String TAG = "LongTimeCacheControlInt";
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            if(LL.D) Log.d(TAG, "intercept() called with: chain = [" + chain + "]");
+            Request request = chain.request();
+            if(LL.D) Log.d(TAG, "intercept: request url" + request.url());
+            if(LL.D) Log.d(TAG, "intercept: request body " + request.body());
+            if(LL.D) Log.d(TAG, "intercept: request header " + request.headers());
+            if(LL.D) Log.d(TAG, "intercept: request cacheControl " + request.cacheControl());
+            request = request.newBuilder()
+                    .cacheControl(new CacheControl.Builder()
+                            .maxAge(1, TimeUnit.DAYS)
+                            .minFresh(6, TimeUnit.HOURS)
+                            .maxStale(1, TimeUnit.HOURS)
+                            .build())
+                    .url(request.url())
+                    .build();
+
+            Response response = chain.proceed(request);
+            if(LL.D) Log.d(TAG, "intercept: response isSuccessful " + response.isSuccessful());
+            if(LL.D) Log.d(TAG, "intercept: response body " + response.body());
+            if(LL.D) Log.d(TAG, "intercept: response headers " + response.headers());
+            if(LL.D) Log.d(TAG, "intercept: response cacheControl " + response.cacheControl());
+            return response;
+        }
     }
 
     private static class LongTimeCacheControlInterceptor implements Interceptor {
+
+        private static final String TAG = "LongTimeCacheControlInt";
+
         @Override
         public Response intercept(Chain chain) throws IOException {
             if(LL.D) Log.d(TAG, "intercept() called with: chain = [" + chain + "]");
@@ -111,5 +187,36 @@ public class NetworkServiceProvider {
             if(LL.D) Log.d(TAG, "intercept: response cacheControl " + response.cacheControl());
             return response;
         }
+    }
+
+    private static class GoogleImageCacheControlInterceptor implements Interceptor {
+
+        private static final String TAG = "GoogleImageCacheControl";
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            if(LL.D) Log.d(TAG, "intercept() called with: chain = [" + chain + "]");
+            Request request = chain.request();
+            if(LL.D) Log.d(TAG, "intercept: request url" + request.url());
+            if(LL.D) Log.d(TAG, "intercept: request body " + request.body());
+            if(LL.D) Log.d(TAG, "intercept: request header " + request.headers());
+            if(LL.D) Log.d(TAG, "intercept: request cacheControl " + request.cacheControl());
+            request = request.newBuilder()
+                    .cacheControl(new CacheControl.Builder()
+                            .maxAge(365, TimeUnit.DAYS)
+                            .minFresh(30, TimeUnit.DAYS)
+                            .maxStale(30, TimeUnit.DAYS)
+                            .build())
+                    .url(request.url())
+                    .build();
+
+            Response response = chain.proceed(request);
+            if(LL.D) Log.d(TAG, "intercept: response isSuccessful " + response.isSuccessful());
+            if(LL.D) Log.d(TAG, "intercept: response body " + response.body());
+            if(LL.D) Log.d(TAG, "intercept: response headers " + response.headers());
+            if(LL.D) Log.d(TAG, "intercept: response cacheControl " + response.cacheControl());
+            return response;
+        }
+
     }
 }

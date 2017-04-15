@@ -10,9 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.ui.SettingsActivity;
 import com.opencsv.CSVWriter;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -30,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Created by kwonojin on 2017. 4. 7..
@@ -184,6 +181,27 @@ public class ExportUtil {
             intent.setType("text/*");
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.export)));
         });
+    }
+
+    public static void send(Context context, final String fileName, final List<Product> products){
+        StringBuilder sb = new StringBuilder(fileName);
+        sb.append(" (" + context.getString(R.string.product_count, products.size()) + ")")
+                .append("\n");
+        long total = 0;
+        for(Product p : products){
+            sb.append(p.getName());
+            if(p.getPrice() > 0){
+                sb.append(" - ").append(CommonUtils.convertToCurrency(p.getPrice()));
+            }
+            sb.append("\n");
+            total += p.getPrice();
+        }
+        sb.append("= " + CommonUtils.convertToCurrency(total));
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+        sendIntent.setType("text/plain");
+        context.startActivity(sendIntent);
     }
 
     public static void export(Context context, final String fileName, final List<Product> products){

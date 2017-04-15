@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +23,11 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
+import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
@@ -48,6 +51,8 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     private TextView mTextMessage;
     private FloatingActionButton mFabAction;
 
+    private FrameLayout mLayoutAd;
+
     private GridLayoutManager mLayoutManager;
 
     private Disposable mProductDisposable;
@@ -59,13 +64,31 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
                 .map(products ->
                         Observable.fromIterable(products)
                                 .filter(product -> makeFilter(product)).toList().blockingGet())
-                .subscribe(product -> setProductList(product));
+                .subscribe(product -> setProductList(product), Throwable::printStackTrace);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(showAd()){
+            AdUtil.getInstance().addAdView(mLayoutAd, getAdType(), false);
+        }
+    }
 
     @Override
     public void onStop() {
         super.onStop();
+        if(showAd()){
+            AdUtil.getInstance().detachAdView(getAdType());
+        }
+    }
+
+    protected boolean showAd(){
+        return false;
+    }
+
+    protected String getAdType(){
+        return AdUtil.AD_LIST_BOTTOM_1;
     }
 
     @Nullable
@@ -81,6 +104,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
         mFabAction = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list);
+        mLayoutAd = (FrameLayout) view.findViewById(R.id.layout_fragemnt_product_list_ad);
 
         mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
         mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -102,6 +126,14 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         mRecyclerProduct.setLayoutManager(mLayoutManager);
         mRecyclerProduct.setItemAnimator(new ProductItemAnimator());
 
+        mTextMessage.setOnClickListener(view1 -> {
+            if(getActivity() != null){
+                view1.getContext().startActivity(ProductAddActivity.makeIntent(view.getContext(), getClass().getSimpleName()));
+                if(getActivity() instanceof MainActivity){
+                    ((MainActivity) getActivity()).movePageToLeft();
+                }
+            }
+        });
         mFabAction.setImageResource(getFabIconResource());
         mFabAction.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(getFabTintColor())));
         mFabAction.setOnClickListener(v -> {
@@ -193,7 +225,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     @Override
     public int getImageResource() {
-        return R.drawable.selector_cart_loaded;
+        return R.drawable.selector_cart;
     }
 
     @Override

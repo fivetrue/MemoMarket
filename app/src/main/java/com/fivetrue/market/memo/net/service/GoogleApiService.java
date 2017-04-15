@@ -1,11 +1,12 @@
 package com.fivetrue.market.memo.net.service;
 
+import com.fivetrue.market.memo.model.dto.GeoLocation;
 import com.fivetrue.market.memo.model.image.ImageEntry;
-
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 /**
@@ -13,10 +14,8 @@ import retrofit2.http.Query;
  */
 
 
-public interface ImageService {
+public interface GoogleApiService {
 
-    @GET("bing/v5.0/images/search")
-    Observable<ImageEntry> getImageList(@Header("Ocp-Apim-Subscription-Key") String apiKey,
-                                        @Query("q") String keyword, @Query("mkt") String market);
-
+    @POST("/geolocation/v1/geolocate")
+    Observable<GeoLocation> getGeoLocation(@Query("key") String apiKey);
 }

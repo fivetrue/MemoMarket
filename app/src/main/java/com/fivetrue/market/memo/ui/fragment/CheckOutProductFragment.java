@@ -12,6 +12,7 @@ import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.list.ProductCheckoutListAdapter;
 import com.fivetrue.market.memo.ui.adapter.list.RecentlyPurchaseListAdapter;
 import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
 
 import java.util.List;
@@ -78,12 +79,12 @@ public class CheckOutProductFragment extends ProductListFragment{
 
     @Override
     public String getTitle(Context context) {
-        return context.getString(R.string.purchase_list);
+        return context.getString(R.string.purchase_product);
     }
 
     @Override
     public int getImageResource() {
-        return R.drawable.selector_feed;
+        return R.drawable.selector_cart_loaded;
     }
 
     @Override
@@ -101,4 +102,8 @@ public class CheckOutProductFragment extends ProductListFragment{
         return TabIcon.TextWithIcon;
     }
 
+    @Override
+    protected String getAdType() {
+        return AdUtil.AD_LIST_BOTTOM_2;
+    }
 }

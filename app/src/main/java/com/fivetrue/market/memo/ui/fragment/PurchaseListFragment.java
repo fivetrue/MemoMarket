@@ -70,7 +70,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
                 )
                 .subscribe(product -> {
                     setData(product);
-                });
+                }, Throwable::printStackTrace);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
             if(getActivity() != null){
                 v.getContext().startActivity(ProductAddActivity.makeIntent(view.getContext(), TAG));
                 if(getActivity() instanceof MainActivity){
-                    ((MainActivity) getActivity()).movePageToLeft();
+                    ((MainActivity) getActivity()).movePageToPosition(0);
                 }
             }
         });
@@ -106,7 +106,6 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         mBottomView = view.findViewById(R.id.layout_fragment_purchase_list_bottom);
 
         List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter(getString(R.string.all), Filter.Value.ALL));
         filters.add(new Filter(getString(R.string.day), Filter.Value.DAY));
         filters.add(new Filter(getString(R.string.week), Filter.Value.WEEK));
         filters.add(new Filter(getString(R.string.month), Filter.Value.MONTH));
@@ -184,9 +183,6 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         if(getActivity() != null){
             Filter filter = mSpinnerAdapter.getItem(mSpinner.getSelectedItemPosition());
             switch (filter.value){
-                case ALL:{
-                    return CommonUtils.getDate(getActivity(), "MM dd yyyy HH", product.getCheckOutDate());
-                }
                 case DAY:{
                     return CommonUtils.getDate(getActivity(), "MM dd yyyy", product.getCheckOutDate());
                 }
@@ -268,7 +264,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
     }
 
     private static class Filter{
-        enum Value { ALL, DAY, WEEK, MONTH, YEAR }
+        enum Value {DAY, WEEK, MONTH, YEAR }
         public final String name;
         public final Value value;
         public Filter(String name, Value value){
@@ -289,4 +285,5 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
         }
         return super.onBackPressed();
     }
+
 }

@@ -8,11 +8,13 @@
     <string name="buy">구매</string>
     <string name="purchase_list">구매목록</string>
     <string name="product">상품</string>
+    <string name="purchase_product">구매상품</string>
     <string name="settings">설정</string>
     <string name="price">가격</string>
     <string name="store">구매처</string>
     <string name="export">내보내기</string>
     <string name="info">정보</string>
+    <string name="send">보내기</string>
 
     <string name="excel">Excel</string>
     <string name="csv">CSV</string>
@@ -36,6 +38,7 @@
     <string name="data">데이터</string>
     <string name="recently_purchase_list">최근 구매목록</string>
     <string name="recently_purchase_top_message" formatted="false">마지막 구매 %s.\n총 %d 개의 상품</string>
+    <string name="previous_purchase">이전 구매목록</string>
 
     <string name="hint_input_product_name">상품이름 입력</string>
     <string name="register_product">상품 등록</string>

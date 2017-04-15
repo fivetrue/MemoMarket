@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +26,11 @@ import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.dto.ProductData;
+import com.fivetrue.market.memo.model.image.GoogleImage;
 import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.list.ProductNameListAdapter;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.DataManager;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
@@ -38,7 +41,6 @@ import com.google.zxing.integration.android.IntentResult;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -58,6 +60,8 @@ public class ProductAddActivity extends BaseActivity{
     private FloatingActionButton mFabScan;
     private FloatingActionButton mFabOk;
     private ProgressBar mProgressDone;
+
+    private FrameLayout mAdContainer;
 
     private ProductNameListAdapter mProductNameListAdapter;
     private ListPopupWindow mPopup;
@@ -92,6 +96,8 @@ public class ProductAddActivity extends BaseActivity{
         mFabScan = (FloatingActionButton) findViewById(R.id.fab_product_scan);
         mFabOk = (FloatingActionButton) findViewById(R.id.fab_product_add);
 
+        mAdContainer = (FrameLayout) findViewById(R.id.layout_ad_product_add);
+
         mInput.setOnEditorActionListener((textView, i, keyEvent) -> {
             if(i == EditorInfo.IME_ACTION_DONE){
                 if(LL.D)
@@ -115,6 +121,18 @@ public class ProductAddActivity extends BaseActivity{
         mFabScan.setOnClickListener(view -> scan());
 
         ((TextView)findViewById(R.id.tv_fragment_product_add)).setTypeface(CommonUtils.getFont(this, "font/Magra.ttf"));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        AdUtil.getInstance().addAdView(mAdContainer, AdUtil.AD_PRODUCT_ADD, false);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AdUtil.getInstance().detachAdView(AdUtil.AD_PRODUCT_ADD);
     }
 
     /**
@@ -182,29 +200,36 @@ public class ProductAddActivity extends BaseActivity{
             if(LL.D) Log.d(TAG, "findImage: text = " + text);
             SimpleViewUtils.showView(mProgressDone, View.VISIBLE);
             SimpleViewUtils.hideView(mFabOk, View.GONE);
-            DataManager.getInstance(this).getConfig().subscribe(configData ->
+            DataManager.getInstance(this).findImage(text).subscribe(s -> {
+                if(LL.D) Log.d(TAG, "findImage() called = " + s);
+                saveProduct(text, s);
 
-                    DataManager.getInstance(ProductAddActivity.this).findImage(configData, text)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.newThread())
-                    .subscribe(imageEntry ->
-                            saveProduct(text, imageEntry),
-                            throwable -> {
-                                Log.e(TAG, "accept: ", throwable);
-                                saveProduct(text, null);
-                            }), throwable -> saveProduct(text, null));
+            }, throwable -> {
+                Log.e(TAG, "accept: ", throwable);
+                saveProduct(text, null);
+            });
+//            DataManager.getInstance(this).getConfig().subscribe(configData ->
+//
+//                    DataManager.getInstance(ProductAddActivity.this).findImage(configData, text)
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeOn(Schedulers.newThread())
+//                    .subscribe(imageEntry ->
+//                            saveProduct(text, imageEntry),
+//                            throwable -> {
+//                                Log.e(TAG, "accept: ", throwable);
+//                                saveProduct(text, null);
+//                            }), throwable -> saveProduct(text, null));
         }
     }
 
-    private void saveProduct(final String text, final ImageEntry imageEntry){
+    private void saveProduct(final String text, final GoogleImage image){
         if(LL.D)
-            Log.d(TAG, "saveProduct() called with: text = [" + text + "], imageEntry = [" + imageEntry + "]");
+            Log.d(TAG, "saveProduct() called with: text = [" + text + "], image = [" + image + "]");
         if(!TextUtils.isEmpty(text)){
             RealmDB.get().executeTransaction(realm -> {
                 String imageUrl = null;
-                if(imageEntry != null
-                        && imageEntry.getValue() != null && imageEntry.getValue().size() > 0){
-                    imageUrl = imageEntry.getValue().get(0).thumbnailUrl;
+                if(image != null){
+                    imageUrl = image.getImageUrl();
                 }
                 Product product = new Product();
                 product.setName(text);

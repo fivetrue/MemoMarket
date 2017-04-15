@@ -91,6 +91,12 @@
         </LinearLayout>
     </android.support.v7.widget.CardView>
 
+    <FrameLayout
+        android:id="@+id/layout_ad_product_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_product_add"
         android:layout_width="@dimen/fab_size"

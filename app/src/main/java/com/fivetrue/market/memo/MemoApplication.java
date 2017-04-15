@@ -5,6 +5,7 @@ import android.support.multidex.MultiDex;
 
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.net.NetworkServiceProvider;
+import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.DataManager;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 
@@ -25,5 +26,6 @@ public class MemoApplication extends Application {
         RealmDB.init(this);
         DataManager.getInstance(this);
         TrackingUtil.init(this);
+        AdUtil.init(this);
     }
 }

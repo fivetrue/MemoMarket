@@ -90,13 +90,13 @@ public class DataManager {
         return mFirebaseDB.findBarcode(barcode);
     }
 
-    public Observable<ImageEntry> findImage(ConfigData config, final String q) {
-        Log.i(TAG, "findImage: q = " + q);
-        if (LL.D) Log.d(TAG, "findImage() called with: config = [" + config + "], q = [" + q + "]");
-        return NetworkServiceProvider.getInstance()
-                .getImageService()
-                .getImageList(config.msKey, q, "en-us");
-    }
+//    public Observable<ImageEntry> findImage(ConfigData config, final String q) {
+//        Log.i(TAG, "findImage: q = " + q);
+//        if (LL.D) Log.d(TAG, "findImage() called with: config = [" + config + "], q = [" + q + "]");
+//        return NetworkServiceProvider.getInstance()
+//                .getImageService()
+//                .getImageList(config.msKey, q, "en-us");
+//    }
 
     public Observable<GoogleImage> findGoogleImage(String q){
         if(LL.D) Log.d(TAG, "findGoogleImage() called with: q = [" + q + "]");

@@ -141,16 +141,17 @@ public class SplashActivity extends BaseActivity {
     }
 
     public void checkConfig(){
-        DataManager.getInstance(this).getConfig()
-                .subscribe(configData -> startApplication(configData), throwable -> {
-            if(LL.D) Log.d(TAG, "call() called with: throwable = [" + throwable + "]");
-            Toast.makeText(SplashActivity.this,throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            finish();
-        });
+//        DataManager.getInstance(this).getConfig()
+//                .subscribe(configData -> startApplication(configData), throwable -> {
+//            if(LL.D) Log.d(TAG, "call() called with: throwable = [" + throwable + "]");
+//            Toast.makeText(SplashActivity.this,throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+//
+//        });
+        startApplication();
     }
 
-    public void startApplication(ConfigData config){
-        if(LL.D) Log.d(TAG, "startApplication() called with: config = [" + config + "]");
+    public void startApplication(){
+        Log.d(TAG, "startApplication() called");
         startActivity(new Intent(SplashActivity.this, MainActivity.class));
         finish();
     }

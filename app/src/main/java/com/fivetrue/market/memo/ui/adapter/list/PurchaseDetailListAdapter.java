@@ -227,28 +227,21 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
 
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
             DataManager.getInstance(layout.getContext())
-                    .getConfig().subscribe(configData -> {
+                    .findImage(data.getKey())
+                    .subscribe(img -> {
 
-                DataManager.getInstance(layout.getContext())
-                        .findImage(configData, data.getKey())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeOn(Schedulers.newThread())
-                        .subscribe(imageEntry -> {
+                        String imageUrl = null;
+                        if(img != null){
+                            imageUrl = img.getImageUrl();
+                        }
+                        Glide.with(layout.getContext())
+                                .load(imageUrl)
+                                .placeholder(R.drawable.ic_product_gray_50dp)
+                                .dontTransform().into(image);
 
-                            String imageUrl = null;
-                            if(imageEntry != null
-                                    && imageEntry.getValue() != null && imageEntry.getValue().size() > 0){
-                                imageUrl = imageEntry.getValue().get(0).thumbnailUrl;
-                            }
-                            Glide.with(layout.getContext())
-                                    .load(imageUrl)
-                                    .placeholder(R.drawable.ic_product_gray_50dp)
-                                    .dontTransform().into(image);
-
-                        }, throwable -> {
-                            Log.e(TAG, "setData: ", throwable);
-                        });
-            });
+                    }, throwable -> {
+                        Log.e(TAG, "setData: ", throwable);
+                    });
             DataPoint[] dataPoints = new DataPoint[products.size()];
             for(int i = 0 ; i < products.size() ; i ++){
                 Product p = products.get(i);

@@ -17,9 +17,13 @@
 #}
 
 -dontwarn java.lang.invoke.*
+-dontwarn org.jsoup.*
 
 # RETROFIT 2
 -dontwarn retrofit2.**
+-dontnote retrofit2.Platform
+-dontnote retrofit2.Platform$IOS$MainThreadExecutor
+-dontwarn retrofit2.Platform$Java8
 -dontwarn okhttp3.**
 -keep class retrofit2.** { *; }
 -keepattributes Signature
@@ -36,6 +40,7 @@
 -keepattributes *Annotation*
 # Gson specific classes
 -keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
 
 # Poi
 -keep public class org.apache.poi.** {*;}
@@ -48,3 +53,6 @@
 -dontwarn com.google.firebase.**
 
 -keep class com.fivetrue.market.memo.model.** { *; }
+-keep class android.support.** { *; }
+-keep class android.webkit.** { *; }
+-keep class org.jsoup.** { *; }

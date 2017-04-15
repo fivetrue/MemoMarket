@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +49,8 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
         super.onBindProductHolder(holder, position);
         Product p = getItem(position);
         if(p != null){
+            holder.name.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+            holder.name.setMaxLines(2);
             holder.name.setText(p.getName() + "\n" + CommonUtils.convertToCurrency(p.getPrice()));
         }
     }

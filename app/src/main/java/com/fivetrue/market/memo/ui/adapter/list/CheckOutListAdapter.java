@@ -196,6 +196,8 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 barcode.setText(product.getBarcode());
                 priceInput.setText(product.getPrice() > 0 ? product.getPrice() + "" : "");
                 storeInput.setText(product.getStoreName());
+                accept.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
         }
     }

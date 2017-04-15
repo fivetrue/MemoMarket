@@ -11,6 +11,7 @@
     <string name="delete">Delete</string>
     <string name="duplicate">Duplicate</string>
     <string name="revert">Revert</string>
+    <string name="modify">Modify</string>
     <string name="cart">Cart</string>
     <string name="buy">Buy</string>
     <string name="purchase_list">Purchase list</string>

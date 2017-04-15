@@ -78,7 +78,7 @@ public class BaseActivity extends AppCompatActivity implements FragmentManager.O
     }
 
     public Fragment addFragment(Class< ? extends BaseFragment> cls, Bundle arguments, int anchorLayout, boolean addBackstack
-            , int enterAnim, int exitAnim, Object sharedTransition, Pair<View, String>... pair){
+            , int enterAnim, int exitAnim, @Nullable Object sharedTransition, @Nullable Pair<View, String>... pair){
         BaseFragment f = null;
         try {
             f = (BaseFragment) cls.newInstance();

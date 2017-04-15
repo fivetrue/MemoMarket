@@ -50,6 +50,6 @@
 -keep class android.webkit.** { *; }
 
 -keep class com.vungle.** { *; }
--keep class javax.inject.*
+-keep class javax.inject.* { *; }
 
--keep com.fivetrue.market.memo.model.** { *; }
+-keep class com.fivetrue.market.memo.model.** { *; }

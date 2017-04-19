@@ -11,7 +11,6 @@ import com.fivetrue.market.memo.model.dto.ConfigData;
 import com.fivetrue.market.memo.model.dto.GeoLocation;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.GoogleImage;
-import com.fivetrue.market.memo.model.image.ImageEntry;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.net.NetworkServiceProvider;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
@@ -74,9 +73,13 @@ public class DataManager {
             Log.i(TAG, "findProductName: exist data in Local = " + products.size());
             return Observable.fromIterable(products)
                     .map(product -> new ProductData(product))
-                    .buffer(products.size());
+                    .toList().toObservable();
         }
         return mFirebaseDB.findProductContain(name);
+    }
+
+    public Observable<List<Product>> findStoreName(String name){
+        return Observable.fromIterable(ProductDB.getInstance().findStoreName(name)).toList().toObservable();
     }
 
     public Observable<List<ProductData>> findBarcode(String barcode) {

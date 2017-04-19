@@ -1,6 +1,7 @@
 package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
@@ -14,10 +15,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
+import com.fivetrue.market.memo.utils.TrackingUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -133,7 +137,8 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     protected ListPopupWindow makePopup(Context context, GroupedObservable<String, Product> item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.export)
-                ,context.getString(R.string.send)};
+                ,context.getString(R.string.send)
+                ,context.getString(R.string.delete)};
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
@@ -145,6 +150,23 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     break;
                 case 1 :
                     ExportUtil.send(context, item.getKey(), mDataMap.get(item));
+                    break;
+
+                case 2 :
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.delete)
+                            .setMessage(R.string.delete_product_message)
+                            .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
+                                dialogInterface.dismiss();
+                                RealmDB.get().executeTransaction(realm -> {
+                                    for(Product p : mDataMap.get(item)){
+                                        TrackingUtil.getInstance().deleteProduct(p.getName(), TAG);
+                                        p.deleteFromRealm();
+                                        notifyItemRemoved(position);
+                                    }
+                                });
+                            }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
+                            .show();
                     break;
             }
         });

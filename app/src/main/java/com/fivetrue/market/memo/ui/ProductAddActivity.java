@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.dto.ProductData;
 import com.fivetrue.market.memo.model.image.GoogleImage;
 import com.fivetrue.market.memo.model.image.ImageEntry;
@@ -40,6 +41,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -140,10 +142,12 @@ public class ProductAddActivity extends BaseActivity{
      * @param data
      */
     private void setProductData(ProductData data){
+        hideImm();
         mSelectedProductData = data;
         mInput.setText(data.name);
         mBarcode.setText(data.barcode);
         setInputText(data.name);
+        findImage();
     }
 
     /**
@@ -171,8 +175,8 @@ public class ProductAddActivity extends BaseActivity{
         if(mPopup != null){
             mPopup.dismiss();
         }
-        if(mDataFinder != null && mImm != null){
-            mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
+        if(mDataFinder != null){
+            hideImm();
             mDataFinder.selectedName = text;
         }
     }
@@ -208,17 +212,6 @@ public class ProductAddActivity extends BaseActivity{
                 Log.e(TAG, "accept: ", throwable);
                 saveProduct(text, null);
             });
-//            DataManager.getInstance(this).getConfig().subscribe(configData ->
-//
-//                    DataManager.getInstance(ProductAddActivity.this).findImage(configData, text)
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribeOn(Schedulers.newThread())
-//                    .subscribe(imageEntry ->
-//                            saveProduct(text, imageEntry),
-//                            throwable -> {
-//                                Log.e(TAG, "accept: ", throwable);
-//                                saveProduct(text, null);
-//                            }), throwable -> saveProduct(text, null));
         }
     }
 
@@ -266,14 +259,19 @@ public class ProductAddActivity extends BaseActivity{
             }
 
             if(mProductNameListAdapter == null){
-                mProductNameListAdapter = new ProductNameListAdapter(this, data);
+                mProductNameListAdapter = new ProductNameListAdapter(this, Observable.fromIterable(data)
+                        .distinct(productData -> productData.name)
+                        .toList().blockingGet());
                 mPopup.setAdapter(mProductNameListAdapter);
             }else{
-                mProductNameListAdapter.setData(data);
+                mProductNameListAdapter.setData(Observable.fromIterable(data)
+                        .distinct(productData -> productData.name)
+                        .toList().blockingGet());
             }
 
             mPopup.setOnItemClickListener((adapterView, view, i, l) -> {
                 if(mProductNameListAdapter != null && mProductNameListAdapter.getItemCount() > i){
+                    mInput.removeTextChangedListener(mDataFinder);
                     ProductData product = mProductNameListAdapter.getItem(i);
                     if(LL.D) Log.d(TAG, "onItemClick: product = " + product.name);
                     setProductData(product);
@@ -287,6 +285,12 @@ public class ProductAddActivity extends BaseActivity{
             if(mPopup != null && mPopup.isShowing()){
                 mPopup.dismiss();
             }
+        }
+    }
+
+    private void hideImm(){
+        if(mImm != null && mInput != null){
+            mImm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
         }
     }
 
@@ -314,16 +318,22 @@ public class ProductAddActivity extends BaseActivity{
             }else{
                 mFabOk.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
             }
+
             if(!TextUtils.isEmpty(text)
                     && !(selectedName != null && selectedName.equals(text))
                     && TextUtils.isEmpty(mBarcode.getText())){
                 mProgressRetrieving.setVisibility(View.VISIBLE);
                 DataManager.getInstance(ProductAddActivity.this)
                         .findProductName(text)
-                        .distinct()
-                        .subscribe(storeDatas -> {
-                    setRetrievedProductList(storeDatas);
-                }, throwable -> TrackingUtil.getInstance().report(throwable));
+                        .subscribe(storeDatas -> setRetrievedProductList(storeDatas)
+                                , throwable -> TrackingUtil.getInstance().report(throwable));
+
+                Product p = ProductDB.getInstance().findExactlyName(text);
+                if(p != null){
+                    mInput.removeTextChangedListener(this);
+                    ProductData product = new ProductData(p);
+                    setProductData(product);
+                }
             }else{
                 selectedName = null;
             }

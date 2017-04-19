@@ -74,6 +74,14 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
         return get().where(Product.class).contains("name", name).findAll();
     }
 
+    public Product findExactlyName(String name){
+        return get().where(Product.class).equalTo("name", name).findFirst();
+    }
+
+    public List<Product> findStoreName(String name){
+        return get().where(Product.class).contains("storeName", name).findAll();
+    }
+
     public Observable<List<Product>> getObservable(){
         return mProductPublishSubject;
     }

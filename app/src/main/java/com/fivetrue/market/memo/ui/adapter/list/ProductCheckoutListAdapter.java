@@ -58,7 +58,8 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {
-                context.getString(R.string.revert)
+                context.getString(R.string.revert),
+                context.getString(R.string.duplicate)
                 , context.getString(R.string.delete)};
 
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
@@ -74,6 +75,18 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
                     });
                     break;
                 case 1 :
+                    Product p = new Product();
+                    p.setName(item.getName());
+                    p.setStoreName(item.getStoreName());
+                    p.setBarcode(item.getBarcode());
+                    p.setPrice(item.getPrice());
+                    p.setImageUrl(item.getImageUrl());
+                    p.setCheckInDate(item.getCheckInDate());
+                    p.setCheckOutDate(System.currentTimeMillis());
+                    ProductDB.getInstance().add(p);
+                    break;
+
+                case 2 :
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.delete)
                             .setMessage(R.string.delete_product_message)

@@ -71,6 +71,8 @@
                         android:padding="7dp"
                         android:textSize="17dp"
                         android:hint="@string/store"
+                        android:maxLines="1"
+                        android:imeOptions="actionDone"
                         android:background="@drawable/input_text_background"/>
                 </LinearLayout>
 

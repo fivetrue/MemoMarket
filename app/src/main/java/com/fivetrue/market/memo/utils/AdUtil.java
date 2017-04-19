@@ -84,8 +84,10 @@ public class AdUtil extends AdListener {
                 .addKeyword("보육")
                 .addKeyword("Baby Care");
 
-        mAdViewMap.put(AD_PRODUCT_ADD, makeAdView(mContext.getString(R.string.admob_product_add_bottom), AdSize.MEDIUM_RECTANGLE));
-        mAdViewMap.put(AD_PRODUCT_CHECK_OUT, makeAdView(mContext.getString(R.string.admob_product_checkout_bottom), AdSize.MEDIUM_RECTANGLE));
+//        mAdViewMap.put(AD_PRODUCT_ADD, makeAdView(mContext.getString(R.string.admob_product_add_bottom), AdSize.MEDIUM_RECTANGLE));
+//        mAdViewMap.put(AD_PRODUCT_CHECK_OUT, makeAdView(mContext.getString(R.string.admob_product_checkout_bottom), AdSize.MEDIUM_RECTANGLE));
+        mAdViewMap.put(AD_PRODUCT_ADD, makeAdView(mContext.getString(R.string.admob_product_add_bottom), AdSize.LARGE_BANNER));
+        mAdViewMap.put(AD_PRODUCT_CHECK_OUT, makeAdView(mContext.getString(R.string.admob_product_checkout_bottom), AdSize.LARGE_BANNER));
         mAdViewMap.put(AD_LIST_BOTTOM_1, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
         mAdViewMap.put(AD_LIST_BOTTOM_2, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
         mAdViewMap.put(AD_LIST_BOTTOM_3, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
@@ -118,7 +120,17 @@ public class AdUtil extends AdListener {
             }
             count ++;
             adView.setTag(count);
-            parent.addView(adView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            if(adView.getParent() == null){
+                parent.addView(adView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            }else{
+                try{
+                    ViewGroup viewGroup = (ViewGroup) adView.getParent();
+                    viewGroup.removeView(adView);
+                }catch (Exception e){
+                    Log.e(TAG, "addAdView: ", e);
+                    TrackingUtil.getInstance().report(e);
+                }
+            }
         }
     }
 

@@ -1,20 +1,25 @@
 package com.fivetrue.market.memo.ui.adapter.list;
 
+import android.content.Context;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
@@ -70,6 +75,7 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         );
 
         viewHolder.storeInput.setOnFocusChangeListener((view, b) -> {
+            InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if(b){
                 ((EditText)view).selectAll();
                 List<String> data = Observable.fromIterable(ProductDB.getInstance().getProducts())
@@ -85,6 +91,8 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     popupWindow.dismiss();
                     if(adapter != null && adapter.getItemCount() > i){
                         viewHolder.storeInput.setText(adapter.getItem(i));
+                        imm.hideSoftInputFromWindow(viewHolder.storeInput.getWindowToken(), 0);
+
                     }
                 });
                 popupWindow.setAnchorView(view);
@@ -106,6 +114,16 @@ public class CheckOutListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             popupWindow.dismiss();
                         }
                     }
+                });
+
+                viewHolder.storeInput.setOnEditorActionListener((textView, i, keyEvent) -> {
+                    if(i == EditorInfo.IME_ACTION_DONE){
+                        if(LL.D)
+                            Log.d(TAG, "onEditorAction: done");
+                        imm.hideSoftInputFromWindow(viewHolder.storeInput.getWindowToken(), 0);
+                        return true;
+                    }
+                    return false;
                 });
             }
         });

@@ -7,8 +7,8 @@ import android.util.Log;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -28,7 +28,6 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     private Context mContext;
     private PublishSubject<List<Product>> mProductPublishSubject;
-    private List<ShareableProduct> mShareableProducts = new ArrayList<>();
 
     public static void init(Context context){
         sInstance = new ProductDB(context.getApplicationContext());
@@ -92,16 +91,13 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
         updatePublish();
     }
 
-    public List<ShareableProduct> getShareableProducts(){
-        return mShareableProducts;
-    }
 
     private void updateWidgetIntent(List<Product> products){
         Observable.fromIterable(products)
                 .filter(product -> product.getCheckOutDate() == 0)
                 .map(product -> new ShareableProduct(product))
                 .toList().subscribe(shareableProducts -> {
-            mShareableProducts = shareableProducts;
+            DefaultPreferenceUtil.saveShareableProducts(mContext, shareableProducts);
             Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
             mContext.sendBroadcast(intent);
         });
@@ -109,10 +105,12 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     public static final class ShareableProduct{
         private final String name;
+        private final String imageUrl;
         private final long checkInDate;
 
         public ShareableProduct(Product product) {
             this.name = product.getName();
+            this.imageUrl = product.getImageUrl();
             this.checkInDate = product.getCheckInDate();
         }
         public String getName() {
@@ -121,6 +119,10 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
         public long getCheckInDate() {
             return checkInDate;
+        }
+
+        public String getImageUrl() {
+            return imageUrl;
         }
     }
 }

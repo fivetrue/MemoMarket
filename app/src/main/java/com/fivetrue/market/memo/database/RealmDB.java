@@ -1,16 +1,11 @@
 package com.fivetrue.market.memo.database;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.database.product.ProductDB;
 
-import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmMigration;
-import io.realm.RealmSchema;
 
 /**
  * Created by kwonojin on 2017. 1. 24..

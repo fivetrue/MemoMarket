@@ -71,7 +71,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     public void onStart() {
         super.onStart();
         if(showAd()){
-            AdUtil.getInstance().addAdView(mLayoutAd, getAdType(), false);
+//            AdUtil.getInstance().addAdView(mLayoutAd, getAdType(), false);
         }
     }
 
@@ -79,7 +79,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     public void onStop() {
         super.onStop();
         if(showAd()){
-            AdUtil.getInstance().detachAdView(getAdType());
+//            AdUtil.getInstance().detachAdView(getAdType());
         }
     }
 

@@ -139,6 +139,7 @@ public class PurchaseListFragment extends BaseFragment implements PagerTabConten
                     @Override
                     public void onClickItem(PurchaseListAdapter.PurchaseHolder holder, List<Product> items) {
                         if(getActivity() != null && items != null){
+                            getChildFragmentManager().popBackStackImmediate();
                             Bundle arg = PurchaseDetailListFragment.makeArgument(getActivity(), items);
                             addFragment(PurchaseDetailListFragment.class, arg
                                     , R.id.layout_fragment_purchase_list, true

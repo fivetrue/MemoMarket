@@ -84,8 +84,8 @@ public class ProductCheckOutActivity extends BaseActivity{
                             long value = Long.parseLong(price.trim());
                             ProductDB.get().executeTransaction(realm -> {
                                 product.setPrice(value);
-                                product.setStoreName(store);
-                                product.setBarcode(barcode);
+                                product.setStoreName(store.trim());
+                                product.setBarcode(barcode.trim());
                                 product.setCheckOutDate(mCheckOutMillis);
 
                                 SimpleViewUtils.hideView(holder.accept, View.GONE);
@@ -103,7 +103,6 @@ public class ProductCheckOutActivity extends BaseActivity{
                                 }else{
                                     arrangeProduct(holder);
                                 }
-
                             });
                         }catch (Exception e){
                             Log.w(TAG, "onAcceptProduct: ", e);

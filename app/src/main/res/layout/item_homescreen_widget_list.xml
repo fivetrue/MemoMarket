@@ -11,13 +11,18 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_item_homescreen_widget_list"
+            android:layout_width="50dp"
+            android:layout_height="match_parent" />
         <TextView
             android:id="@+id/tv_item_homescreen_widget_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="10dp"
             android:textSize="17dp"
-            android:gravity="center"
+            android:gravity="left|center_vertical"
             android:textColor="@color/darkGray"
             android:text="@string/product"
             android:background="@drawable/common_button_ripple"/>

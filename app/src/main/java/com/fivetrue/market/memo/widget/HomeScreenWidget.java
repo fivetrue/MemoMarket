@@ -15,10 +15,15 @@ import android.widget.RemoteViews;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.SplashActivity;
 import com.fivetrue.market.memo.utils.TrackingUtil;
+
+import java.util.List;
+
+import io.realm.Realm;
 
 
 /**
@@ -141,10 +146,14 @@ public class HomeScreenWidget extends AppWidgetProvider {
             Log.d(TAG, "onClickAddProduct() called with: context = [" + context + "], intent = [" + intent + "]");
         int pos = intent.getIntExtra(KEY_LIST_POSITION, -1);
         if(pos >= 0){
-            if(ProductDB.getInstance().getShareableProducts() != null
-                    && ProductDB.getInstance().getShareableProducts().size() > pos){
+            List<Product> products = Realm.getDefaultInstance().where(Product.class)
+                    .equalTo("checkOutDate", 0)
+                    .findAll();
+            Realm.getDefaultInstance().close();
+            if(products != null
+                    && products.size() > pos){
                 Intent activityIntent = ProductCheckOutActivity.makeIntent(context, TAG
-                        , ProductDB.getInstance().getShareableProducts().get(pos).getCheckInDate());
+                        , products.get(pos).getCheckInDate());
                 activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(activityIntent);
             }

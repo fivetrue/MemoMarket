@@ -227,17 +227,17 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
 
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
             DataManager.getInstance(layout.getContext())
-                    .findImage(data.getKey())
+                    .findImages(data.getKey(), 0)
                     .subscribe(img -> {
 
                         String imageUrl = null;
-                        if(img != null){
-                            imageUrl = img.getImageUrl();
+                        if(img != null && img.size() > 0){
+                            imageUrl = img.get(0).getThumbnailUrl();
+                            Glide.with(layout.getContext())
+                                    .load(imageUrl)
+                                    .placeholder(R.drawable.ic_product_gray_50dp)
+                                    .dontTransform().into(image);
                         }
-                        Glide.with(layout.getContext())
-                                .load(imageUrl)
-                                .placeholder(R.drawable.ic_product_gray_50dp)
-                                .dontTransform().into(image);
 
                     }, throwable -> {
                         Log.e(TAG, "setData: ", throwable);

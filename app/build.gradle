@@ -16,7 +16,7 @@ apply plugin: 'me.tatarka.retrolambda'
 android {
 
     def BASE_VERSION = "1.1"
-    def VERSION_CODE = 3
+    def VERSION_CODE = 4
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
@@ -101,7 +101,6 @@ dependencies {
     compile 'com.android.support:palette-v7:25.1.0'
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'jp.wasabeef:recyclerview-animators:2.2.5'
-    compile 'com.balysv.materialmenu:material-menu:2.0.0'
 
     /**
      * Network Library

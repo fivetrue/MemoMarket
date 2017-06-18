@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.HashMap;
 import java.util.List;
@@ -120,16 +120,26 @@ public class DataManager {
                 .subscribeOn(Schedulers.newThread());
     }
 
-    public Observable<GoogleImage> findImage(String q) {
-        return Observable.create((ObservableOnSubscribe<GoogleImage>) e -> {
-            if(LL.D) Log.d(TAG, "findImage: q = " + q);
+    public Observable<List<GoogleImage>> findImages(String q, int count) {
+        return Observable.create((ObservableOnSubscribe<List<GoogleImage>>) e -> {
+            if(LL.D)
+                Log.d(TAG, "findImages() called with: q = [" + q + "], count = [" + count + "]");
+            String keyword = q.replaceAll(" ", "+");
+            Log.i(TAG, "findImages: keyword =" + keyword);
             try {
-                String googleUrl = "https://www.google.co.kr/search?tbm=isch&q=" + q + "&gws_rd=cr&ei=k0PyWKPiLoOC8wXFr4uoCg";
+                String googleUrl = "https://www.google.co.kr/search?tbm=isch&q=" + keyword + "&ijn="+count;
                 if(LL.D) Log.d(TAG, "findImage: googleUrl = " + googleUrl);
                 Document doc = Jsoup.connect(googleUrl).timeout(10 * 1000).get();
-                Element data = doc.select("div.rg_meta").first();
-                String json = data.childNode(0).toString().trim();
-                e.onNext(new Gson().fromJson(json, GoogleImage.class));
+                Elements elements = doc.select("div.rg_meta");
+                Observable.fromIterable(elements)
+                        .map(element-> {
+                            String json = element.childNode(0).toString().trim();
+                            GoogleImage image = new Gson().fromJson(json, GoogleImage.class);
+                            return image;
+                        }).toList().subscribe(images -> {
+                    e.onNext(images);
+                });
+
             } catch (Exception e1) {
                 Log.e(TAG, "findImage: ", e1);
                 e.onError(e1);

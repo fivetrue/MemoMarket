@@ -204,9 +204,11 @@ public class ProductAddActivity extends BaseActivity{
             if(LL.D) Log.d(TAG, "findImage: text = " + text);
             SimpleViewUtils.showView(mProgressDone, View.VISIBLE);
             SimpleViewUtils.hideView(mFabOk, View.GONE);
-            DataManager.getInstance(this).findImage(text).subscribe(s -> {
+            DataManager.getInstance(this).findImages(text, 0).subscribe(s -> {
                 if(LL.D) Log.d(TAG, "findImage() called = " + s);
-                saveProduct(text, s);
+                if(s != null && s.size() > 0){
+                    saveProduct(text, s.get(0));
+                }
 
             }, throwable -> {
                 Log.e(TAG, "accept: ", throwable);
@@ -222,7 +224,7 @@ public class ProductAddActivity extends BaseActivity{
             RealmDB.get().executeTransaction(realm -> {
                 String imageUrl = null;
                 if(image != null){
-                    imageUrl = image.getImageUrl();
+                    imageUrl = image.getThumbnailUrl();
                 }
                 Product product = new Product();
                 product.setName(text);
@@ -328,12 +330,12 @@ public class ProductAddActivity extends BaseActivity{
                         .subscribe(storeDatas -> setRetrievedProductList(storeDatas)
                                 , throwable -> TrackingUtil.getInstance().report(throwable));
 
-                Product p = ProductDB.getInstance().findExactlyName(text);
-                if(p != null){
-                    mInput.removeTextChangedListener(this);
-                    ProductData product = new ProductData(p);
-                    setProductData(product);
-                }
+//                Product p = ProductDB.getInstance().findExactlyName(text);
+//                if(p != null){
+//                    mInput.removeTextChangedListener(this);
+//                    ProductData product = new ProductData(p);
+//                    setProductData(product);
+//                }
             }else{
                 selectedName = null;
             }

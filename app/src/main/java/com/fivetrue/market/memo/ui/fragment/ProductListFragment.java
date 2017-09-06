@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
@@ -201,13 +202,19 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     }
 
     public void onClickActionButton(){
-        Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), TAG, getAdapter().getSelections());
-        getActivity().startActivity(intent);
-        getAdapter().clearSelection();
-        updateFab();
-        if(getActivity() != null && getActivity() instanceof MainActivity){
-            ((MainActivity) getActivity()).movePageToRight();
-        }
+//        Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), TAG, getAdapter().getSelections());
+//        getActivity().startActivity(intent);
+        long millis = System.currentTimeMillis();
+        RealmDB.get().executeTransaction(realm -> {
+            for(Product p : getAdapter().getSelections()){
+                p.setCheckOutDate(millis);
+            }
+            getAdapter().clearSelection();
+            updateFab();
+            if(getActivity() != null && getActivity() instanceof MainActivity){
+                ((MainActivity) getActivity()).movePageToRight();
+            }
+        });
     }
 
     @Override

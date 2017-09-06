@@ -39,19 +39,6 @@ public class CheckOutProductFragment extends ProductListFragment{
     }
 
     @Override
-    public void onClickActionButton() {
-        if(getAdapter() != null && getActivity() != null){
-            Intent intent = ProductCheckOutActivity.makeIntent(getActivity(), TAG, getAdapter().getSelections());
-            getActivity().startActivity(intent);
-            getAdapter().clearSelection();
-            updateFab();
-            if(getActivity() != null && getActivity() instanceof MainActivity){
-                ((MainActivity) getActivity()).movePageToRight();
-            }
-        }
-    }
-
-    @Override
     protected ProductListAdapter makeAdapter(List<Product> productList) {
         ProductListAdapter adapter =  new ProductCheckoutListAdapter(productList, new ProductListAdapter.OnProductItemListener() {
             @Override

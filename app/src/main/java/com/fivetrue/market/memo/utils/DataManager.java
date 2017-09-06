@@ -82,16 +82,16 @@ public class DataManager {
         return Observable.fromIterable(ProductDB.getInstance().findStoreName(name)).toList().toObservable();
     }
 
-    public Observable<List<ProductData>> findBarcode(String barcode) {
-        List<Product> products = ProductDB.getInstance().findBarcode(barcode);
-        if (products != null && products.size() > 0) {
-            Log.i(TAG, "findBarcode: exist data in Local = " + products.size());
-            return Observable.fromIterable(products)
-                    .map(product -> new ProductData(product))
-                    .buffer(products.size());
-        }
-        return mFirebaseDB.findBarcode(barcode);
-    }
+//    public Observable<List<ProductData>> findBarcode(String barcode) {
+//        List<Product> products = ProductDB.getInstance().findBarcode(barcode);
+//        if (products != null && products.size() > 0) {
+//            Log.i(TAG, "findBarcode: exist data in Local = " + products.size());
+//            return Observable.fromIterable(products)
+//                    .map(product -> new ProductData(product))
+//                    .buffer(products.size());
+//        }
+//        return mFirebaseDB.findBarcode(barcode);
+//    }
 
 //    public Observable<ImageEntry> findImage(ConfigData config, final String q) {
 //        Log.i(TAG, "findImage: q = " + q);

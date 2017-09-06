@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.database.FirebaseDB;
 import com.fivetrue.market.memo.database.RealmDB;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
@@ -26,6 +28,7 @@ import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.AdUtil;
+import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -103,6 +106,22 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     }
 
+    private void checkoutProduct(Context context, Product product){
+        long mills = System.currentTimeMillis();
+        ProductDB.get().executeTransaction(realm -> {
+            product.setCheckOutDate(mills);
+            TrackingUtil.getInstance().checkoutProduct(product.getName()
+                    , product.getBarcode()
+                    , product.getPrice()
+                    , product.getStoreName());
+
+            FirebaseDB.getInstance(context)
+                    .addProduct(product).addOnCompleteListener(task -> {
+//                notifyDataSetChanged();
+            });
+        });
+    }
+
     protected void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
         final Product item = getItem(position);
         if(holder != null && item != null){
@@ -145,8 +164,10 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    Intent intent = ProductCheckOutActivity.makeIntent(context, TAG, item);
-                    context.startActivity(intent);
+//                    Intent intent = ProductCheckOutActivity.makeIntent(context, TAG, item);
+//                    context.startActivity(intent);
+                    checkoutProduct(context, item);
+
                     break;
                 case 1 :
                     Product p = new Product();

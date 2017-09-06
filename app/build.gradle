@@ -15,8 +15,8 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
 
-    def BASE_VERSION = "1.1"
-    def VERSION_CODE = 4
+    def BASE_VERSION = "1.2"
+    def VERSION_CODE = 5
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
@@ -124,7 +124,7 @@ dependencies {
     /**
      * ZXing
      */
-    compile 'com.journeyapps:zxing-android-embedded:3.4.0'
+//    compile 'com.journeyapps:zxing-android-embedded:3.4.0'
 
     /**
      * Open CVS

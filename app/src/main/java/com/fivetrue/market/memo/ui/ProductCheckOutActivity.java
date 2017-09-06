@@ -22,8 +22,6 @@ import com.fivetrue.market.memo.ui.adapter.list.CheckOutListAdapter;
 import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.utils.TrackingUtil;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,24 +180,24 @@ public class ProductCheckOutActivity extends BaseActivity{
         return makeIntent(context, where, array);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if(result != null) {
-            if(result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-            } else {
-                if(mAdapter != null && mProductForBarcode != null){
-                    ProductDB.get().executeTransaction(realm -> {
-                        mProductForBarcode.setBarcode(result.getContents());
-                        mAdapter.notifyDataSetChanged();
-                        mProductForBarcode = null;
-                    });
-                }
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if(result != null) {
+//            if(result.getContents() == null) {
+//                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+//            } else {
+//                if(mAdapter != null && mProductForBarcode != null){
+//                    ProductDB.get().executeTransaction(realm -> {
+//                        mProductForBarcode.setBarcode(result.getContents());
+//                        mAdapter.notifyDataSetChanged();
+//                        mProductForBarcode = null;
+//                    });
+//                }
+//            }
+//        } else {
+//            super.onActivityResult(requestCode, resultCode, data);
+//        }
+//    }
 }

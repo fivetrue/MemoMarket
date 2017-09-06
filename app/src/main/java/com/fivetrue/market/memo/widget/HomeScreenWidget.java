@@ -152,10 +152,10 @@ public class HomeScreenWidget extends AppWidgetProvider {
             Realm.getDefaultInstance().close();
             if(products != null
                     && products.size() > pos){
-                Intent activityIntent = ProductCheckOutActivity.makeIntent(context, TAG
-                        , products.get(pos).getCheckInDate());
-                activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(activityIntent);
+                long mills = System.currentTimeMillis();
+                Realm.getDefaultInstance().executeTransaction(realm -> {
+                    products.get(pos).setCheckOutDate(mills);
+                });
             }
 
         }

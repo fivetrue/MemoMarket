@@ -16,6 +16,8 @@ import com.google.android.gms.ads.AdView;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Observable;
+
 /**
  * Created by kwonojin on 2017. 4. 15..
  */
@@ -26,14 +28,11 @@ public class AdUtil extends AdListener {
 
     public static final String AD_PRODUCT_ADD = "product_add";
     public static final String AD_PRODUCT_CHECK_OUT = "product_check_out";
-    public static final String AD_LIST_BOTTOM_1 = "list_bottom1";
-    public static final String AD_LIST_BOTTOM_2 = "list_bottom2";
-    public static final String AD_LIST_BOTTOM_3 = "list_bottom3";
 
     private static final int REFRESH_COUNT = 2;
 
     private Map<String, AdView> mAdViewMap = new HashMap<>();
-    private AdRequest mAdRequest;
+    private AdRequest.Builder mAdRequestBuilder;
     private Context mContext;
 
     private static AdUtil sInstance;
@@ -66,11 +65,11 @@ public class AdUtil extends AdListener {
     }
 
     private void setLocation(Location location){
-        final AdRequest.Builder request = new AdRequest.Builder();
+        mAdRequestBuilder = new AdRequest.Builder();
         if(location != null){
-            request.setLocation(location);
+            mAdRequestBuilder.setLocation(location);
         }
-        request.setGender(AdRequest.GENDER_FEMALE)
+        mAdRequestBuilder.setGender(AdRequest.GENDER_FEMALE)
                 .addKeyword("Baby")
                 .addKeyword("아기")
                 .addKeyword("집")
@@ -88,15 +87,8 @@ public class AdUtil extends AdListener {
 //        mAdViewMap.put(AD_PRODUCT_CHECK_OUT, makeAdView(mContext.getString(R.string.admob_product_checkout_bottom), AdSize.MEDIUM_RECTANGLE));
         mAdViewMap.put(AD_PRODUCT_ADD, makeAdView(mContext.getString(R.string.admob_product_add_bottom), AdSize.LARGE_BANNER));
         mAdViewMap.put(AD_PRODUCT_CHECK_OUT, makeAdView(mContext.getString(R.string.admob_product_checkout_bottom), AdSize.LARGE_BANNER));
-        mAdViewMap.put(AD_LIST_BOTTOM_1, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
-        mAdViewMap.put(AD_LIST_BOTTOM_2, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
-        mAdViewMap.put(AD_LIST_BOTTOM_3, makeAdView(mContext.getString(R.string.admob_product_list_bottom), AdSize.BANNER));
-        mAdRequest = request.build();
-        mAdViewMap.get(AD_PRODUCT_ADD).loadAd(mAdRequest);
-        mAdViewMap.get(AD_PRODUCT_CHECK_OUT).loadAd(mAdRequest);
-        mAdViewMap.get(AD_LIST_BOTTOM_1).loadAd(mAdRequest);
-        mAdViewMap.get(AD_LIST_BOTTOM_2).loadAd(mAdRequest);
-        mAdViewMap.get(AD_LIST_BOTTOM_2).loadAd(mAdRequest);
+        mAdViewMap.get(AD_PRODUCT_ADD).loadAd(mAdRequestBuilder.build());
+        mAdViewMap.get(AD_PRODUCT_CHECK_OUT).loadAd(mAdRequestBuilder.build());
     }
 
     private AdView makeAdView(String unitId, AdSize adSize){
@@ -112,7 +104,7 @@ public class AdUtil extends AdListener {
         if(adView != null && parent != null){
             Integer count = (Integer) adView.getTag();
             if((count != null && count > REFRESH_COUNT) || refresh){
-                adView.loadAd(mAdRequest);
+                adView.loadAd(mAdRequestBuilder.build());
                 adView.setTag(0);
             }
             if(count == null){
@@ -170,5 +162,33 @@ public class AdUtil extends AdListener {
     public void onAdLoaded() {
         super.onAdLoaded();
         Log.i(TAG, "onAdLoaded: ");
+    }
+
+    public Observable<AdRequest.Builder> getAdRequestBuilder(){
+        return Observable.create(e -> {
+            if(mAdRequestBuilder != null){
+                e.onNext(mAdRequestBuilder);
+                e.onComplete();
+            }else{
+                DataManager.getInstance(mContext).getGeoLocation()
+                        .subscribe(geoLocation -> {
+                            if(LL.D) Log.d(TAG, "loadAd: geoLocation : " + geoLocation);
+                            if(geoLocation != null){
+                                Location location = new Location(LocationManager.NETWORK_PROVIDER);
+                                location.setAccuracy(geoLocation.getAccuracy());
+                                location.setLatitude(geoLocation.getLocation().getLat());
+                                location.setLongitude(geoLocation.getLocation().getLng());
+                                setLocation(location);
+                                e.onNext(mAdRequestBuilder);
+                                e.onComplete();
+                            }
+                        }, throwable -> {
+                            Log.e(TAG, "fail getGeoLocation ", throwable);
+                            setLocation(null);
+                            e.onNext(mAdRequestBuilder);
+                            e.onComplete();
+                        });
+            }
+        });
     }
 }

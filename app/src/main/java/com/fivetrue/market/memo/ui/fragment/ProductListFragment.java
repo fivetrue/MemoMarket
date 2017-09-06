@@ -1,7 +1,6 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,13 +23,14 @@ import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.MainActivity;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
-import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
 import com.fivetrue.market.memo.utils.AdUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.SimpleViewUtils;
 import com.fivetrue.market.memo.view.PagerTabContent;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdView;
 
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     private TextView mTextMessage;
     private FloatingActionButton mFabAction;
 
-    private FrameLayout mLayoutAd;
+    private AdView mAdView;
 
     private GridLayoutManager mLayoutManager;
 
@@ -68,30 +67,6 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
                 .subscribe(product -> setProductList(product), Throwable::printStackTrace);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(showAd()){
-//            AdUtil.getInstance().addAdView(mLayoutAd, getAdType(), false);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if(showAd()){
-//            AdUtil.getInstance().detachAdView(getAdType());
-        }
-    }
-
-    protected boolean showAd(){
-        return false;
-    }
-
-    protected String getAdType(){
-        return AdUtil.AD_LIST_BOTTOM_1;
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -105,7 +80,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         mRecyclerProduct = (RecyclerView) view.findViewById(R.id.rv_fragment_product_list);
         mTextMessage = (TextView) view.findViewById(R.id.tv_fragment_product_list);
         mFabAction = (FloatingActionButton) view.findViewById(R.id.fab_fragment_product_list);
-        mLayoutAd = (FrameLayout) view.findViewById(R.id.layout_fragemnt_product_list_ad);
+        mAdView = (AdView) view.findViewById(R.id.adView);
 
         mLayoutManager = new GridLayoutManager(getActivity(), 3, GridLayoutManager.VERTICAL, false);
         mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -142,6 +117,41 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         });
 
         ProductDB.getInstance().updatePublish();
+
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+                if(LL.D) Log.d(TAG, "onAdFailedToLoad() called with: i = [" + i + "]");
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                super.onAdLeftApplication();
+            }
+
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+            }
+        });
+        if(AdUtil.getInstance() == null){
+            AdUtil.init(getContext().getApplicationContext());
+        }
+        AdUtil.getInstance().getAdRequestBuilder().subscribe(builder -> {
+            mAdView.loadAd(builder.build());
+        });
+
     }
 
     protected boolean makeFilter(Product p){

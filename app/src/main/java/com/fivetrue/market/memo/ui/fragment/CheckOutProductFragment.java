@@ -89,8 +89,4 @@ public class CheckOutProductFragment extends ProductListFragment{
         return TabIcon.TextWithIcon;
     }
 
-    @Override
-    protected String getAdType() {
-        return AdUtil.AD_LIST_BOTTOM_2;
-    }
 }

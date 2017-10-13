@@ -2,22 +2,13 @@ package com.fivetrue.market.memo.widget;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.database.product.ProductDB;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * Created by kwonojin on 2017. 4. 13..

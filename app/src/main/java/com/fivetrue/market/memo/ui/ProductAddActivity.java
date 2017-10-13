@@ -142,15 +142,15 @@ public class ProductAddActivity extends BaseActivity{
                 return;
             }
 
-            if(TextUtils.isEmpty(mInputPrice.getText())){
-                Snackbar.make(mLayoutInput, R.string.product_has_no_price_message, Snackbar.LENGTH_SHORT).show();
-                return;
-            }
-
-            if(TextUtils.isEmpty(mInputStore.getText())){
-                Snackbar.make(mLayoutInput, R.string.product_has_no_price_message, Snackbar.LENGTH_SHORT).show();
-                return;
-            }
+//            if(TextUtils.isEmpty(mInputPrice.getText())){
+//                Snackbar.make(mLayoutInput, R.string.product_has_no_price_message, Snackbar.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//            if(TextUtils.isEmpty(mInputStore.getText())){
+//                Snackbar.make(mLayoutInput, R.string.product_has_no_price_message, Snackbar.LENGTH_SHORT).show();
+//                return;
+//            }
 
             if(mInputName.getText().length() > 0){
                 setInputText(mInputName.getText().toString().trim());
@@ -271,7 +271,7 @@ public class ProductAddActivity extends BaseActivity{
                 product.setBarcode(mScanBarcode);
                 product.setStoreName(mInputStore.getText().toString());
                 try{
-                    product.setPrice(Long.parseLong(mInputPrice.getText().toString()));
+                    product.setPrice(TextUtils.isEmpty(mInputPrice.getText()) ? 0 : Long.parseLong(mInputPrice.getText().toString()));
                 }catch(Exception e){
 
                 }

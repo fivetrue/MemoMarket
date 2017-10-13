@@ -16,7 +16,7 @@ apply plugin: 'me.tatarka.retrolambda'
 android {
 
     def BASE_VERSION = "1.2"
-    def VERSION_CODE = 5
+    def VERSION_CODE = 6
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
@@ -31,7 +31,7 @@ android {
 
 
     compileSdkVersion 25
-    buildToolsVersion "24.0.1"
+    buildToolsVersion '25.0.0'
     defaultConfig {
         applicationId "com.fivetrue.market.memo"
         minSdkVersion 21

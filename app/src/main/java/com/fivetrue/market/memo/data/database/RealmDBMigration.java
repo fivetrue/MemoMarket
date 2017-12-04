@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.database;
+package com.fivetrue.market.memo.data.database;
 
 import android.util.Log;
 
@@ -10,6 +10,7 @@ import io.realm.DynamicRealm;
  * Created by kwonojin on 2017. 3. 28..
  */
 
+@Deprecated
 public class RealmDBMigration implements io.realm.RealmMigration {
 
     private static final String TAG = "RealmDBMigration";

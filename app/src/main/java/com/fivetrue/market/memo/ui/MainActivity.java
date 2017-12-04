@@ -124,11 +124,6 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public int getDefaultFragmentAnchor() {
-        return R.id.layout_main_anchor;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);

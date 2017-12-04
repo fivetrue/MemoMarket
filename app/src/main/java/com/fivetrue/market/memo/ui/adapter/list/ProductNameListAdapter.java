@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.dto.ProductData;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.List;
@@ -17,14 +17,14 @@ import java.util.List;
  * Created by kwonojin on 2017. 2. 26..
  */
 
-public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterImpl<ProductData> {
+public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterImpl<Product> {
 
     private static final String TAG = "ProductNameListAdapter";
 
     private Context mContext;
-    private List<ProductData> mData;
+    private List<Product> mData;
 
-    public ProductNameListAdapter(Context context, List<ProductData> list){
+    public ProductNameListAdapter(Context context, List<Product> list){
         this.mContext = context;
         this.mData = list;
     }
@@ -42,7 +42,7 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         Holder holder = new Holder();
-        ProductData product = getItem(i);
+        Product product = getItem(i);
         if(view == null){
             LayoutInflater inflater = LayoutInflater.from(mContext);
             view = inflater.inflate(R.layout.item_store_list_popup, null);
@@ -58,12 +58,12 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
             }
         }
 
-        holder.name.setText(product.name);
+        holder.name.setText(product.getName());
         return view;
     }
 
     @Override
-    public ProductData getItem(int pos) {
+    public Product getItem(int pos) {
         return mData.get(pos);
     }
 
@@ -73,17 +73,17 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     }
 
     @Override
-    public List<ProductData> getData() {
+    public List<Product> getData() {
         return mData;
     }
 
-    public void setData(List<ProductData> data){
+    public void setData(List<Product> data){
         this.mData = data;
         notifyDataSetChanged();
     }
 
     @Override
-    public void add(ProductData data) {
+    public void add(Product data) {
         mData.add(data);
         notifyDataSetChanged();
     }
@@ -114,7 +114,7 @@ public class ProductNameListAdapter extends BaseAdapter implements BaseAdapterIm
     }
 
     @Override
-    public List<ProductData> getSelections() {
+    public List<Product> getSelections() {
         return null;
     }
 

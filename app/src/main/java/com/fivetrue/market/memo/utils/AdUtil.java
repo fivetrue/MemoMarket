@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.data.NetworkData;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
@@ -48,20 +49,7 @@ public class AdUtil extends AdListener {
 
     private AdUtil(Context context){
         mContext = context;
-        DataManager.getInstance(context).getGeoLocation()
-                .subscribe(geoLocation -> {
-                    if(LL.D) Log.d(TAG, "loadAd: geoLocation : " + geoLocation);
-                    if(geoLocation != null){
-                        Location location = new Location(LocationManager.NETWORK_PROVIDER);
-                        location.setAccuracy(geoLocation.getAccuracy());
-                        location.setLatitude(geoLocation.getLocation().getLat());
-                        location.setLongitude(geoLocation.getLocation().getLng());
-                        setLocation(location);
-                    }
-                }, throwable -> {
-                    Log.e(TAG, "fail getGeoLocation ", throwable);
-                    setLocation(null);
-                });
+
     }
 
     private void setLocation(Location location){
@@ -170,7 +158,7 @@ public class AdUtil extends AdListener {
                 e.onNext(mAdRequestBuilder);
                 e.onComplete();
             }else{
-                DataManager.getInstance(mContext).getGeoLocation()
+                NetworkData.getInstance(mContext).getGeoLocation()
                         .subscribe(geoLocation -> {
                             if(LL.D) Log.d(TAG, "loadAd: geoLocation : " + geoLocation);
                             if(geoLocation != null){

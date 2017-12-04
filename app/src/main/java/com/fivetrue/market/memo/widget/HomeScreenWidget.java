@@ -14,10 +14,9 @@ import android.widget.RemoteViews;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
-import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.SplashActivity;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 
@@ -155,6 +154,7 @@ public class HomeScreenWidget extends AppWidgetProvider {
                 long mills = System.currentTimeMillis();
                 Realm.getDefaultInstance().executeTransaction(realm -> {
                     products.get(pos).setCheckOutDate(mills);
+                    ProductDB.getInstance().updatePublish();
                 });
             }
 

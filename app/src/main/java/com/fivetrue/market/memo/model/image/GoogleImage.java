@@ -3,29 +3,31 @@ package com.fivetrue.market.memo.model.image;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fivetrue.market.memo.model.Image;
+
 /**
  * Created by kwonojin on 2017. 2. 21..
  */
 
 
-public class GoogleImage implements Parcelable {
+public class GoogleImage implements Parcelable , Image{
 
-    public int cr;
-    public String id;
-    public String isu;
-    public String itg;
-    public String ity;
-    public int oh;
-    public String ou;
-    public int ow;
-    public String pt;
-    public String rid;
-    public String ru;
-    public String s;
-    public String st;
-    public String tu;
-    public int th;
-    public int tw;
+    private int cr;
+    private String id;
+    private String isu;
+    private String itg;
+    private String ity;
+    private int oh;
+    private String ou;
+    private int ow;
+    private String pt;
+    private String rid;
+    private String ru;
+    private String s;
+    private String st;
+    private String tu;
+    private int th;
+    private int tw;
 
     protected GoogleImage(Parcel in) {
         cr = in.readInt();
@@ -163,5 +165,25 @@ public class GoogleImage implements Parcelable {
         parcel.writeString(tu);
         parcel.writeInt(th);
         parcel.writeInt(tw);
+    }
+
+    @Override
+    public String getImageThumbnailUrl() {
+        return tu;
+    }
+
+    @Override
+    public String getImageUrl() {
+        return ou;
+    }
+
+    @Override
+    public String getImageKeyword() {
+        return s;
+    }
+
+    @Override
+    public String getImagePost() {
+        return ru;
     }
 }

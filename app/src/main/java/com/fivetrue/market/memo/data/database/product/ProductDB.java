@@ -1,11 +1,11 @@
-package com.fivetrue.market.memo.database.product;
+package com.fivetrue.market.memo.data.database.product;
 
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
-import com.fivetrue.market.memo.database.RealmDB;
+import com.fivetrue.market.memo.data.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 
@@ -20,6 +20,7 @@ import io.realm.RealmChangeListener;
  * Created by kwonojin on 2017. 3. 28..
  */
 
+@Deprecated
 public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
 
     private static final String TAG = "ProductDB";
@@ -47,18 +48,21 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
     public void add(Product product){
         get().executeTransaction(realm -> {
             get().insert(product);
+            updatePublish();
         });
     }
 
     public void add(List<Product> products){
         get().executeTransaction(realm -> {
             get().insert(products);
+            updatePublish();
         });
     }
 
     public void delete(Product product){
         get().executeTransaction(realm -> {
             product.deleteFromRealm();
+            updatePublish();
         });
     }
 
@@ -96,7 +100,7 @@ public class ProductDB extends RealmDB implements RealmChangeListener<Realm>{
     @Override
     public void onChange(Realm element) {
         if(LL.D) Log.d(TAG, "onChange() called with: element = [" + element + "]");
-        updatePublish();
+//        updatePublish();
     }
 
 

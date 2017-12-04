@@ -1,46 +1,40 @@
 package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.FirebaseDB;
-import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.database.product.ProductDB;
-import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
-import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
-import com.fivetrue.market.memo.utils.AdUtil;
-import com.fivetrue.market.memo.utils.SimpleViewUtils;
-import com.fivetrue.market.memo.utils.TrackingUtil;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.fivetrue.market.memo.ui.adapter.ItemTouchHelperAdapter;
+import com.fivetrue.market.memo.ui.adapter.holder.HolderClickEvent;
+import com.fivetrue.market.memo.ui.adapter.holder.HolderMoreEvent;
+import com.fivetrue.market.memo.ui.adapter.holder.ProductAddHolder;
+import com.fivetrue.market.memo.ui.adapter.holder.ProductFooterHolder;
+import com.fivetrue.market.memo.ui.adapter.holder.ProductHolder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 
 /**
  * Created by kwonojin on 2017. 1. 26..
  */
 
-public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements BaseAdapterImpl<Product> {
+public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+        implements BaseAdapterImpl<Product>, HolderClickEvent, HolderMoreEvent {
 
     private static final String TAG = "ProductListAdapter";
 
@@ -48,39 +42,28 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public static final int PRODUCT = 0x01;
     public static final int FOOTER = 0x02;
 
-    public interface OnProductItemListener {
-        void onClickItem(ProductListAdapter.ProductHolder holder, Product item);
-        boolean onLongClickItem(ProductListAdapter.ProductHolder holder, Product item);
-    }
+    private PublishSubject<ClickEvent> clickEventSubject = PublishSubject.create();
+    private PublishSubject<MoreEvent> moreEventSubject = PublishSubject.create();
 
     private SparseBooleanArray mSelectedItems;
     private List<Product> mData;
-    private ProductListAdapter.OnProductItemListener mProductItemListener;
 
     private boolean mShowAddButton = true;
 
-    public ProductListAdapter(List<Product> data, ProductListAdapter.OnProductItemListener ll){
+    public ProductListAdapter(List<Product> data){
         this.mData = data;
-        mProductItemListener = ll;
         mSelectedItems = new SparseBooleanArray();
     }
 
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if(viewType == FOOTER){
-            View view = inflater.inflate(R.layout.item_product_list_footer, null);
-            RecyclerView.ViewHolder holder = new ProductFooterHolder(view);
-            return holder;
+            return ProductFooterHolder.makeHolder(parent.getContext());
         }else if(viewType == PRODUCT_ADD){
-            View view = inflater.inflate(R.layout.item_product_list_add, null);
-            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductAddHolder(view);
-            return holder;
+            return ProductAddHolder.makeHolder(parent.getContext());
         }else{
-            View view = inflater.inflate(R.layout.item_product_list_item, null);
-            RecyclerView.ViewHolder holder = new ProductListAdapter.ProductHolder(view);
-            return holder;
+            return ProductHolder.makeHolder(parent.getContext());
         }
     }
 
@@ -90,56 +73,29 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(getItemViewType(position) == FOOTER){
             onBindFooterHolder((ProductFooterHolder) holder, position);
         }else if(getItemViewType(position) == PRODUCT_ADD){
-            onBindProductAddHolder((ProductAddHolder) holder, position);
+
         }else if(getItemViewType(position) == PRODUCT){
-            onBindProductHolder((ProductListAdapter.ProductHolder) holder, position);
+            onBindProductHolder((ProductHolder) holder, position);
         }
     }
 
-    private void onBindFooterHolder(ProductFooterHolder holder, int position){
-    }
-
-    private void onBindProductAddHolder(ProductListAdapter.ProductAddHolder holder, int position){
-        holder.layout.setOnClickListener(view -> {
-            view.getContext().startActivity(ProductAddActivity.makeIntent(view.getContext(), TAG));
-        });
+    protected void onBindFooterHolder(ProductFooterHolder holder, int position){
 
     }
 
-    private void checkoutProduct(Context context, Product product){
-        long mills = System.currentTimeMillis();
-        ProductDB.get().executeTransaction(realm -> {
-            product.setCheckOutDate(mills);
-            TrackingUtil.getInstance().checkoutProduct(product.getName()
-                    , product.getBarcode()
-                    , product.getPrice()
-                    , product.getStoreName());
-
-            FirebaseDB.getInstance(context)
-                    .addProduct(product).addOnCompleteListener(task -> {
-//                notifyDataSetChanged();
-            });
-        });
+    protected void onBindProductAddHolder(ProductAddHolder holder, int pos){
     }
 
-    protected void onBindProductHolder(final ProductListAdapter.ProductHolder holder, final int position){
+
+    protected void onBindProductHolder(final ProductHolder holder, final int position){
         final Product item = getItem(position);
         if(holder != null && item != null){
             holder.setProduct(item, isSelect(position));
-            holder.layout.setOnClickListener(view -> {
-                if(mProductItemListener != null){
-                    mProductItemListener.onClickItem(holder, item);
-                }
+            holder.mBinding.layout.setOnClickListener(view -> {
+                clickEventSubject.onNext(new ClickEvent(ClickType.Click, holder));
             });
 
-            holder.layout.setOnLongClickListener(view -> {
-                if(mProductItemListener != null){
-                    return mProductItemListener.onLongClickItem(holder, item);
-                }
-                return false;
-            });
-
-            holder.more.setOnClickListener(view -> {
+            holder.mBinding.more.setOnClickListener(view -> {
                 showPopup(view.getContext(), view, item, position);
             });
         }
@@ -164,39 +120,13 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-//                    Intent intent = ProductCheckOutActivity.makeIntent(context, TAG, item);
-//                    context.startActivity(intent);
-                    checkoutProduct(context, item);
-
+                    publishMoreEvent(new MoreEvent(MoreType.Buy, position, item));
                     break;
                 case 1 :
-                    Product p = new Product();
-                    p.setName(item.getName());
-                    p.setStoreName(item.getStoreName());
-                    p.setBarcode(item.getBarcode());
-                    p.setPrice(item.getPrice());
-                    p.setImageUrl(item.getImageUrl());
-                    p.setCheckInDate(System.currentTimeMillis());
-                    ProductDB.getInstance().add(p);
-
+                    publishMoreEvent(new MoreEvent(MoreType.Duplicate, position, item));
                     break;
                 case 2 :
-                    new AlertDialog.Builder(context)
-                            .setTitle(R.string.delete)
-                            .setMessage(R.string.delete_product_message)
-                            .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
-                                dialogInterface.dismiss();
-                                RealmDB.get().executeTransaction(realm -> {
-                                    Toast.makeText(view1.getContext()
-                                            , String.format("%s \"%s\"", listItems[i], item.getName())
-                                            , Toast.LENGTH_SHORT).show();
-                                    TrackingUtil.getInstance().deleteProduct(item.getName(), TAG);
-                                    item.deleteFromRealm();
-                                    notifyItemRemoved(position);
-                                });
-                            }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
-                            .show();
-
+                    publishMoreEvent(new MoreEvent(MoreType.Delete, position, item));
                     break;
             }
             clearSelection();
@@ -207,6 +137,10 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void showAddButton(boolean b){
         mShowAddButton = b;
         notifyDataSetChanged();
+    }
+
+    protected void publishMoreEvent(MoreEvent event){
+        moreEventSubject.onNext(event);
     }
 
 
@@ -304,7 +238,6 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void clearSelection() {
         mSelectedItems.clear();
-        notifyDataSetChanged();
     }
 
     @Override
@@ -324,65 +257,13 @@ public class ProductListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         clearSelection();
     }
 
-
-    public static final class ProductHolder extends RecyclerView.ViewHolder{
-
-        public final View layout;
-        public final ImageView image;
-        public final TextView name;
-        public final ImageView check;
-        public final ImageView badge;
-        public final ImageView more;
-
-        public ProductHolder(View itemView) {
-            super(itemView);
-            layout = itemView.findViewById(R.id.layout_item_product_list_item);
-            image = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_image);
-            name = (TextView) itemView.findViewById(R.id.tv_item_product_list_item_name);
-            check = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_check);
-            badge = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_badge);
-            more = (ImageView) itemView.findViewById(R.id.iv_item_product_list_item_more);
-        }
-
-        public void setProduct(Product product, boolean b){
-            name.setText(product.getName());
-            Glide.with(image.getContext())
-                    .load(product.getImageUrl())
-                    .placeholder(R.drawable.ic_product_gray_50dp)
-                    .into(image);
-            if(System.currentTimeMillis() - product.getCheckInDate()
-                    < DefaultPreferenceUtil.getNewProductPeriod(name.getContext())){
-                badge.setImageResource(R.drawable.ic_new_red_20dp);
-            }else{
-                badge.setImageBitmap(null);
-            }
-
-            check.setVisibility(b ? View.VISIBLE : View.GONE);
-            more.setVisibility(b ? View.INVISIBLE : View.VISIBLE);
-            layout.animate().scaleX(b ? 0.9f : 1f)
-                    .scaleY(b ? 0.9f : 1f)
-                    .setDuration(200L)
-                    .start();
-        }
+    @Override
+    public Observable<ClickEvent> getClickObservable() {
+        return clickEventSubject;
     }
 
-    public static final class ProductAddHolder extends RecyclerView.ViewHolder{
-
-        public View layout;
-
-        public ProductAddHolder(View itemView) {
-            super(itemView);
-            layout = itemView.findViewById(R.id.layout_item_product_list_add);
-        }
-    }
-
-    public static final class ProductFooterHolder extends RecyclerView.ViewHolder{
-
-        public FrameLayout layout;
-
-        public ProductFooterHolder(View itemView) {
-            super(itemView);
-            layout = (FrameLayout) itemView.findViewById(R.id.layout_item_product_list_footer);
-        }
+    @Override
+    public Observable<MoreEvent> getMoreObservable(){
+        return moreEventSubject;
     }
 }

@@ -1,8 +1,8 @@
-package com.fivetrue.market.memo.database;
+package com.fivetrue.market.memo.data.database;
 
 import android.content.Context;
 
-import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -11,6 +11,7 @@ import io.realm.RealmConfiguration;
  * Created by kwonojin on 2017. 1. 24..
  */
 
+@Deprecated
 public class RealmDB {
 
     private static final String TAG = "RealmDB";

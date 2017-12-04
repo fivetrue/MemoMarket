@@ -4,24 +4,21 @@ buildscript {
     }
     dependencies {
         classpath "io.realm:realm-gradle-plugin:2.2.0"
-        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
-
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
-apply plugin: 'me.tatarka.retrolambda'
 
 android {
 
-    def BASE_VERSION = "1.2"
-    def VERSION_CODE = 6
+    def BASE_VERSION = "2.0"
+    def VERSION_CODE = 7
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
     def TRUE = "true"
-    def FALSE = "false"
+//    def FALSE = "false"
     def STRING = "String"
     def INT = "int"
     def LONG = "long"
@@ -29,9 +26,8 @@ android {
     def LL_D = "LOG_D"
     def BUILD_DATE = "BUILD_DATE"
 
-
-    compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.fivetrue.market.memo"
         minSdkVersion 21
@@ -70,9 +66,19 @@ android {
         sourceCompatibility 1.8
     }
 
+    dataBinding {
+        enabled = true
+    }
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
+}
+
+ext{
+    FIREBASE_VERSION = '11.6.0'
+    SUPPORT_LIBRARY_VERSION = '26.1.0'
+    ACHITECHURE_VERSION = '1.0.0'
 }
 
 dependencies {
@@ -80,59 +86,83 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:multidex:1.0.0'
+    androidTestCompile 'com.android.support:support-annotations:26.0.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'org.mockito:mockito-android:2.7.22'
 
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:2.7.22"
+
+
+    implementation 'com.android.support:multidex:1.0.2'
     /**
      * Google Firebase
      */
-    compile 'com.google.firebase:firebase-messaging:10.0.1'
-    compile 'com.google.firebase:firebase-core:10.0.1'
-    compile 'com.google.firebase:firebase-crash:10.0.1'
-    compile 'com.google.firebase:firebase-database:10.0.1'
-    compile 'com.google.firebase:firebase-ads:10.0.1'
+    implementation "com.google.firebase:firebase-messaging:$FIREBASE_VERSION"
+    implementation "com.google.firebase:firebase-core:$FIREBASE_VERSION"
+    implementation "com.google.firebase:firebase-crash:$FIREBASE_VERSION"
+    implementation "com.google.firebase:firebase-database:$FIREBASE_VERSION"
+    implementation "com.google.firebase:firebase-ads:$FIREBASE_VERSION"
 
     /**
      * UI Library
      */
-    compile 'com.android.support:cardview-v7:25.1.0'
-    compile 'com.android.support:recyclerview-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:palette-v7:25.1.0'
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'jp.wasabeef:recyclerview-animators:2.2.5'
+    implementation "com.android.support:cardview-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:recyclerview-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:palette-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation 'jp.wasabeef:recyclerview-animators:2.2.5'
 
     /**
      * Network Library
      */
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
 
     /**
      * RxJava
      */
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
-    compile "com.github.akarnokd:rxjava2-extensions:0.16.3"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.1'
+    implementation "com.github.akarnokd:rxjava2-extensions:0.16.3"
 
     /**
      * ImageLoader
      */
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
 
     /**
      * ZXing
      */
-//    compile 'com.journeyapps:zxing-android-embedded:3.4.0'
+//    implementation 'com.journeyapps:zxing-android-embedded:3.4.0'
 
     /**
      * Open CVS
      */
-    compile 'com.opencsv:opencsv:3.9'
-    compile 'org.apache.poi:poi:3.9'
-    compile 'com.jjoe64:graphview:4.2.1'
-    compile 'org.jsoup:jsoup:1.10.2'
+    implementation 'com.opencsv:opencsv:3.9'
+    implementation 'org.apache.poi:poi:3.9'
+    implementation 'com.jjoe64:graphview:4.2.1'
+    implementation 'org.jsoup:jsoup:1.10.2'
+
+    implementation 'com.github.frankiesardo:auto-parcel:0.3.1'
+    annotationProcessor 'com.github.frankiesardo:auto-parcel-processor:0.3.1'
+
+    /**
+     * Android Architecture library
+     */
+    implementation "android.arch.lifecycle:common-java8:$ACHITECHURE_VERSION"
+    implementation "android.arch.lifecycle:extensions:$ACHITECHURE_VERSION"
+    annotationProcessor "android.arch.lifecycle:compiler:$ACHITECHURE_VERSION"
+
+    implementation "android.arch.persistence.room:runtime:$ACHITECHURE_VERSION"
+    annotationProcessor "android.arch.persistence.room:compiler:$ACHITECHURE_VERSION"
+    testImplementation "android.arch.persistence.room:testing:$ACHITECHURE_VERSION"
+
+    implementation "android.arch.persistence.room:rxjava2:$ACHITECHURE_VERSION"
+
+    testImplementation "android.arch.core:core-testing:$ACHITECHURE_VERSION"
 }
 
 apply plugin: 'com.google.gms.google-services'

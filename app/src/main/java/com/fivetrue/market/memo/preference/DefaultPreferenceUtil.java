@@ -3,8 +3,8 @@ package com.fivetrue.market.memo.preference;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.fivetrue.market.memo.database.product.ProductDB;
-import com.fivetrue.market.memo.model.dto.ConfigData;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
+import com.fivetrue.market.memo.model.remote.ConfigData;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

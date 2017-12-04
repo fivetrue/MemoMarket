@@ -11,10 +11,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.data.NetworkData;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.DataManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -28,9 +28,7 @@ import java.util.Map;
 
 import hu.akarnokd.rxjava2.math.MathFlowable;
 import io.reactivex.Flowable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observables.GroupedObservable;
-import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -226,13 +224,13 @@ public class PurchaseDetailListAdapter extends RecyclerView.Adapter<RecyclerView
         }
 
         public void setData(GroupedObservable<String, Product> data, List<Product> products){
-            DataManager.getInstance(layout.getContext())
+            NetworkData.getInstance(layout.getContext())
                     .findImages(data.getKey(), 0)
                     .subscribe(img -> {
 
                         String imageUrl = null;
                         if(img != null && img.size() > 0){
-                            imageUrl = img.get(0).getThumbnailUrl();
+                            imageUrl = img.get(0).getImageThumbnailUrl();
                             Glide.with(layout.getContext())
                                     .load(imageUrl)
                                     .placeholder(R.drawable.ic_product_gray_50dp)

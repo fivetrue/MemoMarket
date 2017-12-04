@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -32,12 +34,7 @@
         <activity android:name=".ui.ProductAddActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Transparent"
-            android:windowSoftInputMode="adjustNothing"/>
-
-        <activity android:name=".ui.ProductCheckOutActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Transparent"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustPan"/>
 
         <receiver
             android:icon="@drawable/ic_cart_checkout_white_50dp"

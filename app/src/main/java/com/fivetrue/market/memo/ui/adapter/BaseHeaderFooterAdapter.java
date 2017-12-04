@@ -197,6 +197,7 @@ public abstract class BaseHeaderFooterAdapter<V> extends RecyclerView.Adapter<Re
     public void clear(){
         mData.clear();
         clearSelection();
+        notifyDataSetChanged();
     }
 
     public void setOnItemClickListener(OnItemClickListener<V> ll){

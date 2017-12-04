@@ -1,7 +1,6 @@
 package com.fivetrue.market.memo.ui;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AlertDialog;
@@ -11,7 +10,7 @@ import android.widget.TextView;
 
 import com.fivetrue.market.memo.BuildConfig;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.TrackingUtil;
@@ -64,6 +63,7 @@ public class SettingsActivity extends BaseActivity {
                                     ProductDB.get().executeTransaction(realm -> {
                                         ProductDB.get().deleteAll();
                                         dialogInterface.dismiss();
+                                        ProductDB.getInstance().updatePublish();
                                     });
                                 }).setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
                             dialogInterface.dismiss();

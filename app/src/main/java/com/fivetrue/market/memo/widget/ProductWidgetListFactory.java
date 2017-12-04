@@ -7,7 +7,7 @@ import android.widget.RemoteViews;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 
 /**

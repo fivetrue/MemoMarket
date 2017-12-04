@@ -1,46 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_fragment_purchase_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <data>
+        <import type="android.view.View"/>
+        <variable name="empty" type="boolean" />
+        <variable name="showFab" type="boolean" />
+    </data>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_fragment_product_list"
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/layout_fragment_purchase_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
 
-    <TextView
-        android:id="@+id/tv_fragment_product_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:padding="4dp"
-        android:drawableTop="@drawable/ic_add_primary_50dp"
-        android:text="@string/purchases_no_item"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/product_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="@{empty ? View.GONE : View.VISIBLE}" />
 
-    <FrameLayout
-        android:id="@+id/layout_fragemnt_product_list_ad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom" >
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="4dp"
+            android:drawableTop="@drawable/ic_add_primary_50dp"
+            android:text="@string/purchases_no_item"
+            android:visibility="@{empty ? View.VISIBLE : View.GONE}"/>
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="@string/admob_product_list_bottom" />
-    </FrameLayout>
+            android:layout_gravity="bottom" >
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/ad_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:adSize="BANNER"
+                app:adUnitId="@string/admob_product_list_bottom" />
+        </FrameLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_fragment_product_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="25dp"
-        android:src="@drawable/ic_cart_checkout_white_50dp"
-        android:visibility="invisible"
-        android:layout_gravity="center_horizontal|bottom"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="25dp"
+            android:src="@drawable/ic_cart_checkout_white_50dp"
+            android:visibility="@{showFab ? View.VISIBLE : View.INVISIBLE}"
+            android:layout_gravity="center_horizontal|bottom"/>
 
-</android.support.design.widget.CoordinatorLayout>
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

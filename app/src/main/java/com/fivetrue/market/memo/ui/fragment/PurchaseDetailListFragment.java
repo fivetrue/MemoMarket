@@ -1,7 +1,6 @@
 package com.fivetrue.market.memo.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.product.ProductDB;
+import com.fivetrue.market.memo.data.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.ui.adapter.list.PurchaseDetailListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;

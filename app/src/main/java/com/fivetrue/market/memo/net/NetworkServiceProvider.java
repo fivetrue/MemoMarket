@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.net.service.GoogleApiService;
-import com.fivetrue.market.memo.net.service.GoogleImageService;
-import com.fivetrue.market.memo.net.service.ImageService;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import java.io.File;
@@ -66,27 +64,6 @@ public class NetworkServiceProvider {
         mContext = context;
         mCache = new Cache(new File(mContext.getCacheDir(), "http"), CACHE_SIZE);
         initHttpClient();
-    }
-
-    public GoogleImageService getGoogleImageService(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API_GOOGLE)
-                .client(mGoogleImageCacheHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        return retrofit.create(GoogleImageService.class);
-    }
-
-
-    public ImageService getImageService(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API_MS_SEARCH_IMAGE_HOST)
-                .client(mForceCacheHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        return retrofit.create(ImageService.class);
     }
 
     public GoogleApiService getGoogleApiService(){

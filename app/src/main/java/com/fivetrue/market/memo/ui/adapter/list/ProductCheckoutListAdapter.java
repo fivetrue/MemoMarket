@@ -1,34 +1,14 @@
 package com.fivetrue.market.memo.ui.adapter.list;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
-import android.support.v7.widget.RecyclerView;
-import android.util.SparseBooleanArray;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.database.RealmDB;
-import com.fivetrue.market.memo.database.product.ProductDB;
-import com.fivetrue.market.memo.model.vo.Product;
-import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
-import com.fivetrue.market.memo.ui.ProductAddActivity;
-import com.fivetrue.market.memo.ui.ProductCheckOutActivity;
-import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
+import com.fivetrue.market.memo.model.Product;
+import com.fivetrue.market.memo.ui.adapter.holder.ProductHolder;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.TrackingUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,26 +20,28 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
 
     private static final String TAG = "ProductCheckoutListAdap";
 
-    public ProductCheckoutListAdapter(List<Product> data, ProductListAdapter.OnProductItemListener ll) {
-        super(data, ll);
+    public ProductCheckoutListAdapter(List<Product> data) {
+        super(data);
     }
 
     @Override
-    protected void onBindProductHolder(ProductListAdapter.ProductHolder holder, int position) {
-        super.onBindProductHolder(holder, position);
-        Product p = getItem(position);
-        if(p != null){
-            holder.name.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
-            holder.name.setMaxLines(2);
-            holder.name.setText(p.getName() + "\n" + CommonUtils.convertToCurrency(p.getPrice()));
+    protected void onBindProductHolder(ProductHolder holder, int position) {
+        final Product item = getItem(position);
+        if(holder != null && item != null){
+            holder.mBinding.name.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+            holder.mBinding.name.setMaxLines(2);
+            holder.mBinding.name.setText(item.getName() + "\n" + CommonUtils.convertToCurrency(item.getPrice()));
+            holder.setProduct(item, isSelect(position));
+            holder.mBinding.more.setOnClickListener(view -> {
+                showPopup(view.getContext(), view, item, position);
+            });
         }
     }
 
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {
-                context.getString(R.string.revert),
-                context.getString(R.string.duplicate)
+                context.getString(R.string.revert)
                 , context.getString(R.string.delete)};
 
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
@@ -67,39 +49,10 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
             popupWindow.dismiss();
             switch (i){
                 case 0 :
-                    ProductDB.get().executeTransaction(realm -> {
-                        item.setCheckOutDate(0);
-                        Toast.makeText(view1.getContext()
-                                , String.format("%s \"%s\"", listItems[i], item.getName())
-                                , Toast.LENGTH_SHORT).show();
-                    });
+                    publishMoreEvent(new MoreEvent(MoreType.Revert, position, item));
                     break;
-                case 1 :
-                    Product p = new Product();
-                    p.setName(item.getName());
-                    p.setStoreName(item.getStoreName());
-                    p.setBarcode(item.getBarcode());
-                    p.setPrice(item.getPrice());
-                    p.setImageUrl(item.getImageUrl());
-                    p.setCheckInDate(item.getCheckInDate());
-                    p.setCheckOutDate(System.currentTimeMillis());
-                    ProductDB.getInstance().add(p);
-                    break;
-
                 case 2 :
-                    new AlertDialog.Builder(context)
-                            .setTitle(R.string.delete)
-                            .setMessage(R.string.delete_product_message)
-                            .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
-                                dialogInterface.dismiss();
-                                RealmDB.get().executeTransaction(realm -> {
-                                    TrackingUtil.getInstance().deleteProduct(item.getName(), TAG);
-                                    item.deleteFromRealm();
-                                    notifyItemRemoved(position);
-                                });
-                            }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
-                            .show();
-
+                    publishMoreEvent(new MoreEvent(MoreType.Delete, position, item));
                     break;
             }
             clearSelection();

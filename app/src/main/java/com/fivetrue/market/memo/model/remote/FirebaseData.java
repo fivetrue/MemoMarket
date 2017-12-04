@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.model.dto;
+package com.fivetrue.market.memo.model.remote;
 
 import android.util.Log;
 

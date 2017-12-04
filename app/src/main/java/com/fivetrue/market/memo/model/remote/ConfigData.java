@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.model.dto;
+package com.fivetrue.market.memo.model.remote;
 
 /**
  * Created by kwonojin on 2017. 2. 19..

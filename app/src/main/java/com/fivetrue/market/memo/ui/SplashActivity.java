@@ -1,9 +1,7 @@
 package com.fivetrue.market.memo.ui;
 
 import android.Manifest;
-import android.accounts.AccountManager;
 import android.annotation.TargetApi;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -13,15 +11,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.dto.ConfigData;
-import com.fivetrue.market.memo.utils.DataManager;
-import com.google.android.gms.common.AccountPicker;
-
-import io.reactivex.functions.Consumer;
 
 
 /**
@@ -141,7 +133,7 @@ public class SplashActivity extends BaseActivity {
     }
 
     public void checkConfig(){
-//        DataManager.getInstance(this).getConfig()
+//        NetworkData.getInstance(this).getConfig()
 //                .subscribe(configData -> startApplication(configData), throwable -> {
 //            if(LL.D) Log.d(TAG, "call() called with: throwable = [" + throwable + "]");
 //            Toast.makeText(SplashActivity.this,throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();

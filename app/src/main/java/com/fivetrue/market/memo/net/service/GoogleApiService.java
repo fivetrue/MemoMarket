@@ -1,11 +1,8 @@
 package com.fivetrue.market.memo.net.service;
 
-import com.fivetrue.market.memo.model.dto.GeoLocation;
-import com.fivetrue.market.memo.model.image.ImageEntry;
+import com.fivetrue.market.memo.model.remote.GeoLocation;
 
 import io.reactivex.Observable;
-import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 

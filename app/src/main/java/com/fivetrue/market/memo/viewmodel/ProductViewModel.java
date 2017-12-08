@@ -3,11 +3,9 @@ package com.fivetrue.market.memo.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
-import android.view.View;
 
-import com.fivetrue.market.memo.data.DataRepository;
+import com.fivetrue.market.memo.persistence.DataRepository;
 import com.fivetrue.market.memo.model.Product;
-import com.fivetrue.market.memo.model.entity.ProductEntity;
 
 import java.util.List;
 

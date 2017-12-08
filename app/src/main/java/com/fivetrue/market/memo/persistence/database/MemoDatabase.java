@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.data.database;
+package com.fivetrue.market.memo.persistence.database;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -11,11 +11,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import com.fivetrue.market.memo.data.database.converter.DateConverter;
-import com.fivetrue.market.memo.data.database.dao.ProductDao;
+import com.fivetrue.market.memo.persistence.database.converter.DateConverter;
+import com.fivetrue.market.memo.persistence.database.dao.ProductDao;
 import com.fivetrue.market.memo.model.entity.ProductEntity;
-
-import java.util.concurrent.Executor;
 
 
 /**

@@ -26,11 +26,8 @@ public class CheckOutProductFragment extends ProductListFragment{
     @Override
     protected List<Product> arrangeProducts(List<Product> products) {
         return Observable.fromIterable(products)
-                .filter(product -> product.getCheckOutDate() > 0 &&
-                        CommonUtils.getDate(getActivity()
-                                , "MM dd yyyy", product.getCheckOutDate())
-                                .equals(CommonUtils.getDate(getActivity()
-                                        , "MM dd yyyy",System.currentTimeMillis()))).toList().blockingGet();
+                .filter(product -> product.getCheckOutDate() > 0
+                        && product.getCheckInDate() != -1).toList().blockingGet();
     }
 
     @Override
@@ -68,5 +65,10 @@ public class CheckOutProductFragment extends ProductListFragment{
     @Override
     protected void onItemClickEvent(HolderClickEvent.ClickEvent event) {
         // Nothing
+    }
+
+    @Override
+    protected boolean supportTouchHelper() {
+        return false;
     }
 }

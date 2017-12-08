@@ -3,6 +3,8 @@ package com.fivetrue.market.memo.model.entity;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.fivetrue.market.memo.model.Product;
@@ -12,7 +14,7 @@ import com.fivetrue.market.memo.model.Product;
  */
 
 @Entity(indices = {@Index(value = {"name"})})
-public class ProductEntity implements Product{
+public class ProductEntity implements Product, Parcelable{
 
     @NonNull
     private @PrimaryKey(autoGenerate = true) long id;
@@ -22,6 +24,30 @@ public class ProductEntity implements Product{
     private String imageUrl;
     private long checkInDate;
     private long checkOutDate;
+
+    public ProductEntity(){};
+
+    protected ProductEntity(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        price = in.readLong();
+        storeName = in.readString();
+        imageUrl = in.readString();
+        checkInDate = in.readLong();
+        checkOutDate = in.readLong();
+    }
+
+    public static final Creator<ProductEntity> CREATOR = new Creator<ProductEntity>() {
+        @Override
+        public ProductEntity createFromParcel(Parcel in) {
+            return new ProductEntity(in);
+        }
+
+        @Override
+        public ProductEntity[] newArray(int size) {
+            return new ProductEntity[size];
+        }
+    };
 
     public void setId(long id) {
         this.id = id;
@@ -98,5 +124,21 @@ public class ProductEntity implements Product{
                 ", checkInDate=" + checkInDate +
                 ", checkOutDate=" + checkOutDate +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(id);
+        parcel.writeString(name);
+        parcel.writeLong(price);
+        parcel.writeString(storeName);
+        parcel.writeString(imageUrl);
+        parcel.writeLong(checkInDate);
+        parcel.writeLong(checkOutDate);
     }
 }

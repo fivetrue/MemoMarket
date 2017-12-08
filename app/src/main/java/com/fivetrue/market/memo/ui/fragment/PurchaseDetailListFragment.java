@@ -1,24 +1,24 @@
 package com.fivetrue.market.memo.ui.fragment;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.databinding.FragmentPurchaseListBinding;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.adapter.list.PurchaseDetailListAdapter;
 import com.fivetrue.market.memo.utils.CommonUtils;
+import com.fivetrue.market.memo.viewmodel.ProductListViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +38,6 @@ public class PurchaseDetailListFragment extends BaseFragment{
 
     private static final String KEY_PURCHASE_ITEMS = "purchase_items";
 
-    private RecyclerView mRecyclerView;
-    private Spinner mSpinner;
-    private TextView mNoItem;
-    private TextView mTotalPrice;
-    private TextView mTotalCount;
-
     private PurchaseDetailListAdapter mAdapter;
     private ArrayAdapter<Filter> mSpinnerAdapter;
 
@@ -51,33 +45,39 @@ public class PurchaseDetailListFragment extends BaseFragment{
 
     private long[] mPurchaseItemCheckouts;
 
+    private FragmentPurchaseListBinding mBinding;
+    private ProductListViewModel mViewModel;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mViewModel = ViewModelProviders.of(this).get(ProductListViewModel.class);
     }
 
     private void loadData(){
-        List<GroupedObservable<String,Product>> list = Observable.fromIterable(getProducts())
-                .sorted((product, t1) -> sort(product, t1))
-                .groupBy(product -> groupBy(product)).toList().blockingGet();
-        setData(list);
+        mPurchaseItemCheckouts = getArguments().getLongArray(KEY_PURCHASE_ITEMS);
+        mViewModel.getProductList().observe(this, products -> {
+            Observable.fromIterable(products)
+                    .filter(product -> product.getCheckOutDate() > 0)
+                    .filter(product -> filter(product))
+                    .sorted((product, t1) -> sort(product, t1))
+                    .groupBy(product -> groupBy(product))
+                    .toList().subscribe((groupedObservables, throwable) -> setData(groupedObservables));
+
+            MathFlowable.sumLong(Flowable.fromIterable(products)
+                    .filter(product -> filter(product))
+                    .map(product -> product.getPrice()))
+                    .subscribe(aLong -> mBinding.totalPrice.setText(CommonUtils.convertToCurrency(aLong)));
+
+            Flowable.fromIterable(products)
+                    .filter(product -> filter(product))
+                    .count()
+                    .subscribe(aLong
+                            -> mBinding.totalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
+        });
+
     }
 
-    private List<Product> getProducts(){
-        mPurchaseItemCheckouts = getArguments().getLongArray(KEY_PURCHASE_ITEMS);
-        List<Product> list = Flowable.fromIterable(ProductDB.getInstance().getProducts())
-                .filter(product -> product.getCheckOutDate() > 0)
-                .filter(product -> {
-                    for(long l : mPurchaseItemCheckouts){
-                        if(product.getCheckOutDate() == l){
-                            return true;
-                        }
-                    }
-                    return false;
-                }).toList().blockingGet();
-        Log.d(TAG, "getProducts() returned: " + list);
-        return list;
-    }
 
     @Override
     public void onStop() {
@@ -93,13 +93,10 @@ public class PurchaseDetailListFragment extends BaseFragment{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_fragment_purchase_list);
-        mNoItem = (TextView) view.findViewById(R.id.tv_fragment_purchase_list);
-        mTotalPrice = (TextView) view.findViewById(R.id.tv_fragment_purchase_list_total_price);
-        mTotalCount = (TextView) view.findViewById(R.id.tv_fragment_purchase_list_total_count);
-        mSpinner = (Spinner) view.findViewById(R.id.sp_fragment_purchase_list);
+        mBinding = DataBindingUtil.bind(view);
         mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mBinding.list.setLayoutManager(mLayoutManager);
+
 
         List<Filter> filters = new ArrayList<>();
         filters.add(new Filter(getString(R.string.product), Filter.Value.PRODUCT));
@@ -107,11 +104,9 @@ public class PurchaseDetailListFragment extends BaseFragment{
 
         mSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, filters);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-
-        mSpinner.setAdapter(mSpinnerAdapter);
-        mSpinner.setSelection(0);
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mBinding.spinner.setAdapter(mSpinnerAdapter);
+        mBinding.spinner.setSelection(0);
+        mBinding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 loadData();
@@ -139,26 +134,25 @@ public class PurchaseDetailListFragment extends BaseFragment{
                         return false;
                     }
                 });
-                mRecyclerView.setAdapter(mAdapter);
+                mBinding.list.setAdapter(mAdapter);
             }else{
                 mAdapter.setData(data);
             }
-            MathFlowable.sumLong(Flowable.fromIterable(getProducts())
-                    .map(product -> product.getPrice()))
-                    .subscribe(aLong -> mTotalPrice.setText(CommonUtils.convertToCurrency(aLong)));
-
-            Flowable.fromIterable(getProducts())
-                    .count()
-                    .subscribe(aLong
-                            -> mTotalCount.setText(String.format(getString(R.string.total_product_count), aLong)));
-
-
-            validation();
+            mBinding.setShowEmpty(data.isEmpty());
         }else{
             getFragmentManager().popBackStackImmediate();
         }
     }
 
+
+    private boolean filter(Product product){
+        for(long l : mPurchaseItemCheckouts){
+            if(product.getCheckOutDate() == l){
+                return true;
+            }
+        }
+        return false;
+    }
 
     private int sort(Product t1, Product t2){
         return t1.getCheckOutDate() < t2.getCheckOutDate() ? -1 : 1;
@@ -166,7 +160,7 @@ public class PurchaseDetailListFragment extends BaseFragment{
 
     private String groupBy(Product product){
         if(getActivity() != null){
-            Filter filter = mSpinnerAdapter.getItem(mSpinner.getSelectedItemPosition());
+            Filter filter = mSpinnerAdapter.getItem(mBinding.spinner.getSelectedItemPosition());
             switch (filter.value){
                 case PRODUCT:{
                     return product.getName();
@@ -178,14 +172,6 @@ public class PurchaseDetailListFragment extends BaseFragment{
         }
         return null;
     }
-
-    private void validation(){
-        if(mNoItem != null){
-            mNoItem.setVisibility(mAdapter != null && mAdapter.getItemCount() -1 > 0
-                    ? View.GONE : View.VISIBLE);
-        }
-    }
-
 
     @Override
     public void onDestroy() {

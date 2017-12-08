@@ -1,11 +1,11 @@
-package com.fivetrue.market.memo.data.database.product;
+package com.fivetrue.market.memo.persistence.database.product;
 
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
-import com.fivetrue.market.memo.data.database.RealmDB;
+import com.fivetrue.market.memo.persistence.database.RealmDB;
 import com.fivetrue.market.memo.model.vo.Product;
 import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
 

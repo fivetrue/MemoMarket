@@ -1,14 +1,16 @@
-package com.fivetrue.market.memo.data;
+package com.fivetrue.market.memo.persistence;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
-import com.fivetrue.market.memo.data.database.FirebaseDatabase;
-import com.fivetrue.market.memo.data.database.MemoDatabase;
-import com.fivetrue.market.memo.data.database.dao.ProductDao;
+import com.fivetrue.market.memo.net.NetworkData;
+import com.fivetrue.market.memo.persistence.database.AppExecutors;
+import com.fivetrue.market.memo.persistence.database.FirebaseDatabase;
+import com.fivetrue.market.memo.persistence.database.MemoDatabase;
 import com.fivetrue.market.memo.model.Image;
 import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.model.entity.ProductEntity;
@@ -142,9 +144,25 @@ public class DataRepository implements Repository {
         return localDatabase.productDao().findAllByLiveData();
     }
 
+    public List<ProductEntity> findAllInboxProduct(){
+        return localDatabase.productDao().findAllInboxProduct();
+    }
+
+    public ProductEntity findProduct(long id){
+        return localDatabase.productDao().findItem(id);
+    }
+
 
     public Observable<List<Image>> findImage(String name, int count){
         return networkData.findImages(name, count);
     }
 
+    public AppExecutors getAppExecutors(){
+        return localDatabase.getAppExecutors();
+    }
+
+    public void updateWidget(){
+        Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
+        context.sendBroadcast(intent);
+    }
 }

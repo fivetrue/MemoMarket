@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 
 import java.util.ArrayList;

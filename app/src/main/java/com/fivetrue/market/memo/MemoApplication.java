@@ -4,13 +4,14 @@ import android.arch.persistence.room.RoomDatabase;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
-import com.fivetrue.market.memo.data.database.AppExecutors;
-import com.fivetrue.market.memo.data.database.MemoDatabase;
-import com.fivetrue.market.memo.data.database.MigrationCallback;
-import com.fivetrue.market.memo.data.database.RealmDB;
+import com.fivetrue.market.memo.persistence.DataRepository;
+import com.fivetrue.market.memo.persistence.database.AppExecutors;
+import com.fivetrue.market.memo.persistence.database.MemoDatabase;
+import com.fivetrue.market.memo.persistence.database.MigrationCallback;
+import com.fivetrue.market.memo.persistence.database.RealmDB;
 import com.fivetrue.market.memo.net.NetworkServiceProvider;
 import com.fivetrue.market.memo.utils.AdUtil;
-import com.fivetrue.market.memo.data.NetworkData;
+import com.fivetrue.market.memo.net.NetworkData;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 
 
@@ -31,6 +32,10 @@ public class MemoApplication extends MultiDexApplication {
         NetworkData.getInstance(this);
         TrackingUtil.init(this);
         AdUtil.init(this);
+
+        DataRepository.getInstance(this).findAllProducts().observeForever(productEntities ->
+                DataRepository.getInstance(this).updateWidget()
+        );
     }
 
 

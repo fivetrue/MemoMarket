@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.data.database.dao;
+package com.fivetrue.market.memo.persistence.database.dao;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
@@ -32,9 +32,18 @@ public interface ProductDao{
     @Query("SELECT * From ProductEntity")
     LiveData<List<ProductEntity>> findAllByLiveData();
 
+    @Query("SELECT * From ProductEntity where checkOutDate=0 and checkInDate > 0")
+    LiveData<List<ProductEntity>> findAllInboxProductAsync();
+
+    @Query("SELECT * From ProductEntity where checkOutDate=0 and checkInDate > 0")
+    List<ProductEntity> findAllInboxProduct();
+
 
     @Query("SELECT * From ProductEntity")
     List<ProductEntity> findAll();
+
+    @Query("SELECT * From ProductEntity where id=:id")
+    ProductEntity findItem(long id);
 
     @Query("SELECT count(*) From ProductEntity")
     int getCount();

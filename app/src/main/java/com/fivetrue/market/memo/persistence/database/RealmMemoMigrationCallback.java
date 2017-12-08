@@ -1,10 +1,10 @@
-package com.fivetrue.market.memo.data.database;
+package com.fivetrue.market.memo.persistence.database;
 
 import android.util.Log;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.model.entity.ProductEntity;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
+import com.fivetrue.market.memo.persistence.database.product.ProductDB;
 import com.fivetrue.market.memo.model.vo.Product;
 
 import java.util.ArrayList;

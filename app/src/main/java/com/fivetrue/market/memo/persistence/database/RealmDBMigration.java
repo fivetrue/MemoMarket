@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.data.database;
+package com.fivetrue.market.memo.persistence.database;
 
 import android.util.Log;
 

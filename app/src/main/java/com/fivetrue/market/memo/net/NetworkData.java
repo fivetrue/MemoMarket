@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.data;
+package com.fivetrue.market.memo.net;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,7 +8,7 @@ import com.fivetrue.market.memo.R;
 import com.fivetrue.market.memo.model.Image;
 import com.fivetrue.market.memo.model.remote.GeoLocation;
 import com.fivetrue.market.memo.model.image.GoogleImage;
-import com.fivetrue.market.memo.net.NetworkServiceProvider;
+import com.fivetrue.market.memo.persistence.Repository;
 import com.google.gson.Gson;
 
 import org.jsoup.Jsoup;

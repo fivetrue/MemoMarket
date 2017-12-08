@@ -1,4 +1,4 @@
-package com.fivetrue.market.memo.data.database.converter;
+package com.fivetrue.market.memo.persistence.database.converter;
 
 import android.arch.persistence.room.TypeConverter;
 

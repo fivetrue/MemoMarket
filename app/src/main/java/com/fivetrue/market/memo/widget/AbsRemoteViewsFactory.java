@@ -20,14 +20,14 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
 
     private static final String TAG = "AbsRemoteViewsFactory";
 
-    private Context mContext;
+    private Context context;
 
-    private List<T> mData;
-    private int mWidgetId;
+    private List<T> data;
+    private int widgetId;
 
     public AbsRemoteViewsFactory(Context context, Intent intent) {
-        mContext = context;
-        mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+        this.context = context;
+        widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
@@ -38,13 +38,16 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
     }
 
     protected Context getContext(){
-        return mContext;
+        return context;
     }
 
     @Override
     public int getCount() {
-        if(LL.D) Log.d(TAG, "getCount() :" + mData.size());
-        return mData.size();
+        if(data != null){
+            if(LL.D) Log.d(TAG, "getCount() :" + data.size());
+            return data.size();
+        }
+        return 0;
     }
 
     @Override
@@ -54,14 +57,18 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
     }
 
     public T getItem(int pos){
-        return mData.get(pos);
+        if(data != null){
+            return data.get(pos);
+        }
+        return null;
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
+        if(LL.D) Log.d(TAG, "getViewAt() called with: position = [" + position + "]");
         T item = getItem(position);
         RemoteViews remoteView = new RemoteViews(
-                mContext.getPackageName(), getListRowLayoutId());
+                context.getPackageName(), getListRowLayoutId());
         onView(remoteView, item, position);
         return remoteView;
     }
@@ -74,16 +81,13 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
 
     @Override
     public void onDataSetChanged(){
+        if(LL.D) Log.d(TAG, "onDataSetChanged() called");
 
-    }
-
-    protected void setData(List<T> data){
-        if(LL.D) Log.d(TAG, "setData() called with: data = [" + data + "]");
-        mData = data;
     }
 
     @Override
     public void onDestroy() {
+        if(LL.D) Log.d(TAG, "onDestroy() called");
 
     }
 
@@ -100,5 +104,10 @@ public abstract class AbsRemoteViewsFactory<T> implements RemoteViewsService.Rem
     @Override
     public boolean hasStableIds() {
         return true;
+    }
+
+    public void setData(List<T> data) {
+        if(LL.D) Log.d(TAG, "setData() called with: data = [" + data + "]");
+        this.data = data;
     }
 }

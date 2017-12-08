@@ -10,7 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.Product;
 import com.opencsv.CSVWriter;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;

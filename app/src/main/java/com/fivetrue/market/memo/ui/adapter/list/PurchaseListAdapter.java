@@ -15,13 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.database.RealmDB;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.CommonUtils;
-import com.fivetrue.market.memo.utils.TrackingUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -138,7 +135,8 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {context.getString(R.string.export)
                 ,context.getString(R.string.send)
-                ,context.getString(R.string.delete)};
+//                ,context.getString(R.string.delete)
+        };
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
         popupWindow.setOnItemClickListener((adapterView, view1, i, l) -> {
             popupWindow.dismiss();
@@ -158,14 +156,14 @@ public class PurchaseListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             .setMessage(R.string.delete_product_message)
                             .setPositiveButton(android.R.string.ok, (dialogInterface, i1) -> {
                                 dialogInterface.dismiss();
-                                ProductDB.get().executeTransaction(realm -> {
-                                    for(Product p : mDataMap.get(item)){
-                                        TrackingUtil.getInstance().deleteProduct(p.getName(), TAG);
-                                        p.deleteFromRealm();
-                                        notifyItemRemoved(position);
-                                    }
-                                    ProductDB.getInstance().updatePublish();
-                                });
+//                                ProductDB.get().executeTransaction(realm -> {
+//                                    for(Product p : mDataMap.get(item)){
+//                                        TrackingUtil.getInstance().deleteProduct(p.getName(), TAG);
+//                                        p.deleteFromRealm();
+//                                        notifyItemRemoved(position);
+//                                    }
+//                                    ProductDB.getInstance().updatePublish();
+//                                });
                             }).setNegativeButton(android.R.string.cancel, (dialogInterface, i1) -> dialogInterface.dismiss())
                             .show();
                     break;

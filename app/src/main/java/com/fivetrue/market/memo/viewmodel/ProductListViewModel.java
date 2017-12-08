@@ -6,7 +6,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
-import com.fivetrue.market.memo.data.DataRepository;
+import com.fivetrue.market.memo.persistence.DataRepository;
 import com.fivetrue.market.memo.model.entity.ProductEntity;
 import com.fivetrue.market.memo.model.Product;
 

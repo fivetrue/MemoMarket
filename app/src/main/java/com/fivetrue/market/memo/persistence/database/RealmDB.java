@@ -1,8 +1,8 @@
-package com.fivetrue.market.memo.data.database;
+package com.fivetrue.market.memo.persistence.database;
 
 import android.content.Context;
 
-import com.fivetrue.market.memo.data.database.product.ProductDB;
+import com.fivetrue.market.memo.persistence.database.product.ProductDB;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;

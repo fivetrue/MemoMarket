@@ -2,45 +2,43 @@ package com.fivetrue.market.memo.widget;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
-import com.fivetrue.market.memo.preference.DefaultPreferenceUtil;
+import com.fivetrue.market.memo.model.entity.ProductEntity;
+import com.fivetrue.market.memo.persistence.DataRepository;
+
+import java.util.List;
+
 
 /**
  * Created by kwonojin on 2017. 4. 13..
  */
 
-public class ProductWidgetListFactory extends AbsRemoteViewsFactory<ProductDB.ShareableProduct> {
+public class ProductWidgetListFactory extends AbsRemoteViewsFactory<ProductEntity> {
 
     private static final String TAG = "ProductWidgetListFactor";
 
-    private Context mContext;
 
     public ProductWidgetListFactory(Context context, Intent intent) {
         super(context, intent);
-        mContext = context;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if(LL.D) Log.d(TAG, "onCreate() called");
-        setData(DefaultPreferenceUtil.getShareableProducts(mContext));
+        onDataSetChanged();
     }
 
     @Override
-    protected void onView(RemoteViews remoteViews, ProductDB.ShareableProduct data, int position) {
-        if(LL.D)
-            Log.d(TAG, "onView() called with: remoteViews = [" + remoteViews + "], data = [" + data + "]");
+    protected void onView(RemoteViews remoteViews, ProductEntity data, int pos) {
         remoteViews.setTextViewText(R.id.tv_item_homescreen_widget_list, data.getName());
         Intent fillInIntent = new Intent();
-        fillInIntent.putExtra(HomeScreenWidget.KEY_LIST_POSITION, position);
+        fillInIntent.putExtra(HomeScreenWidget.KEY_ITEM_ID, data.getId());
+        fillInIntent.putExtra(HomeScreenWidget.KEY_PRODUCT, data);
         remoteViews.setOnClickFillInIntent(R.id.tv_item_homescreen_widget_list, fillInIntent);
     }
+
 
     @Override
     protected int getListRowLayoutId() {
@@ -50,6 +48,8 @@ public class ProductWidgetListFactory extends AbsRemoteViewsFactory<ProductDB.Sh
     @Override
     public void onDataSetChanged() {
         super.onDataSetChanged();
-        setData(DefaultPreferenceUtil.getShareableProducts(mContext));
+        DataRepository.getInstance(getContext()).getAppExecutors().diskIO().execute(() ->
+                setData(DataRepository.getInstance(getContext()).findAllInboxProduct())
+        );
     }
 }

@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.NetworkData;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.Product;
+import com.fivetrue.market.memo.net.NetworkData;
 import com.fivetrue.market.memo.ui.adapter.BaseAdapterImpl;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.jjoe64.graphview.DefaultLabelFormatter;

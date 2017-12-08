@@ -14,15 +14,12 @@ import android.widget.RemoteViews;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
-import com.fivetrue.market.memo.model.vo.Product;
+import com.fivetrue.market.memo.model.entity.ProductEntity;
+import com.fivetrue.market.memo.persistence.DataRepository;
 import com.fivetrue.market.memo.ui.ProductAddActivity;
 import com.fivetrue.market.memo.ui.SplashActivity;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 
-import java.util.List;
-
-import io.realm.Realm;
 
 
 /**
@@ -38,12 +35,12 @@ public class HomeScreenWidget extends AppWidgetProvider {
     public static final String ACTION_CHECKOUT_PRODUCT = "com.fivetrue.market.memo.widget.product.checkout";
     public static final String ACTION_WIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
 
-    public static final String KEY_LIST_POSITION = "list_position";
+    public static final String KEY_ITEM_ID = "item_id";
+    public static final String KEY_PRODUCT = "product";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
-
         for (int widgetId : appWidgetIds) {
             if(LL.D) Log.d(TAG, "onUpdate: widget id" + widgetId);
 
@@ -69,13 +66,11 @@ public class HomeScreenWidget extends AppWidgetProvider {
             listIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             listIntent.setData(Uri.parse(listIntent.toUri(Intent.URI_INTENT_SCHEME)));
             remoteViews.setRemoteAdapter(R.id.lv_home_widget, listIntent);
-
             Intent clickIntent = new Intent(context, HomeScreenWidget.class);
             clickIntent.setAction(ACTION_CHECKOUT_PRODUCT);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, clickIntent, 0);
             remoteViews.setPendingIntentTemplate(R.id.lv_home_widget, pendingIntent);
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.lv_home_widget);
-
             appWidgetManager.updateAppWidget( new ComponentName( context, getClass()),
                     remoteViews);
         }
@@ -95,7 +90,6 @@ public class HomeScreenWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
-        ProductDB.getInstance().updatePublish();
     }
 
     @Override
@@ -121,7 +115,8 @@ public class HomeScreenWidget extends AppWidgetProvider {
                 if(ACTION_ADD_PRODUCT.equalsIgnoreCase(action)){
                     onClickAddProduct(context, intent);
                 }else if(ACTION_CHECKOUT_PRODUCT.equalsIgnoreCase(action)){
-                    onClickCheckoutProduct(context, intent);
+//                    onClickCheckoutProduct(context, intent);
+                    onStartApp(context, intent);
                 }else if(ACTION_APP_START.equalsIgnoreCase(action)){
                     onStartApp(context, intent);
                 }else {
@@ -143,24 +138,16 @@ public class HomeScreenWidget extends AppWidgetProvider {
     private void onClickCheckoutProduct(Context context, Intent intent){
         if(LL.D)
             Log.d(TAG, "onClickAddProduct() called with: context = [" + context + "], intent = [" + intent + "]");
-        int pos = intent.getIntExtra(KEY_LIST_POSITION, -1);
-        if(pos >= 0){
-            List<Product> products = Realm.getDefaultInstance().where(Product.class)
-                    .equalTo("checkOutDate", 0)
-                    .findAll();
-            Realm.getDefaultInstance().close();
-            if(products != null
-                    && products.size() > pos){
+        long id = intent.getLongExtra(KEY_ITEM_ID, -1);
+        ProductEntity product = intent.getParcelableExtra(KEY_PRODUCT);
+        if(id > 0){
+            if(product != null){
                 long mills = System.currentTimeMillis();
-                Realm.getDefaultInstance().executeTransaction(realm -> {
-                    products.get(pos).setCheckOutDate(mills);
-                    ProductDB.getInstance().updatePublish();
-                });
+                product.setCheckOutDate(mills);
+                DataRepository.getInstance(context).updateProduct(product).subscribe();
             }
-
         }
     }
-
 
 
     private void onStartApp(Context context, Intent intent){
@@ -169,7 +156,7 @@ public class HomeScreenWidget extends AppWidgetProvider {
         TrackingUtil.getInstance().startProductAdd(TAG);
         Intent appIntent = new Intent(context, SplashActivity.class);
         appIntent.setAction(ACTION_APP_START);
-        appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(appIntent);
 
     }

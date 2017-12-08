@@ -1,63 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_fragment_purchase_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="showEmpty"
+            type="boolean" />
 
 
-    <TextView
-        android:id="@+id/tv_fragment_purchase_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:padding="4dp"
-        android:drawableTop="@drawable/ic_add_primary_50dp"
-        android:text="@string/purchases_no_item"/>
-
-    <LinearLayout
-        android:id="@+id/layout_fragment_purchase_list_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:layout_gravity="bottom"
-        android:background="@android:color/white"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:elevation="8dp">
-        <Spinner
-            android:id="@+id/sp_fragment_purchase_list"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3">
-        </Spinner>
-        <TextView
-            android:id="@+id/tv_fragment_purchase_list_total_count"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
-            android:textSize="14dp"
-            android:gravity="right|center_vertical"
-            android:layout_gravity="center_vertical"/>
-        <TextView
-            android:id="@+id/tv_fragment_purchase_list_total_price"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="4"
-            android:textSize="14dp"
-            android:gravity="right|center_vertical"
-            android:layout_gravity="center_vertical"/>
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/layout_fragment_purchase_list"
+    </data>
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="9dp" />
-</android.support.design.widget.CoordinatorLayout>
+        android:background="@android:color/white">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="@{showEmpty ? View.GONE : View.VISIBLE}"/>
+
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="4dp"
+            android:drawableTop="@drawable/ic_add_primary_50dp"
+            android:text="@string/purchases_no_item"
+            android:visibility="@{showEmpty ? View.VISIBLE : View.GONE}"/>
+
+        <LinearLayout
+            android:id="@+id/layout_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_gravity="bottom"
+            android:background="@android:color/white"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:elevation="8dp">
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3">
+            </Spinner>
+            <TextView
+                android:id="@+id/total_count"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:textSize="14dp"
+                android:gravity="right|center_vertical"
+                android:layout_gravity="center_vertical"/>
+            <TextView
+                android:id="@+id/total_price"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:textSize="14dp"
+                android:gravity="right|center_vertical"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment_anchor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="9dp" />
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

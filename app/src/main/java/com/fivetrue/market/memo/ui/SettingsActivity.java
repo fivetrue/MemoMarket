@@ -1,5 +1,6 @@
 package com.fivetrue.market.memo.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -10,10 +11,11 @@ import android.widget.TextView;
 
 import com.fivetrue.market.memo.BuildConfig;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.database.product.ProductDB;
+import com.fivetrue.market.memo.persistence.database.product.ProductDB;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.ExportUtil;
 import com.fivetrue.market.memo.utils.TrackingUtil;
+import com.fivetrue.market.memo.viewmodel.ProductListViewModel;
 
 
 import io.reactivex.Observable;
@@ -29,10 +31,13 @@ public class SettingsActivity extends BaseActivity {
     private TextView mTitle;
     private NavigationView mNavigationView;
 
+    private ProductListViewModel mViewModel;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        mViewModel = ViewModelProviders.of(this).get(ProductListViewModel.class);
         initView();
     }
 
@@ -72,11 +77,13 @@ public class SettingsActivity extends BaseActivity {
                         return true;
 
                     case R.id.menu_setting_export_data :{
-                        ExportUtil.export(SettingsActivity.this
+                        mViewModel.getProductList().observe(this, products -> {
+                            ExportUtil.export(SettingsActivity.this
                                 , "ALL_" + ExportUtil.getDate(System.currentTimeMillis())
-                                ,  Observable.fromIterable(ProductDB.getInstance().getProducts())
+                                ,  Observable.fromIterable(products)
                                         .filter(product -> product.getCheckOutDate() > 0)
                                         .toList().blockingGet());
+                        });
                     }
                         return true;
                 }

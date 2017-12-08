@@ -6,8 +6,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.fivetrue.market.memo.data.database.MemoDatabase;
-import com.fivetrue.market.memo.data.database.dao.ProductDao;
+import com.fivetrue.market.memo.persistence.database.MemoDatabase;
+import com.fivetrue.market.memo.persistence.database.dao.ProductDao;
 import com.fivetrue.market.memo.model.entity.ProductEntity;
 
 import org.junit.After;

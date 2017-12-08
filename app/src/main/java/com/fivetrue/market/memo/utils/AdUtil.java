@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
-import com.fivetrue.market.memo.data.NetworkData;
+import com.fivetrue.market.memo.net.NetworkData;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;

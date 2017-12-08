@@ -26,22 +26,23 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
 
     @Override
     protected void onBindProductHolder(ProductHolder holder, int position) {
+        holder.mBinding.name.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        holder.mBinding.name.setMaxLines(2);
+        holder.mBinding.setShowBadge(false);
+        holder.mBinding.setCheck(false);
+        super.onBindProductHolder(holder, position);
         final Product item = getItem(position);
         if(holder != null && item != null){
-            holder.mBinding.name.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
-            holder.mBinding.name.setMaxLines(2);
             holder.mBinding.name.setText(item.getName() + "\n" + CommonUtils.convertToCurrency(item.getPrice()));
-            holder.setProduct(item, isSelect(position));
-            holder.mBinding.more.setOnClickListener(view -> {
-                showPopup(view.getContext(), view, item, position);
-            });
         }
     }
 
+    @Override
     protected ListPopupWindow makePopup(Context context, Product item, int position){
         final ListPopupWindow popupWindow = new ListPopupWindow(context);
         String [] listItems = {
                 context.getString(R.string.revert)
+                , context.getString(R.string.hide)
                 , context.getString(R.string.delete)};
 
         popupWindow.setAdapter(new ArrayAdapter(context,  android.R.layout.simple_list_item_1, listItems));
@@ -50,6 +51,9 @@ public class ProductCheckoutListAdapter extends ProductListAdapter {
             switch (i){
                 case 0 :
                     publishMoreEvent(new MoreEvent(MoreType.Revert, position, item));
+                    break;
+                case 1 :
+                    publishMoreEvent(new MoreEvent(MoreType.Hide, position, item));
                     break;
                 case 2 :
                     publishMoreEvent(new MoreEvent(MoreType.Delete, position, item));

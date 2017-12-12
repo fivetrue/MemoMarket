@@ -129,22 +129,25 @@ public class SplashActivity extends BaseActivity {
 
     private void checkIntent(Intent intent){
         if(LL.D) Log.d(TAG, "checkIntent() called with: intent = [" + intent + "]");
-        checkConfig();
+        checkConfig(intent);
     }
 
-    public void checkConfig(){
+    public void checkConfig(Intent intent){
 //        NetworkData.getInstance(this).getConfig()
 //                .subscribe(configData -> startApplication(configData), throwable -> {
 //            if(LL.D) Log.d(TAG, "call() called with: throwable = [" + throwable + "]");
 //            Toast.makeText(SplashActivity.this,throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 //
 //        });
-        startApplication();
+        startApplication(intent);
     }
 
-    public void startApplication(){
+    public void startApplication(Intent intent){
         Log.d(TAG, "startApplication() called");
-        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        Intent activity = new Intent(intent);
+        activity.setClass(SplashActivity.this, MainActivity.class)
+        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(activity);
         finish();
     }
 

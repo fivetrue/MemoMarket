@@ -5,6 +5,7 @@
         <import type="android.view.View"/>
         <variable name="empty" type="boolean" />
         <variable name="showFab" type="boolean" />
+        <variable name="showShare" type="boolean" />
     </data>
 
 
@@ -51,6 +52,15 @@
             android:src="@drawable/ic_cart_checkout_white_50dp"
             android:visibility="@{showFab ? View.VISIBLE : View.INVISIBLE}"
             android:layout_gravity="center_horizontal|bottom"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="25dp"
+            android:src="@drawable/ic_kakao_yellow_50dp"
+            android:visibility="@{showShare ? View.VISIBLE : View.INVISIBLE}"
+            android:layout_gravity="right|bottom"/>
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

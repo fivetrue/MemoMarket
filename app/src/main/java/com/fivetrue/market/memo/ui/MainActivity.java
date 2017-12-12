@@ -1,5 +1,6 @@
 package com.fivetrue.market.memo.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -19,7 +20,9 @@ import android.widget.TextView;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
+import com.fivetrue.market.memo.model.Product;
 import com.fivetrue.market.memo.ui.adapter.pager.MainPagerAdapter;
+import com.fivetrue.market.memo.ui.dialog.LoadingDialog;
 import com.fivetrue.market.memo.ui.fragment.BaseFragment;
 import com.fivetrue.market.memo.ui.fragment.CheckOutProductFragment;
 import com.fivetrue.market.memo.ui.fragment.ProductListFragment;
@@ -27,8 +30,10 @@ import com.fivetrue.market.memo.ui.fragment.PurchaseListFragment;
 import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.view.BottomNavigationBehavior;
 import com.fivetrue.market.memo.view.PagerSlidingTabStrip;
+import com.fivetrue.market.memo.viewmodel.ProductViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseActivity {
 
@@ -40,12 +45,23 @@ public class MainActivity extends BaseActivity {
 
     private MainPagerAdapter mAdapter;
 
+    private ProductViewModel mProductViewModel;
+
+    private LoadingDialog mLoadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initData();
         initView();
+        checkIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        checkIntent(intent);
     }
 
     @Override
@@ -56,7 +72,7 @@ public class MainActivity extends BaseActivity {
 
     private void initData(){
         getSupportFragmentManager().addOnBackStackChangedListener(this);
-
+        mProductViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
         ArrayList<MainPagerAdapter.FragmentSet> fragmentSets = new ArrayList<>();
         fragmentSets.add(new MainPagerAdapter.FragmentSet(ProductListFragment.class, ProductListFragment.makeArgument(this)));
         fragmentSets.add(new MainPagerAdapter.FragmentSet(CheckOutProductFragment.class, CheckOutProductFragment.makeArgument(this)));
@@ -103,6 +119,8 @@ public class MainActivity extends BaseActivity {
                 ((BottomNavigationBehavior) behavior).setLayoutDependsOn(false);
             }
         }
+
+        mLoadingDialog = new LoadingDialog(this);
     }
 
     public void movePageToRight(){
@@ -183,5 +201,23 @@ public class MainActivity extends BaseActivity {
             }
         }
         super.onBackPressed();
+    }
+
+    private void checkIntent(Intent intent){
+        if(intent != null){
+            if(mProductViewModel.hasProduct(intent)){
+                if(mLoadingDialog != null){
+                    mLoadingDialog.show();
+                }
+                mLoadingDialog.show();
+                mProductViewModel.insertProducts(intent).subscribe(() -> onInsertCompletedFromShared(), throwable -> onInsertCompletedFromShared());
+            }
+        }
+    }
+
+    private void onInsertCompletedFromShared(){
+        if(mLoadingDialog != null){
+            mLoadingDialog.dismiss();
+        }
     }
 }

@@ -7,4 +7,12 @@
     <string name="admob_product_list_bottom" translatable="false">ca-app-pub-6669013618691184/9964707952</string> <!--300x250 -->
 
     <string name="market_google_api_key" translatable="false">AIzaSyA7eHZcWoTphPpciLGYYPZQZboxqBXuwLc</string>
+
+    <string name="kakao_app_key">d6ba4a620b1823ee0c0697ea6cb22dfa</string>
+    <string name="kakao_scheme">kakaod6ba4a620b1823ee0c0697ea6cb22dfa</string>
+    <string name="kakaolink_host">kakaolink</string>
+
+    <string name="market_memo_kakao_link_template">6989</string>
+    <string name="market_memo_kakao_link_url">https://play.google.com/store/apps/details?id=com.fivetrue.market.memo</string>
+
 </resources>

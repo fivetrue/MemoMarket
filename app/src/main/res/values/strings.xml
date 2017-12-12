@@ -50,6 +50,7 @@
     <string name="previous_purchase">Previous purchase list</string>
 
     <string name="hint_input_product_name">Input name of product</string>
+    <string name="hint_input_message">Input message</string>
     <string name="register_product">Register Product</string>
 
     <string name="purchases_no_item">There are no products to purchase\nPlease add items.</string>
@@ -73,5 +74,6 @@
     <string name="delete_product_message">This Product will be deleted.</string>
     <string name="delete_purchase_product_message">The item will be deleted. When you delete it, it will also be deleted from your Purchase list.</string>
     <string name="export_data_message">You can save / share data in the form below.</string>
+    <string name="share_success_message">Products have been shared. Do you want to move these products to purchase?</string>
 
 </resources>

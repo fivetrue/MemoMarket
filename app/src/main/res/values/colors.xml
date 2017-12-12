@@ -31,5 +31,7 @@
 
     <color name="alphaBlack">#55000000</color>
     <color name="alphaWhite">#77FFFFFF</color>
-    
+
+    <color name="kakaoColor">#FDEB1D</color>
+
 </resources>

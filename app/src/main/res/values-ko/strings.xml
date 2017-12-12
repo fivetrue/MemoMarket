@@ -43,6 +43,7 @@
     <string name="previous_purchase">이전 구매목록</string>
 
     <string name="hint_input_product_name">상품이름 입력</string>
+    <string name="hint_input_message">메세지 입력</string>
     <string name="register_product">상품 등록</string>
 
     <string name="purchases_no_item">구매한 상품이 없습니다.\n상품을 추가하세요.</string>
@@ -64,4 +65,5 @@
     <string name="delete_product_message">해당 상품이 삭제 됩니다.</string>
     <string name="delete_purchase_product_message">해당 상품이 삭제됩니다. 삭제 시 구매내역에서도 삭제됩니다.</string>
     <string name="export_data_message">데이터를 아래 형태로 저장/공유 할 수 있습니다.</string>
+    <string name="share_success_message">공유가 완료되었습니다. 상품들을 구매처리 할 겠습니까?</string>
 </resources>

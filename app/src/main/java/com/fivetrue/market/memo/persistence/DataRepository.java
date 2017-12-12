@@ -116,6 +116,15 @@ public class DataRepository implements Repository {
         });
     }
 
+    public Completable insertProduct(List<ProductEntity> products){
+        return Completable.create(e -> {
+                localDatabase.getAppExecutors().diskIO().execute(() -> {
+                    localDatabase.productDao().insertAll(products);
+                    localDatabase.getAppExecutors().mainThread().execute(() -> e.onComplete());
+                });
+        });
+    }
+
     public Completable deleteProduct(ProductEntity product){
         return Completable.create(e ->
             localDatabase.getAppExecutors().diskIO().execute(() -> {

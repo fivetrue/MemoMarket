@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.fivetrue.market.memo.LL;
 import com.fivetrue.market.memo.R;
@@ -28,9 +29,11 @@ import com.fivetrue.market.memo.ui.adapter.list.ProductListAdapter;
 import com.fivetrue.market.memo.ui.touch.ProductListItemTouch;
 import com.fivetrue.market.memo.ui.touch.SimpleItemTouchCallback;
 import com.fivetrue.market.memo.utils.AdUtil;
+import com.fivetrue.market.memo.utils.CommonUtils;
 import com.fivetrue.market.memo.utils.TrackingUtil;
 import com.fivetrue.market.memo.view.PagerTabContent;
 import com.fivetrue.market.memo.viewmodel.ProductListViewModel;
+import com.fivetrue.market.memo.viewmodel.ProductShareViewModel;
 import com.google.android.gms.ads.AdListener;
 
 import java.util.List;
@@ -50,6 +53,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
 
     private ProductListAdapter mProductListAdapter;
     private ProductListViewModel mProductListViewModel;
+    private ProductShareViewModel mProductShareViewModel;
 
     private CompositeDisposable mCompositeDisposable;
 
@@ -114,6 +118,39 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
             onClickActionButton();
         });
 
+        mBinding.fabShare.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.kakaoColor)));
+        mBinding.fabShare.setOnClickListener(view1 ->{
+            View inputView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_input, null);
+            final EditText editText = inputView.findViewById(R.id.name);
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.send)
+                    .setView(inputView)
+                    .setPositiveButton(R.string.send, (dialogInterface, i) -> {
+                        mProductShareViewModel.shareToKakaoTalk(editText.getText().toString(), getAdapter().getSelections())
+                                .subscribe(() ->
+                                                new AlertDialog.Builder(getActivity())
+                                                        .setTitle(R.string.cart)
+                                                        .setMessage(R.string.share_success_message)
+                                                        .setPositiveButton(android.R.string.ok, (dialogInterface1, i1) -> {
+                                                            dialogInterface.dismiss();
+                                                            onClickActionButton();
+                                                        }).setNegativeButton(android.R.string.cancel, (dialogInterface1, i1) -> dialogInterface.dismiss())
+                                                        .show()
+                                        , throwable ->
+                                                new AlertDialog.Builder(getActivity())
+                                                        .setTitle(android.R.string.dialog_alert_title)
+                                                        .setMessage(throwable.getLocalizedMessage())
+                                                        .setPositiveButton(android.R.string.ok, (dialogInterface1, i1) -> dialogInterface.dismiss())
+                                                        .show()
+
+                                );
+                    }).setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
+                    .show();
+        });
+
+
+
+
         mBinding.adView.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
@@ -154,10 +191,12 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mProductListViewModel = ViewModelProviders.of(this).get(ProductListViewModel.class);
+        mProductShareViewModel = ViewModelProviders.of(this).get(ProductShareViewModel.class);
         mProductListViewModel.getProductList().observe(this, products -> {
             setProductList(arrangeProducts(products));
         });
         mBinding.setShowFab(false);
+        mBinding.setShowShare(false);
     }
 
     protected void setProductList(List<Product> productList){
@@ -200,7 +239,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
                     mProductListViewModel.updateProducts(productEntities).subscribe(() -> {
                         getAdapter().clearSelection();
                         getAdapter().notifyDataSetChanged();
-                        updateFab();
+                        updateCheckoutFab();
                         if(getActivity() != null && getActivity() instanceof MainActivity){
                             ((MainActivity) getActivity()).movePageToRight();
                         }
@@ -242,14 +281,21 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
     public boolean onBackPressed() {
         if(mProductListAdapter.getSelections().size() > 0){
             mProductListAdapter.clearSelection();
-            updateFab();
+            mProductListAdapter.notifyDataSetChanged();
+            updateCheckoutFab();
             return true;
         }
         return super.onBackPressed();
     }
 
-    protected void updateFab(){
+    protected void updateCheckoutFab(){
         mBinding.setShowFab(mProductListAdapter.getSelections().size() > 0);
+        updateShareFab();
+    }
+
+    protected void updateShareFab(){
+        mBinding.setShowShare(mProductListAdapter.getSelections().size() > 0 && CommonUtils.hasAppPackage(getActivity(), "com.kakao.talk"));
+
     }
 
     private static class ProductItemAnimator extends DefaultItemAnimator{
@@ -289,7 +335,7 @@ public class ProductListFragment extends BaseFragment implements PagerTabContent
         switch (event.type){
             case Click:
                 mProductListAdapter.toggle(event.getAdapterPosition());
-                updateFab();
+                updateCheckoutFab();
                 return;
         }
     }

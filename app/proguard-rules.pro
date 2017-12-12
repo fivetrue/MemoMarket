@@ -56,3 +56,9 @@
 -keep class android.support.** { *; }
 -keep class android.webkit.** { *; }
 -keep class org.jsoup.** { *; }
+-keep class com.kakao.** { *; }
+-keepclassmembers class * {
+  public static <fields>;
+  public *;
+}
+-dontwarn android.support.v4.**,org.slf4j.**,com.google.android.gms.**

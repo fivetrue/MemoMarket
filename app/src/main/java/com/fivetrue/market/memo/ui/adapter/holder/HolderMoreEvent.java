@@ -12,7 +12,7 @@ import io.reactivex.Observable;
 
 public interface HolderMoreEvent {
 
-    enum MoreType{Buy, Duplicate, Delete, Revert, Hide};
+    enum MoreType{Buy, Modify, Duplicate, Delete, Revert, Hide};
 
     Observable<MoreEvent> getMoreObservable();
 

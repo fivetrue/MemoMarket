@@ -12,8 +12,8 @@ apply plugin: 'realm-android'
 
 android {
 
-    def BASE_VERSION = "2.0"
-    def VERSION_CODE = 7
+    def BASE_VERSION = "2.1"
+    def VERSION_CODE = 8
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
@@ -73,12 +73,18 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
+
+    lintOptions{
+        checkReleaseBuilds false
+        abortOnError false
+    }
 }
 
 ext{
     FIREBASE_VERSION = '11.6.0'
     SUPPORT_LIBRARY_VERSION = '26.1.0'
     ACHITECHURE_VERSION = '1.0.0'
+    KAKAO_VERSION = '1.7.0'
 }
 
 dependencies {
@@ -163,6 +169,11 @@ dependencies {
     implementation "android.arch.persistence.room:rxjava2:$ACHITECHURE_VERSION"
 
     testImplementation "android.arch.core:core-testing:$ACHITECHURE_VERSION"
+
+    /**
+     * KAKAO TALK
+     */
+    implementation "com.kakao.sdk:kakaolink:$KAKAO_VERSION"
 }
 
 apply plugin: 'com.google.gms.google-services'

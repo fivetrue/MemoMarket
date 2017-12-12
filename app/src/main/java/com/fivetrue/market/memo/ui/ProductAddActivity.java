@@ -67,7 +67,7 @@ public class ProductAddActivity extends BaseActivity{
 
             mProductViewModel.insertProduct(mBinding.name.getText().toString()
                     , mBinding.store.getText().toString()
-                    , Integer.parseInt(mBinding.price.getText().toString())).subscribe(() -> finish(), throwable -> mBinding.setShowAddProgress(false));
+                    , mBinding.price.getText().toString()).subscribe(() -> finish(), throwable -> mBinding.setShowAddProgress(false));
         });
 
         mBinding.name.addTextChangedListener(new TextFindWatcher(){

@@ -2,13 +2,18 @@ package com.fivetrue.market.memo.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.format.DateFormat;
+import android.util.Log;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -35,6 +40,36 @@ public class CommonUtils {
         String formatted = DateFormat.getBestDateTimePattern(locale, pattern);
         SimpleDateFormat sdf = new SimpleDateFormat(formatted);
         return sdf.format(new Date(millis));
+    }
+
+    public static String getVersionName(Context context){
+        PackageManager manager = context.getPackageManager();
+        PackageInfo info = null;
+        try {
+            info = manager.getPackageInfo(
+                    context.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "getVersionName", e);
+        }
+        return info != null ? info.versionName : "";
+    }
+
+    public static boolean hasAppPackage(Context context, String packageName){
+        PackageManager pm = context.getPackageManager();
+        List<ApplicationInfo> packages = pm.getInstalledApplications(0);
+        for (ApplicationInfo packageInfo : packages) {
+            if(packageInfo.packageName.equals(packageName)) return true;
+        }
+        return false;
+    }
+
+    public static boolean isEnabledAppPackage(Context context, String packageName){
+        ApplicationInfo ai = null;
+        try {
+            ai = context.getPackageManager().getApplicationInfo(packageName,0);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return ai != null && ai.enabled;
     }
 
     public static void goStore(Context context){

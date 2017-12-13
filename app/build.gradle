@@ -13,7 +13,7 @@ apply plugin: 'realm-android'
 android {
 
     def BASE_VERSION = "2.1"
-    def VERSION_CODE = 8
+    def VERSION_CODE = 9
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"

@@ -13,7 +13,7 @@ apply plugin: 'realm-android'
 android {
 
     def BASE_VERSION = "2.1"
-    def VERSION_CODE = 9
+    def VERSION_CODE = 10
     def VERSION_TYPE = "R"  // Set this to BETA, RELEASE, etc.
 
     def BOOLEAN = "boolean"
@@ -31,7 +31,7 @@ android {
     defaultConfig {
         applicationId "com.fivetrue.market.memo"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode VERSION_CODE
         versionName BASE_VERSION + "." + VERSION_CODE + VERSION_TYPE
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
